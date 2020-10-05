@@ -54,8 +54,8 @@ gkt <- function(data,
     m<-1
     if (interc==TRUE){eq<-"1"} else {eq<-"0"}
     if(interc==TRUE & !is.na(offsetvals[length(features)+1]))
-    #last offset is fixed intercept
-{eq<-paste("0+offset(rep(",offsetvals[length(features)+1],",nrow(e$data)))",sep="")}
+      #last offset is fixed intercept
+    {eq<-paste("0+offset(rep(",offsetvals[length(features)+1],",nrow(e$data)))",sep="")}
     for(i in features){
       k<-k+1
       #print(components)
@@ -275,62 +275,8 @@ gkt <- function(data,
     cat(paste("Latency Scalar: ",Scalar,"\n",
               "Latency Intercept: ",Intercept,"\n",sep=''))}
 
-  if(elastic==FALSE){
-    #collect all the features except "intercept"
-    featuresList<-c("numer","lineafm","logafm","powafm","recency","expdecafm","base","base2",
-                    "base4","ppe","dashafm","dashsuc","diffrelcor1","diffrelcor2","diffcor1","diffcor2","diffcorComp",
-                    "diffincorComp","diffallComp","diffincor1","diffincor2","diffall1","diffall2",
-                    "logsuc","linesuc","logfail","linefail","recencysuc","recencyfail","expdecsuc","expdecfail","basesuc","basefail","base2fail",
-                    "base2suc","base5suc","base5fail")
 
-    #collect all parameters from features and plancomponents (input code)
-    features<-gsub("[[:punct:]]","",features)
-
-    fNames<-list()
-    for (p in 1:length(features)){
-      if(features[p] %in% featuresList){
-        fName<-gsub(" ","",(paste(features[p],components[p])))
-        fNames<-c(fNames,fName)
-      }}
-
-    coeffRownames<-rownames(summary(e$temp)$coefficients)
-   # if (is.element("diffcorComp", features) && is.element("diffincor1", features) ){
-   #   DifcorComp<-coef(summary(e$temp))[toString(fNames[length(fNames)-1]),"Estimate"]
-   #   Difincor1<-coef(summary(e$temp))[toString(fNames[length(fNames)]),"Estimate"]}
-    Nres<-length(e$data$Outcome)
-    e$data$pred<-predict(e$temp,type="response")
-library(XML)
-    top <- newXMLNode("model_output")
-    newXMLNode("N", Nres, parent = top)
-    newXMLNode("Loglikelihood", round(logLik(e$temp),5), parent = top)
-    newXMLNode("RMSE", round(sqrt(mean((e$data$pred-e$data$CF..ansbin.)^2)),5), parent = top)
-    newXMLNode("Accuracy", round(sum(e$data$CF..ansbin.==(e$data$pred>.5))/Nres,5), parent = top)
-#    newXMLNode("AUC", round(auc(data$CF..ansbin.,data$pred,quiet=TRUE),5), parent = top)
-    newXMLNode("r2McFad",e$mcfad, parent = top)
-    # if (is.element("diffcorComp", features) && is.element("diffincor1", features) ){
-    #   newXMLNode("DifcorComp",DifcorComp,parent = top)
-    #   newXMLNode("Difincor1",Difincor1,parent = top)
-    #   newXMLNode("LatencyCoef",Scalar,parent = top)
-    #   newXMLNode("LatencyIntercept",Intercept,parent = top)
-    #   newXMLNode("FailCost",failureLatency,parent = top)
-    # }
-    #collect all the F#, Add into list
-    if(!length(fNames)==0){
-
-    if ((is.element(fNames, coeffRownames) && (!is.element("diffcorComp", features)) && (!is.element("diffincor1", features)))||(length(grep("[[:punct:]]",features))>0)){
-      for (c in coeffRownames){
-        if(!(c=="null"||c=="Null")){
-          cValues=coef(summary(e$temp))[c,"Estimate"]
-        }
-        c<-gsub("/","",c)
-        c<-gsub(":","_",c)
-        c<-gsub("\\(|)","",c)
-        newXMLNode(c,cValues,parent = top)
-      }
-    }
-    }
-    saveXML(top, file=outputFilePath,compression=0,indent=TRUE)
-  }
+  e$data$pred<-predict(e$temp,type="response")
   results <- list("model" = e$temp,
                   "prediction" = if ("pred" %in% colnames(e$data)) {e$data$pred},
                   "nullmodel"=e$nullmodel,
