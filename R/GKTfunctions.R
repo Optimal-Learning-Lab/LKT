@@ -15,18 +15,41 @@ computeSpacingPredictors <- function (data, KCs){
   return(data)
 }
 
-gkt <- function(data,
-                       components,
-                       features,
-                       offsetvals=NA,
-                       fixedpars,
-                       seedpars,
-                covariates=NA,
-                       outputFilePath="FALSE",
-                       dualfit = FALSE,
-                       interc=FALSE,
-                       elastic=FALSE){
+#' Compute a logistic regression model of learning for input data.
+#'
+#' @param data A dataset with Anon.Student.Id and CF..ansbin.
+#' @param components A vector of factors that can be used to compute each features for each subject.
+#' @param features a vector methods to use to compute a feature for the component.
+#' @param offsetvals a vector of set coefficients, or NA values, to fix coefficients set and leave NA to be solved.
+#' @param fixedpars a vector of parameters for all features+components.
+#' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
+#' @param covariates A list of components that interacts with component by feature in the main specification.
+#' @param dualfit TRUE or FALSE, fit a simple latency using logit.
+#' @param interc TRUE or FALSE, include a global intercept.
+#' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
+#' @return list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", and "newdata"
+#' @examples
+#' colnames(data)[1]="Anon.Student.Id"
+#' colnames(data)[3]="CF..ansbin."
+#' colnames(data)[6]="Duration..sec." #only necessary for time based features
+#' data<-computeSpacingPredictors(data,"Skill") #only necessary for time based features
+#' modelob<-gkt(data=data,
+#'             components=c("Anon.Student.Id","Skill","Skill"),
+#'             features=c("logitdec","logitdec$","lineafm$"),
+#'             offsetvals=NA,fixedpars=c(.9,.85),seedpars=NA,
+#'             dualfit=FALSE,interc=FALSE,elastic=FALSE)
+#' print(summary(modelob$model))
 
+gkt <- function(data,
+                components,
+                features,
+                offsetvals=NA,
+                fixedpars=NA,
+                seedpars=NA,
+                covariates=NA,
+                dualfit = FALSE,
+                interc=FALSE,
+                elastic=FALSE){
 
   if (!("CF..reltime." %in% colnames(data))) {
     valrb$CF..reltime. <- practiceTime(data)  }
@@ -46,6 +69,7 @@ gkt <- function(data,
   e$data<-data
   e$fixedpars<-fixedpars
   e$seedpars<-seedpars
+
   modelfun <- function(seedparameters){
     # intialize counts and vars
     k<-0
