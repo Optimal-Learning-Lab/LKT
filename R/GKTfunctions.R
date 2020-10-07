@@ -1,6 +1,15 @@
-#define functions
-
+#' @title computeSpacingPredictors
+#' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
+#' @description which will be automatically computed from Duration..sec. if not present themselves.
+#' @param data is a dataset with Anon.Student.Id and CF..ansbin.
+#' @param KCs are the components for which spaced features will be specified in gkt
+#' @return data which is the same frame with the added spacing relevant columns.
+#' @export
 computeSpacingPredictors <- function (data, KCs){
+  if (!("CF..reltime." %in% colnames(data))) {
+    valrb$CF..reltime. <- practiceTime(data)  }
+  if (!("CF..Time." %in% colnames(data))) {
+    data$CF..Time. <- data$CF..reltime.  }
   for (i in KCs) {
     data$index<-paste(eval(parse(text=paste("data$",i,sep=""))),data$Anon.Student.Id,sep="")
     eval(parse(text=paste("data$",i,"spacing <- componentspacing(data,data$index,data$CF..Time.)",sep="")))
@@ -15,8 +24,8 @@ computeSpacingPredictors <- function (data, KCs){
   return(data)
 }
 
-#' Compute a logistic regression model of learning for input data.
-#'
+#' @title gkt
+#' @description Compute a logistic regression model of learning for input data.
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
 #' @param components A vector of factors that can be used to compute each features for each subject.
 #' @param features a vector methods to use to compute a feature for the component.
@@ -28,6 +37,7 @@ computeSpacingPredictors <- function (data, KCs){
 #' @param interc TRUE or FALSE, include a global intercept.
 #' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
 #' @return list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", and "newdata"
+#' @export
 #' @examples
 #' colnames(data)[1]="Anon.Student.Id"
 #' colnames(data)[3]="CF..ansbin."
@@ -312,6 +322,15 @@ gkt <- function(data,
   return (results)
 }
 
+#' @title computefeatures
+#' @description Compute feature describing prior practice effect.
+#' @param data copy of main data frame.
+#' @param feat is the feature to be computed.
+#' @param par1-5 nonlinear parameters used for nonlinear features.
+#' @param index a student by component levels index
+#' @param index2 a component levels index
+#' @param fcomp the component  name.
+#' @return a vector suitable for regression input.
 computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcomp){
   # fixed features
   feat<-gsub("[$@]","",feat)
@@ -570,11 +589,21 @@ return(temp)
 right = function (string, char){
   substr(string,nchar(string)-(char-1),nchar(string))}
 
-# general cause to self
-countOutcome <-function(data,index,item) {
-  data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(item))))
-  data$temp[tolower(as.character(data$Outcome))==tolower(item)]<-
-    as.numeric(data$temp[tolower(as.character(data$Outcome))==tolower(item)])-1
+
+#' @title countOutcome
+#' @description Compute the prior sum of the response appearing in the outcome column for the index
+#' @param data
+#' @param index
+#' @param response
+#'
+#' @return the vector of the lagged cumulative sum.
+#' @export
+#'
+#' @examples
+countOutcome <-function(data,index,response) {
+  data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(response))))
+  data$temp[tolower(as.character(data$Outcome))==tolower(response)]<-
+    as.numeric(data$temp[tolower(as.character(data$Outcome))==tolower(response)])-1
   as.numeric(data$temp)}
 
 countOutcomeDash <- function(times, scalev) {

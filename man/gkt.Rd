@@ -2,7 +2,7 @@
 % Please edit documentation in R/GKTfunctions.R
 \name{gkt}
 \alias{gkt}
-\title{Compute a logistic regression model of learning for input data.}
+\title{gkt}
 \usage{
 gkt(
   data,
