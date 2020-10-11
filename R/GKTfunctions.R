@@ -598,8 +598,6 @@ right = function (string, char){
 #'
 #' @return the vector of the lagged cumulative sum.
 #' @export
-#'
-#' @examples
 countOutcome <-function(data,index,response) {
   data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(response))))
   data$temp[tolower(as.character(data$Outcome))==tolower(response)]<-
@@ -648,25 +646,6 @@ countOutcomeDashPerf <- function(datav, seeking, scalev) {
     temp[datav[,3]==s]<-v1}
   return(temp)
 }
-
-
-aves<-function (x, ..., FUN = mean)
-{ y<- rep(0,length(x[,1]))
-if (missing(...))
-  x[] <- FUN(x)
-else {
-  g <- interaction(...)
-  split(y,g) <- lapply(split(x, g), FUN)
-}
-y
-}
-
-#d<-data.frame(c(0,30,40,500,0,50,60),c("CORRECT","CORRECT","CORRECT","CORRECT","CORRECT","CORRECT","CORRECT"),c("a","a","a","a","b","b","b"))
-#countOutcomeDashPerf(d,"CORRECT",4)
-#countOutcomeDash(c(0,30,40,500),4)
-#countOutcomeDash(c(0,50,60),4)
-#d[,2]<-as.character(d[,2])
-#d[,3]<-as.character(d[,3])
 
 #count confusable outcome difficulty effect
 countOutcomeDifficulty1 <-function(data,index,r) {
@@ -742,13 +721,6 @@ for (i in unique(data$Anon.Student.Id)){
   temp[data$Anon.Student.Id==i]<-
     c(0,cumsum(data$Duration..sec.[data$Anon.Student.Id==i])
       [1:(length(cumsum(data$Duration..sec.[data$Anon.Student.Id==i]))-1)])}}
-return(temp)}
-
-# adds spacings to compute age since first trial (in seconds)
-Duration <-function(data,index) {temp<-rep(0,length(data$CF..ansbin.))
-for (i in unique(index)){
-  le<-length(data$time_to_answer[index==i])
-  temp[index==i]<-data$time_to_answer[index==i][1:le] - c(0,data$time_to_answer[index==i][1:(le-1)])}
 return(temp)}
 
 # computes spacing from prior repetition for index (in seconds)
@@ -875,15 +847,8 @@ baselevel <-  function(x, d) {
   l<-length(x)
   return(c(0,x[2:l]^-d)[1:l])}
 
+#find the time that corresponds to the longest break in the sequence
 splittimes<- function(times){
   (match(max(rank(diff(times))),rank(diff(times))))
 }
 
-av.sumll <- function(ans,mod,index){
-  ll<-log(1-abs(ans-mod))
-  sum(aggregate(ll,by=list(index),FUN=mean)$V1)
-}
-av.lls <- function(ans,mod,index){
-  ll<-log(1-abs(ans-mod))
-  aggregate(ll,by=list(index),FUN=mean)$V1
-}
