@@ -69,10 +69,7 @@ gkt <- function(data,
     data$Outcome <- ifelse(data$CF..ansbin. == 1, "CORRECT", "INCORRECT")  }
   if (!("CF..ansbin." %in% colnames(data))) {
     data$CF..ansbin. <- ifelse(data$Outcome == "CORRECT", 1, 0)  }
-  if (is.na(covariates)) {
-    covariates <- rep(NA, length(components))  }
-  if (is.na(offsetvals)) {
-    offsetvals <- rep(NA, length(components))  }
+
 
   equation<-"CF..ansbin.~ "
   e<-new.env()
