@@ -2,7 +2,7 @@
 #' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
 #' @description which will be automatically computed from Duration..sec. if not present themselves.
 #' @param data is a dataset with Anon.Student.Id and CF..ansbin.
-#' @param KCs are the components for which spaced features will be specified in gkt
+#' @param KCs are the components for which spaced features will be specified in LKT
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @export
 computeSpacingPredictors <- function (data, KCs){
@@ -24,7 +24,7 @@ computeSpacingPredictors <- function (data, KCs){
   return(data)
 }
 
-#' @title gkt
+#' @title LKT
 #' @description Compute a logistic regression model of learning for input data.
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
 #' @param components A vector of factors that can be used to compute each features for each subject.
@@ -43,14 +43,13 @@ computeSpacingPredictors <- function (data, KCs){
 #' colnames(data)[3]="CF..ansbin."
 #' colnames(data)[6]="Duration..sec." #only necessary for time based features
 #' data<-computeSpacingPredictors(data,"Skill") #only necessary for time based features
-#' modelob<-gkt(data=data,
+#' modelob<-LKT(data=data,
 #'             components=c("Anon.Student.Id","Skill","Skill"),
 #'             features=c("logitdec","logitdec$","lineafm$"),
-#'             offsetvals=NA,fixedpars=c(.9,.85),seedpars=NA,
-#'             dualfit=FALSE,interc=FALSE,elastic=FALSE)
+#'             fixedpars=c(.9,.85))
 #' print(summary(modelob$model))
 
-gkt <- function(data,
+LKT <- function(data,
                 components,
                 features,
                 offsetvals=NA,
