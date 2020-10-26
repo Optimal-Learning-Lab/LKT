@@ -7,7 +7,7 @@
 #' @export
 computeSpacingPredictors <- function (data, KCs){
   if (!("CF..reltime." %in% colnames(data))) {
-    valrb$CF..reltime. <- practiceTime(data)  }
+    data$CF..reltime. <- practiceTime(data)  }
   if (!("CF..Time." %in% colnames(data))) {
     data$CF..Time. <- data$CF..reltime.  }
   for (i in KCs) {
@@ -61,7 +61,7 @@ LKT <- function(data,
                 elastic=FALSE){
 
   if (!("CF..reltime." %in% colnames(data))) {
-    valrb$CF..reltime. <- practiceTime(data)  }
+    data$CF..reltime. <- practiceTime(data)  }
   if (!("CF..Time." %in% colnames(data))) {
     data$CF..Time. <- data$CF..reltime.  }
   if (!("Outcome" %in% colnames(data))) {
