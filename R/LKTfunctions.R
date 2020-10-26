@@ -848,3 +848,16 @@ splittimes<- function(times){
   (match(max(rank(diff(times))),rank(diff(times))))
 }
 
+#' @title smallSet
+#' @export
+smallSet <- function(data,nSub){
+  totsub=length(unique(data$Anon.Student.Id))
+  datasub=unique(data$Anon.Student.Id)
+  smallSub=datasub[sample(1:totsub)[1:nSub]]
+
+  smallIdx=which(data$Anon.Student.Id %in% smallSub)
+  smalldata = data[smallIdx,]
+  smalldata=droplevels(smalldata)
+  return(smalldata)
+}
+

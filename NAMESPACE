@@ -3,3 +3,4 @@
 export(LKT)
 export(computeSpacingPredictors)
 export(countOutcome)
+export(smallSet)

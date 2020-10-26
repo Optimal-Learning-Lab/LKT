@@ -1,6 +1,2 @@
-^renv$
-^renv\.lock$
-^.*\.Rproj$
+^LKT\.Rproj$
 ^\.Rproj\.user$
-^doc$
-^Meta$
