@@ -58,7 +58,7 @@ LKT <- function(data,
                 covariates=NA,
                 dualfit = FALSE,
                 interc=FALSE,
-                elastic=FALSE){
+                elastic=FALSE,verbose=TRUE){
 
   if (!("CF..reltime." %in% colnames(data))) {
     data$CF..reltime. <- practiceTime(data)  }
@@ -102,14 +102,22 @@ LKT <- function(data,
           e$data$indexcomp<-NULL
           e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
           e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
-      else {      # normal KC type Q-matrix
+      else
+        if (length(grep("_",components[k]))){
+          #need an index for each subcomponent of component
+          #need to count for all these indexes
+          #will do this in feature....
+        }
+      else{      # normal KC type Q-matrix
         e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
         e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
         e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
         e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
       # track parameters used
-      if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","pderr","propdec","propdec2","logitdec","base","expdecafm","expdecsuc","expdecfail","dashafm","dashsuc","dashfail",
-                                  "base2","base4","basesuc","basefail","logit","base2suc","base2fail","ppe","base5suc","base5fail")){
+      if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","pderr","propdec","propdec2",
+                                  "logitdec","base","expdecafm","expdecsuc","expdecfail","dashafm","dashsuc","dashfail",
+                                  "base2","base4","basesuc","basefail","logit","base2suc","base2fail","ppe",
+                                  "base5suc","base5fail","clogitdec")){
         if(is.na(e$fixedpars[m])){ # if not fixed them optimize it
           para<-seedparameters[optimparcount]
           optimparcount<-optimparcount+1}
@@ -172,8 +180,12 @@ LKT <- function(data,
                                "<-offsetvals[k]*e$data$",gsub("\\$","",i),components[k],sep="")))
         }}
 
-      if(length(seedparameters)==0){
-      cat(paste(i,components[k],if(exists("para")){para},if(exists("parb")){parb},if(exists("parc")){parc},if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
+      if(length(seedparameters)==0 & verbose){
+      cat(paste(i,components[k],if(exists("para")){para},
+                if(exists("parb")){parb},if(exists("parc")){parc},
+                if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
+
+
       if(exists("para")){rm(para)}
       if(exists("parb")){rm(parb)}
       if(exists("parc")){rm(parc)}
@@ -207,7 +219,7 @@ LKT <- function(data,
                                  paste("offset_",i,gsub('[%]','',components[k]),sep=""),
                                  ")+\",eq,sep=\"\")",sep="")))
           }}}
-    cat(paste(eq,"\n"))
+    if(verbose){cat(paste(eq,"\n"))}
     e$form<-as.formula(paste(equation,eq,sep=""))
 
     if(any(grep("[@]",features)) & dualfit==FALSE){
@@ -238,16 +250,17 @@ LKT <- function(data,
       the.rt=e$data$Duration..sec.[which(e$data$CF..ansbin.==1)]
       e$lm.rt<-lm(the.rt~as.numeric(rt.pred))
       fitstat2<-cor(the.rt,predict(e$lm.rt,type="response"))^2
-      cat(paste("R2 (cor squared) latency: ",fitstat2,"\n",sep=''))
+      if(verbose){cat(paste("R2 (cor squared) latency: ",fitstat2,"\n",sep=''))}
     }
     e$temp<-temp
     if(elastic==FALSE){
       e$nullmodel<-glm(as.formula(paste("CF..ansbin.~ 1",sep="")),data=e$data,family=binomial(logit))
       e$nullfit<-logLik(e$nullmodel)
       e$mcfad<-round(1-fitstat[1]/e$nullfit[1],4)
-      cat(paste("McFadden's R2 logistic:",e$mcfad,"\n"))
-      cat(paste("LogLike logistic:",round(fitstat,8),"\n"))
-      if(length(seedparameters)>0)
+      if(verbose){
+        cat(paste("McFadden's R2 logistic:",e$mcfad,"\n"))
+      cat(paste("LogLike logistic:",round(fitstat,8),"\n"))}
+      if(length(seedparameters)>0 & verbose)
         {cat(paste("step par values ="))
         cat(seedparameters,sep=",")
         cat(paste("\n\n"))}
@@ -267,6 +280,7 @@ LKT <- function(data,
     sum("propdec" == gsub("[$]","",features))+
     sum("propdec2" == gsub("[$]","",features))+
     sum("logitdec" == gsub("[$]","",features))+
+    sum("clogitdec" == gsub("[$]","",features))+
     sum("base" == gsub("[$]","",features))+
     sum("expdecafm" == gsub("[$]","",features))+
     sum("expdecsuc" == gsub("[$]","",features))+
@@ -299,15 +313,15 @@ LKT <- function(data,
   # report
   if(dualfit==TRUE && elastic==FALSE){
     failureLatency<-mean(e$data$Duration..sec.[which(e$data$CF..ansbin.==0)])
-    cat(paste("Failure latency: ",failureLatency,"\n"))
     Scalar<-coef(e$lm.rt)[2]
     Intercept<-coef(e$lm.rt)[1]
+    if(verbose){cat(paste("Failure latency: ",failureLatency,"\n"))
     cat(paste("Latency Scalar: ",Scalar,"\n",
-              "Latency Intercept: ",Intercept,"\n",sep=''))}
-
+              "Latency Intercept: ",Intercept,"\n",sep=''))}}
 
   e$data$pred<-predict(e$temp,type="response")
   results <- list("model" = e$temp,
+                  "r2"=e$mcfad,
                   "prediction" = if ("pred" %in% colnames(e$data)) {e$data$pred},
                   "nullmodel"=e$nullmodel,
                   "latencymodel"=if(exists("e$lm.rt")){e$lm.rt},
@@ -317,6 +331,7 @@ LKT <- function(data,
                   "newdata"= e$data)
   return (results)
 }
+
 
 #' @title computefeatures
 #' @description Compute feature describing prior practice effect.
@@ -333,6 +348,23 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="intercept"){return(index2)}
   if(feat=="numer"){ temp<-eval(parse(text=paste("data$",fcomp,sep="")))
   return(temp)}
+  if(feat=="clineafm"){
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"_")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+(data$cor+data$icor)*eval(parse(text=paste("data$",m,sep="")))
+      #print(data$temp[1:100])
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
   if(feat=="lineafm"){return((data$cor+data$icor))}
   if(feat=="logafm"){return(log(1+data$cor+data$icor))}
   if(feat=="powafm"){return((data$cor+data$icor)^par1)}
@@ -463,8 +495,24 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="propdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
   if(feat=="propdec2"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec2(x,par1)))}
   if(feat=="logitdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidelogitdec(x,par1)))}
+  if(feat=="clogitdec"){
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"_")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      #print((ave(data$CF..ansbin.,data$index,FUN=function(x) slidelogitdec(x,par1))*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+ave(data$CF..ansbin.,data$index,FUN=function(x) slidelogitdec(x,par1))*eval(parse(text=paste("data$",m,sep="")))
+      #print(data$temp[1:100])
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
   if(feat=="prop"){ifelse(is.nan(data$cor/(data$cor+data$icor)),.5,data$cor/(data$cor+data$icor))}
 }
+
 
 #cross-validation function
 mocv <- function(plancomponents,prespecfeatures,val,cvSwitch=NULL,makeFolds=NULL,dualfit=FALSE){
