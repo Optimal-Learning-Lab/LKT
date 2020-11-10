@@ -117,7 +117,7 @@ LKT <- function(data,
       if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","pderr","propdec","propdec2",
                                   "logitdec","base","expdecafm","expdecsuc","expdecfail","dashafm","dashsuc","dashfail",
                                   "base2","base4","basesuc","basefail","logit","base2suc","base2fail","ppe",
-                                  "base5suc","base5fail","clogitdec")){
+                                  "base5suc","base5fail","clogitdec","crecency")){
         if(is.na(e$fixedpars[m])){ # if not fixed them optimize it
           para<-seedparameters[optimparcount]
           optimparcount<-optimparcount+1}
@@ -273,6 +273,7 @@ LKT <- function(data,
   parlength<-
     sum("powafm" == gsub("[$]","",features))+
     sum("recency" == gsub("[$]","",features))+
+    sum("crecency" == gsub("[$]","",features))+
     sum("recencysuc" == gsub("[$]","",features))+
     sum("recencyfail" == gsub("[$]","",features))+
     sum("logit" == gsub("[$]","",features))+
@@ -365,9 +366,44 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
     #print(data$temp[1:100])
     return(data$temp)}
+  if(feat=="clogafm"){
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"_")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+log(1+data$cor+data$icor)*eval(parse(text=paste("data$",m,sep="")))
+      #print(data$temp[1:100])
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
   if(feat=="lineafm"){return((data$cor+data$icor))}
   if(feat=="logafm"){return(log(1+data$cor+data$icor))}
   if(feat=="powafm"){return((data$cor+data$icor)^par1)}
+  if (feat == "crecency") {
+    data$temp <- 0
+    data$div <- 0
+    for (m in strsplit(fcomp, "_")[[1]]) {
+      eval(parse(text = paste("data$rec <- data$", m, "spacing", sep = "")))
+
+      data$temp <-
+        data$temp + ifelse(data$rec == 0, 0, data$rec ^ -par1) * eval(parse(text =
+                                                                              paste("data$", m, sep = "")))
+      #print(data$temp[1:100])
+      data$div <- data$div + eval(parse(text = paste("data$", m, sep = "")))
+      #print(data$div[1:100])
+    }
+    data$temp <- ifelse(data$div != 0, data$temp / data$div, 0)
+    #print(data$temp[1:100])
+    return(data$temp)
+  }
+
   if(feat=="recency"){
     eval(parse(text=paste("data$rec <- data$",fcomp,"spacing",sep="")))
     return(ifelse(data$rec==0,0,data$rec^-par1))}
@@ -451,8 +487,76 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="diffall2"){return(countOutcomeDifficultyAll2(data,data$index))}
   if(feat=="logsuc"){return(log(1+data$cor))}
   if(feat=="linesuc"){return(data$cor)}
+  if(feat=="clogsuc"){
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"_")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+log(1+data$cor)*eval(parse(text=paste("data$",m,sep="")))
+      #print(data$temp[1:100])
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
+  if(feat=="clinesuc"){
+      data$temp<-0
+      data$div<-0
+      for (m in strsplit(fcomp,"_")[[1]]){
+        #print(m)
+        data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+        data$cor<-countOutcome(data,data$index,"CORRECT")
+        data$icor<-countOutcome(data,data$index,"INCORRECT")
+        #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+        data$temp<-data$temp+(data$cor)*eval(parse(text=paste("data$",m,sep="")))
+        #print(data$temp[1:100])
+        data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+        #print(data$div[1:100])
+      }
+      data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+      #print(data$temp[1:100])
+      return(data$temp)}
   if(feat=="logfail"){return(log(1+data$icor))}
   if(feat=="linefail"){return(data$icor)}
+  if(feat=="clogfail"){
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"_")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+log(1+data$icor)*eval(parse(text=paste("data$",m,sep="")))
+      #print(data$temp[1:100])
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
+  if(feat=="clinefail"){
+      data$temp<-0
+      data$div<-0
+      for (m in strsplit(fcomp,"_")[[1]]){
+        #print(m)
+        data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+        data$cor<-countOutcome(data,data$index,"CORRECT")
+        data$icor<-countOutcome(data,data$index,"INCORRECT")
+        #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+        data$temp<-data$temp+(data$icor)*eval(parse(text=paste("data$",m,sep="")))
+        #print(data$temp[1:100])
+        data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+        #print(data$div[1:100])
+      }
+      data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+      #print(data$temp[1:100])
+      return(data$temp)}
   if(feat=="recencyfail"){
     eval(parse(text=paste("data$rec <- data$",fcomp,"spacing",sep="")))
     eval(parse(text=paste("data$prev <- data$",fcomp,"prev",sep="")))
