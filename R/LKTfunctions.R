@@ -618,7 +618,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
 }
 
 
-#' @title lkt_cv
+#' @title LKT_cv
 #' @description student-stratified 5 fold split half cross-validation
 #' @export
 LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE,outputFilePath,val,cvSwitch=NULL,makeFolds=NULL,dualfit=FALSE,interc=FALSE){
