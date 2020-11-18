@@ -618,8 +618,10 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
 }
 
 
-#cross-validation function
-mocv <- function(plancomponents,prespecfeatures,val,cvSwitch=NULL,makeFolds=NULL,dualfit=FALSE){
+#' @title lkt_cv
+#' @description student-stratified 5 fold split half cross-validation
+#' @export
+LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE,outputFilePath,val,cvSwitch=NULL,makeFolds=NULL,dualfit=FALSE,interc=FALSE){
   if(is.null(cvSwitch)){print("cvSwitch input null - default is cross-validation."); cvSwitch = 1}
   if(is.null(makeFolds)){print("makeFolds input null - default is to make new folds."); makeFolds = 1}
   if(cvSwitch==1){#setting it up like this so this function can be explicitly run as not cross-val
@@ -654,12 +656,18 @@ mocv <- function(plancomponents,prespecfeatures,val,cvSwitch=NULL,makeFolds=NULL
       F1 <- which(foldIDX[,i]==1)#fold 1
       F2 <- which(foldIDX[,i]==2)#fold 2
       trainfold1 = val[F1,]
-      modeloptim(plancomponents,prespecfeatures,trainfold1,dualfit=dualfit,interc=interc)
-      glm1=temp
+      modelob1 = LKT(data=trainfold1,
+          components=componentl,features=featl,offsetvals=offsetl,
+          fixedpars=fixedl,seedpars=seedl,
+          dualfit=dualfit,interc=interc,elastic=elastictest)
+      glm1=modelob1$model
       dat1 = glm1$data #test is val with columns for F1,F2 etc created inside modeloptim()
       trainfold2 = val[F2,]
-      modeloptim(plancomponents,prespecfeatures,trainfold2,dualfit=dualfit,interc=interc)
-      glm2=temp
+      modelob2 = LKT(data=trainfold2,
+                     components=componentl,features=featl,offsetvals=offsetl,
+                     fixedpars=fixedl,seedpars=seedl,
+                     dualfit=dualfit,interc=interc,elastic=elastictest)
+      glm2=modelob2$model
       dat2 = glm2$data #test is val with columns for F1,F2 etc created inside modeloptim()
       for(j in 1:2){
         if(j==1){glmT=glm1;datTr=dat1;datTe=dat2;trainfoldTr=trainfold1;trainfoldTe=trainfold2;Ftr=F1;Fte=F2}else{
@@ -681,27 +689,15 @@ mocv <- function(plancomponents,prespecfeatures,val,cvSwitch=NULL,makeFolds=NULL
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.","<-999*rep(1,length(foldIDX[,i]))")))
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.[Ftr]","<-predatait")))
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.[Fte]","<-predtest")))
-
+          
         }
         #Output text summary
         Nresfit<-length(datTr$Outcome)
         Nrestest<-length(datTe$Outcome)
         print(paste("run",i))
         print(paste("fold",j))
-        print(summary(temp))
+        print(summary(glmT))
         r2LR<<-results[t,1]
-        d<-newXMLNode("Index", attrs = c(ReplicationIndex = i, FoldIndex = j), parent = top)
-        newXMLNode("N",Nresfit,parent = d)
-        newXMLNode("Loglikelihood", round(logLik(glmT),5), parent = d)
-        newXMLNode("RMSE", round(sqrt(mean((predatait-datTr$CF..ansbin.)^2)),5), parent = d)
-        newXMLNode("Accuracy", round(sum(datTr$CF..ansbin.==(predatait>.5))/Nresfit,5), parent = d)
-        newXMLNode("AUC", results[t,2], parent = d)
-        newXMLNode("r2LR", r2LR , parent = d)
-        newXMLNode("tN", Nrestest, parent = d)
-        newXMLNode("tRMSE", round(sqrt(mean((predtest-datTe$CF..ansbin.)^2)),5), parent = d)
-        newXMLNode("tAccuracy", round(sum(datTe$CF..ansbin.==(predtest>.5))/Nrestest,5), parent = d)
-        newXMLNode("tAUC", results[t,3], parent = d)
-        saveXML(top,file=outputFilePath,compression=0,indent=TRUE)
       }
       print(results)
     }
@@ -709,8 +705,7 @@ mocv <- function(plancomponents,prespecfeatures,val,cvSwitch=NULL,makeFolds=NULL
     results<<-results
     dat<<-dat
   }
-  else{modeloptim(plancomponents,prespecfeatures,val)}#leaving open option to explicitly run without cross-val
-}#end mocv
+}#end LKT_cv
 
 
 #Get feedback duration function, still experimental as awaiting response from Neil regarding a few questions 10/22/2018
