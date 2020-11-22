@@ -58,7 +58,10 @@ LKT <- function(data,
                 covariates=NA,
                 dualfit = FALSE,
                 interc=FALSE,
-                elastic=FALSE,verbose=TRUE){
+                elastic=FALSE,
+                verbose=TRUE,
+                epsilon=1e-4,
+                cost=512){
 
   if (!("CF..reltime." %in% colnames(data))) {
     data$CF..reltime. <- practiceTime(data)  }
@@ -75,6 +78,8 @@ LKT <- function(data,
   e$data<-data
   e$fixedpars<-fixedpars
   e$seedpars<-seedpars
+  e$counter<-0
+  e$flag<-FALSE
 
   modelfun <- function(seedparameters){
     # intialize counts and vars
@@ -86,33 +91,12 @@ LKT <- function(data,
     if(interc==TRUE & !is.na(offsetvals[length(features)+1]))
       #last offset is fixed intercept
     {eq<-paste("0+offset(rep(",offsetvals[length(features)+1],",nrow(e$data)))",sep="")}
+
+    e$counter<-e$counter+1
+
     for(i in features){
       k<-k+1
-      #print(components)
-      # count an effect only when counted factor level is of specific type
-      if(length(grep("%",components[k]))){
-        KCs<-strsplit(components[k],"%")
-        e$data$index<-paste(eval(parse(text=paste("e$data$",KCs[[1]][1],sep=""))),e$data$Anon.Student.Id,sep="")
-        e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",KCs[[1]][1],sep=""))),sep="")
-        e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeGen(e$data,e$data$index,\"CORRECT\",e$data$",KCs[[1]][2],",\"",KCs[[1]][3],"\")",sep="")))))
-        e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeGen(e$data,e$data$index,\"INCORRECT\",e$data$",KCs[[1]][2],",\"",KCs[[1]][3],"\")",sep="")))))}
-      else        # count an effect when both counted factor level and recipient factor level are specified
-        if(length(grep("\\?",components[k]))){
-          KCs<-strsplit(components[k],"\\?")
-          e$data$indexcomp<-NULL
-          e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
-          e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
-      else
-        if (length(grep("_",components[k]))){
-          #need an index for each subcomponent of component
-          #need to count for all these indexes
-          #will do this in feature....
-        }
-      else{      # normal KC type Q-matrix
-        e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
-        e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
-        e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
-        e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
+
       # track parameters used
       if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","pderr","propdec","propdec2",
                                   "logitdec","base","expdecafm","expdecsuc","expdecfail","dashafm","dashsuc","dashfail",
@@ -120,6 +104,7 @@ LKT <- function(data,
                                   "base5suc","base5fail","clogitdec","crecency")){
         if(is.na(e$fixedpars[m])){ # if not fixed them optimize it
           para<-seedparameters[optimparcount]
+          e$flag<-TRUE
           optimparcount<-optimparcount+1}
         else
         { if(e$fixedpars[m]>=1 & e$fixedpars[m]%%1==0) { # if fixed is set to 1 or more, interpret it as an indicator to use optimized parameter
@@ -163,6 +148,38 @@ LKT <- function(data,
         }else{pare<-e$fixedpars[m]        }}
         m<-m+1}
 
+
+      if(e$flag==TRUE | e$counter<2){
+
+        #print(components)
+        # count an effect only when counted factor level is of specific type
+        if(length(grep("%",components[k]))){
+          KCs<-strsplit(components[k],"%")
+          e$data$index<-paste(eval(parse(text=paste("e$data$",KCs[[1]][1],sep=""))),e$data$Anon.Student.Id,sep="")
+          e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",KCs[[1]][1],sep=""))),sep="")
+          e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeGen(e$data,e$data$index,\"CORRECT\",e$data$",KCs[[1]][2],",\"",KCs[[1]][3],"\")",sep="")))))
+          e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeGen(e$data,e$data$index,\"INCORRECT\",e$data$",KCs[[1]][2],",\"",KCs[[1]][3],"\")",sep="")))))}
+        else        # count an effect when both counted factor level and recipient factor level are specified
+          if(length(grep("\\?",components[k]))){
+            KCs<-strsplit(components[k],"\\?")
+            e$data$indexcomp<-NULL
+            e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
+            e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
+        else
+          if (length(grep("_",components[k]))){
+            #need an index for each subcomponent of component
+            #need to count for all these indexes
+            #will do this in feature....
+          }
+        else{      # normal KC type Q-matrix
+          e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
+          e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
+          e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
+          e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}}
+
+
+      if(e$flag==TRUE | e$counter<2){
+        e$flag<-FALSE
       if (right(i,1)=="@"){
         # random effect
         eval(parse(text=paste("e$data$",components[k],
@@ -170,17 +187,21 @@ LKT <- function(data,
                               parc,pard,pare,components[k])",sep="")))
       } else{
         # fixed effect
+
+         # is.na(e$fixedpars[m]) | e$counter<2){
         eval(parse(text=paste("e$data$",gsub("\\$","",i),gsub("[%]","",components[k]),
                               "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
-                              parc,pard,pare,components[k])",sep="")))
+                              parc,pard,pare,components[k])",sep="")))#}
         if(!is.na(offsetvals[k]))
         {
         #fixed effects can have offsets
         eval(parse(text=paste("e$data$offset_",gsub("\\$","",i),gsub("[%]","",components[k]),
                                "<-offsetvals[k]*e$data$",gsub("\\$","",i),components[k],sep="")))
         }}
+}
 
-      if(length(seedparameters)==0 & verbose){
+
+      if( verbose){
       cat(paste(i,components[k],if(exists("para")){para},
                 if(exists("parb")){parb},if(exists("parc")){parc},
                 if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
@@ -220,7 +241,8 @@ LKT <- function(data,
                                  ")+\",eq,sep=\"\")",sep="")))
           }}}
     if(verbose){cat(paste(eq,"\n"))}
-    e$form<-as.formula(paste(equation,eq,sep=""))
+    e$form<-as.formula(paste(equation,eq,sep="")) #fix for liblinear
+#e$form<-as.formula(paste("~",eq,sep=""))
 
     if(any(grep("[@]",features)) & dualfit==FALSE){
       temp<-glmer(e$form,data=e$data,family=binomial(logit))
@@ -237,10 +259,36 @@ LKT <- function(data,
             if(elastic=="cva.glmnet") {temp<-cva.glmnet(e$form,data=e$data,family="binomial")
             plot(temp)
             print(temp)} else
-            { temp<-glm(e$form,data=e$data,family=binomial(logit),x=TRUE)
-            fitstat<-logLik(temp)}}
+            {
+              #temp<-glm(e$form,data=e$data,family=binomial(logit),x=TRUE)
+            #fitstat<-logLik(temp)}}   #fix for Liblin
 
-    if(dualfit==TRUE && elastic==FALSE){
+              X.csc <- new("matrix.csc", ra = X@x,
+                           ja = X@i + 1L,
+                           ia = X@p + 1L,
+                           dimension = X@Dim)
+
+    predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
+
+    #X<-sparse.model.matrix(~-1+contf,data=val3)
+    predictset.csc <- new("matrix.csc", ra = predictset@x,
+                 ja = predictset@i + 1L,
+                 ia = predictset@p + 1L,
+                 dimension = predictset@Dim)
+    predictset.csr <- as.matrix.csr(predictset.csc)
+    predictset2<-predictset.csr
+    #predictset2<-as.matrix.csr(predictset)
+
+    temp<-LiblineaR(predictset2,val3$CF..ansbin.,bias=0,
+                    cost=cost,epsilon=epsilon,type=0)
+    modelvs<-data.frame(temp$W)
+    colnames(modelvs)<-colnames(predictset)
+    e$modelvs<-t(modelvs)
+    colnames(e$modelvs)<-"coefficient"
+    e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities
+    fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))}}
+
+    if(dualfit==TRUE && elastic==FALSE){      #fix for Liblin
       rt.pred=exp(1)^(-(predict(temp)[which(e$data$CF..ansbin.==1)]))
       outVals = boxplot(e$data$Duration..sec.,plot=FALSE)$out
       outVals = which(e$data$Duration..sec. %in% outVals)
@@ -320,8 +368,11 @@ LKT <- function(data,
     cat(paste("Latency Scalar: ",Scalar,"\n",
               "Latency Intercept: ",Intercept,"\n",sep=''))}}
 
-  e$data$pred<-predict(e$temp,type="response")
+  #e$data$pred<-predict(e$temp,type="response")  #fix for Liblin
+
+
   results <- list("model" = e$temp,
+                  "coefs" = e$modelvs,
                   "r2"=e$mcfad,
                   "prediction" = if ("pred" %in% colnames(e$data)) {e$data$pred},
                   "nullmodel"=e$nullmodel,
@@ -689,7 +740,7 @@ LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.","<-999*rep(1,length(foldIDX[,i]))")))
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.[Ftr]","<-predatait")))
           eval(parse(text=paste(sep="","dat$CF..run",i,"fold",j,"modbin.[Fte]","<-predtest")))
-          
+
         }
         #Output text summary
         Nresfit<-length(datTr$Outcome)
