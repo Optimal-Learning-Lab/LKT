@@ -279,7 +279,7 @@ LKT <- function(data,
     predictset2<-predictset.csr
     #predictset2<-as.matrix.csr(predictset)
 
-    temp<-LiblineaR(predictset2,val3$CF..ansbin.,bias=0,
+    temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
                     cost=cost,epsilon=epsilon,type=0)
     modelvs<-data.frame(temp$W)
     colnames(modelvs)<-colnames(predictset)
