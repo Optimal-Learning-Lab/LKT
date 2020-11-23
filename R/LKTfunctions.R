@@ -263,10 +263,7 @@ LKT <- function(data,
               #temp<-glm(e$form,data=e$data,family=binomial(logit),x=TRUE)
             #fitstat<-logLik(temp)}}   #fix for Liblin
 
-              X.csc <- new("matrix.csc", ra = X@x,
-                           ja = X@i + 1L,
-                           ia = X@p + 1L,
-                           dimension = X@Dim)
+
 
     predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
 
