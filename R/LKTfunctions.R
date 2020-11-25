@@ -216,8 +216,17 @@ LKT <- function(data,
       if(right(i,1)=="$"){
         # add the fixed effect feature to the model with a coefficient per level
         cleanfeat<-gsub("\\$","",i)
-        eval(parse(text=paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],\"+\",eq,sep=\"\")")))
+        if(is.na(covariates[k])){
+          #standard way
+          eval(parse(text=paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],
+                                \"+\",eq,sep=\"\")")))}
 
+        else
+        {
+          eval(parse(text=paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
+                                ,\":\",covariates[k]
+                                ,\"+\",eq,sep=\"\")")))
+          }
       }
       else if (right(i,1)=="@"){
         # add the random effect feature to the model with a coefficient per level
@@ -241,9 +250,7 @@ LKT <- function(data,
                                  ")+\",eq,sep=\"\")",sep="")))
           }}}
     if(verbose){cat(paste(eq,"\n"))}
-    e$form<-as.formula(paste(equation,eq,sep="")) #fix for liblinear
-#e$form<-as.formula(paste("~",eq,sep=""))
-
+    e$form<-as.formula(paste(equation,eq,sep=""))
     if(any(grep("[@]",features)) & dualfit==FALSE){
       temp<-glmer(e$form,data=e$data,family=binomial(logit))
       fitstat<-logLik(temp)
@@ -260,21 +267,17 @@ LKT <- function(data,
             plot(temp)
             print(temp)} else
             {
-              #temp<-glm(e$form,data=e$data,family=binomial(logit),x=TRUE)
-            #fitstat<-logLik(temp)}}   #fix for Liblin
 
 
-
+e$data<-e$data[order(-e$data$CF..ansbin.),]
     predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
 
-    #X<-sparse.model.matrix(~-1+contf,data=val3)
     predictset.csc <- new("matrix.csc", ra = predictset@x,
                  ja = predictset@i + 1L,
                  ia = predictset@p + 1L,
                  dimension = predictset@Dim)
     predictset.csr <- as.matrix.csr(predictset.csc)
     predictset2<-predictset.csr
-    #predictset2<-as.matrix.csr(predictset)
 
     temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
                     cost=cost,epsilon=epsilon,type=0)
@@ -283,7 +286,10 @@ LKT <- function(data,
     e$modelvs<-t(modelvs)
     colnames(e$modelvs)<-"coefficient"
     e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities
-    fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))}}
+    fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
+
+    e$data<-e$data[order(rownames(e$data)),]
+    }}
 
     if(dualfit==TRUE && elastic==FALSE){      #fix for Liblin
       rt.pred=exp(1)^(-(predict(temp)[which(e$data$CF..ansbin.==1)]))
