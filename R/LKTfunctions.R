@@ -61,7 +61,8 @@ LKT <- function(data,
                 elastic=FALSE,
                 verbose=TRUE,
                 epsilon=1e-4,
-                cost=512){
+                cost=512,
+                type=0){
 
   if (!("CF..reltime." %in% colnames(data))) {
     data$CF..reltime. <- practiceTime(data)  }
@@ -280,7 +281,7 @@ e$data<-e$data[order(-e$data$CF..ansbin.),]
     predictset2<-predictset.csr
 
     temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
-                    cost=cost,epsilon=epsilon,type=0)
+                    cost=cost,epsilon=epsilon,type=type)
     modelvs<-data.frame(temp$W)
     colnames(modelvs)<-colnames(predictset)
     e$modelvs<-t(modelvs)
