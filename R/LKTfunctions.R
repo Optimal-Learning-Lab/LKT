@@ -167,12 +167,12 @@ LKT <- function(data,
             e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
             e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
         else
-          # if (length(grep("_",components[k]))){
+           if (length(grep("__",components[k]))){
           #   #need an index for each subcomponent of component
           #   #need to count for all these indexes
           #   #will do this in feature....
-          # }
-        #else
+           }
+        else
           {      # normal KC type Q-matrix
           e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
           e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
@@ -420,7 +420,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clineafm"){
     data$temp<-0
     data$div<-0
-    for (m in strsplit(fcomp,"_")[[1]]){
+    for (m in strsplit(fcomp,"__")[[1]]){
       #print(m)
       data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
       data$cor<-countOutcome(data,data$index,"CORRECT")
@@ -437,7 +437,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clogafm"){
     data$temp<-0
     data$div<-0
-    for (m in strsplit(fcomp,"_")[[1]]){
+    for (m in strsplit(fcomp,"__")[[1]]){
       #print(m)
       data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
       data$cor<-countOutcome(data,data$index,"CORRECT")
@@ -558,7 +558,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clogsuc"){
     data$temp<-0
     data$div<-0
-    for (m in strsplit(fcomp,"_")[[1]]){
+    for (m in strsplit(fcomp,"__")[[1]]){
       #print(m)
       data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
       data$cor<-countOutcome(data,data$index,"CORRECT")
@@ -575,12 +575,14 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clinesuc"){
       data$temp<-0
       data$div<-0
-      for (m in strsplit(fcomp,"_")[[1]]){
+      for (m in strsplit(fcomp,"__")[[1]]){
         #print(m)
         data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
         data$cor<-countOutcome(data,data$index,"CORRECT")
         data$icor<-countOutcome(data,data$index,"INCORRECT")
-        #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+        #print((eval(parse(text=paste("data$",m,sep=""))))[1:100])
+
+        #print(((data$cor))[1:100])
         data$temp<-data$temp+(data$cor)*eval(parse(text=paste("data$",m,sep="")))
         #print(data$temp[1:100])
         data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
@@ -594,7 +596,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clogfail"){
     data$temp<-0
     data$div<-0
-    for (m in strsplit(fcomp,"_")[[1]]){
+    for (m in strsplit(fcomp,"__")[[1]]){
       #print(m)
       data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
       data$cor<-countOutcome(data,data$index,"CORRECT")
@@ -611,7 +613,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clinefail"){
       data$temp<-0
       data$div<-0
-      for (m in strsplit(fcomp,"_")[[1]]){
+      for (m in strsplit(fcomp,"__")[[1]]){
         #print(m)
         data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
         data$cor<-countOutcome(data,data$index,"CORRECT")
@@ -670,7 +672,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="clogitdec"){
     data$temp<-0
     data$div<-0
-    for (m in strsplit(fcomp,"_")[[1]]){
+    for (m in strsplit(fcomp,"__")[[1]]){
       #print(m)
       data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
       #print((ave(data$CF..ansbin.,data$index,FUN=function(x) slidelogitdec(x,par1))*eval(parse(text=paste("data$",m,sep=""))))[1:100])
