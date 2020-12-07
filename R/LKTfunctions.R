@@ -167,14 +167,16 @@ LKT <- function(data,
             e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
             e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
         else
-          if (length(grep("_",components[k]))){
-            #need an index for each subcomponent of component
-            #need to count for all these indexes
-            #will do this in feature....
-          }
-        else{      # normal KC type Q-matrix
+          # if (length(grep("_",components[k]))){
+          #   #need an index for each subcomponent of component
+          #   #need to count for all these indexes
+          #   #will do this in feature....
+          # }
+        #else
+          {      # normal KC type Q-matrix
           e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
           e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
+          #print(e$data$indexcomp[1:40])
           e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
           e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}}
 
@@ -271,6 +273,8 @@ LKT <- function(data,
 
 
 e$data<-e$data[order(-e$data$CF..ansbin.),]
+#print(str(e$data))
+#print(e$form)
     predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
 
     predictset.csc <- new("matrix.csc", ra = predictset@x,
@@ -283,10 +287,19 @@ e$data<-e$data[order(-e$data$CF..ansbin.),]
     temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
                     cost=cost,epsilon=epsilon,type=type)
     modelvs<-data.frame(temp$W)
+    #print(modelvs[,1:40])
+    #print(length(colnames(modelvs)))
+    #      print(length(colnames(predictset)))
     colnames(modelvs)<-colnames(predictset)
+    #print(modelvs[,1:10])
     e$modelvs<-t(modelvs)
+    #print(e$modelvs[1:40])
     colnames(e$modelvs)<-"coefficient"
-    e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities
+
+    #print(str(predict(temp,predictset2,proba=TRUE)$probabilities))
+    e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
+
+
     fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
 
     e$data<-e$data[order(rownames(e$data)),]
@@ -401,7 +414,7 @@ e$data<-e$data[order(-e$data$CF..ansbin.),]
 computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcomp){
   # fixed features
   feat<-gsub("[$@]","",feat)
-  if(feat=="intercept"){return(index2)}
+  if(feat=="intercept"){return(as.character(index2))}
   if(feat=="numer"){ temp<-eval(parse(text=paste("data$",fcomp,sep="")))
   return(temp)}
   if(feat=="clineafm"){
