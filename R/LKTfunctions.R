@@ -194,7 +194,10 @@ LKT <- function(data,
          # is.na(e$fixedpars[m]) | e$counter<2){
         eval(parse(text=paste("e$data$",gsub("\\$","",i),gsub("[%]","",components[k]),
                               "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
-                              parc,pard,pare,components[k])",sep="")))#}
+                              parc,pard,pare,components[k])",sep="")))
+
+
+        #}
         if(!is.na(offsetvals[k]))
         {
         #fixed effects can have offsets
@@ -204,7 +207,7 @@ LKT <- function(data,
 }
 
 
-      if( verbose){
+      if(  verbose){
       cat(paste(i,components[k],if(exists("para")){para},
                 if(exists("parb")){parb},if(exists("parc")){parc},
                 if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
@@ -272,9 +275,8 @@ LKT <- function(data,
             {
 
 
-e$data<-e$data[order(-e$data$CF..ansbin.),]
-#print(str(e$data))
-#print(e$form)
+#e$data<-e$data[order(-e$data$CF..ansbin.),]
+
     predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
 
     predictset.csc <- new("matrix.csc", ra = predictset@x,
@@ -286,23 +288,22 @@ e$data<-e$data[order(-e$data$CF..ansbin.),]
 
     temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
                     cost=cost,epsilon=epsilon,type=type)
+
     modelvs<-data.frame(temp$W)
-    #print(modelvs[,1:40])
-    #print(length(colnames(modelvs)))
-    #      print(length(colnames(predictset)))
+
     colnames(modelvs)<-colnames(predictset)
-    #print(modelvs[,1:10])
+
     e$modelvs<-t(modelvs)
-    #print(e$modelvs[1:40])
+
     colnames(e$modelvs)<-"coefficient"
 
-    #print(str(predict(temp,predictset2,proba=TRUE)$probabilities))
     e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
 
 
     fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
 
-    e$data<-e$data[order(rownames(e$data)),]
+   # e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
+
     }}
 
     if(dualfit==TRUE && elastic==FALSE){      #fix for Liblin
@@ -664,7 +665,8 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
 
   # double factor dynamic features
   if(feat=="linecomp"){return((data$cor-data$icor))}
-  if(feat=="logit"){return(log((.1+par1*30+data$cor)/(.1+par1*30+data$icor)))}
+  if(feat=="logit"){
+    return(log((.1+par1*30+data$cor)/(.1+par1*30+data$icor)))}
   if(feat=="pderr"){return(ave(data$pred-data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
   if(feat=="propdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
   if(feat=="propdec2"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec2(x,par1)))}
