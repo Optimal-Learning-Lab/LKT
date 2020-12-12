@@ -99,7 +99,7 @@ LKT <- function(data,
       k<-k+1
 
       # track parameters used
-      if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","pderr","propdec","propdec2",
+      if(gsub("[$@]","",i) %in% c("powafm","recency","recencysuc","recencyfail","errordec","propdec","propdec2",
                                   "logitdec","base","expdecafm","expdecsuc","expdecfail","dashafm","dashsuc","dashfail",
                                   "base2","base4","basesuc","basefail","logit","base2suc","base2fail","ppe",
                                   "base5suc","base5fail","clogitdec","crecency")){
@@ -343,7 +343,7 @@ LKT <- function(data,
     sum("recencysuc" == gsub("[$]","",features))+
     sum("recencyfail" == gsub("[$]","",features))+
     sum("logit" == gsub("[$]","",features))+
-    sum("pderr" == gsub("[$]","",features))+
+    sum("errordec" == gsub("[$]","",features))+
     sum("propdec" == gsub("[$]","",features))+
     sum("propdec2" == gsub("[$]","",features))+
     sum("logitdec" == gsub("[$]","",features))+
@@ -667,7 +667,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="linecomp"){return((data$cor-data$icor))}
   if(feat=="logit"){
     return(log((.1+par1*30+data$cor)/(.1+par1*30+data$icor)))}
-  if(feat=="pderr"){return(ave(data$pred-data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
+  if(feat=="errordec"){return(ave(data$pred-data$CF..ansbin.,index,FUN=function(x) slideerrordec(x,par1)))}
   if(feat=="propdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
   if(feat=="propdec2"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec2(x,par1)))}
   if(feat=="logitdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidelogitdec(x,par1)))}
@@ -974,6 +974,15 @@ for (i in unique(index)){
 }
 return(temp)}
 
+
+errordec <- function (v,d){
+  w<-length(v)
+  sum((c(0,v[1:w]) * d^((w):0))/sum(d^((w+1):0)))}
+slideerrordec <- function(x, d) {
+  v <- c(rep(0, length(x)))
+  for (i in 1:length(x) ) {
+    v[i] <- errordec(x[1:i],d)  }
+  
 # exponetial decy for trial
 expdec <- function (v,d){
   w<-length(v)
