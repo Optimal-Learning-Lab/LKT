@@ -977,11 +977,13 @@ return(temp)}
 
 errordec <- function (v,d){
   w<-length(v)
-  sum((c(0,v[1:w]) * d^((w):0))/sum(d^((w+1):0)))}
+  sum((c(0,v[1:w]) * d^((w):0))/sum(d^((w+1):0)))
+}
 slideerrordec <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x) ) {
     v[i] <- errordec(x[1:i],d)  }
+  }
   
 # exponetial decy for trial
 expdec <- function (v,d){
