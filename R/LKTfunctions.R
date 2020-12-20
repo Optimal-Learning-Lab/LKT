@@ -297,8 +297,12 @@ LKT <- function(data,
 
     colnames(e$modelvs)<-"coefficient"
 
+    
+    if(e$data$CF..ansbin.[1]==1){
     e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
-
+    }else{
+    e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,2]  
+         }
 
     fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
 
