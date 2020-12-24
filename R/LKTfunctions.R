@@ -73,7 +73,6 @@ if(maketimes){
   if (!("CF..ansbin." %in% colnames(data))) {
     data$CF..ansbin. <- ifelse(data$Outcome == "CORRECT", 1, 0)  }
 
-
   equation<-"CF..ansbin.~ "
   e<-new.env()
   e$data<-data
@@ -81,7 +80,6 @@ if(maketimes){
   e$seedpars<-seedpars
   e$counter<-0
   e$flag<-FALSE
-
   modelfun <- function(seedparameters){
     # intialize counts and vars
     k<-0
@@ -94,7 +92,6 @@ if(maketimes){
     {eq<-paste("0+offset(rep(",offsetvals[length(features)+1],",nrow(e$data)))",sep="")}
 
     e$counter<-e$counter+1
-
     for(i in features){
       k<-k+1
 
@@ -175,9 +172,12 @@ if(maketimes){
         else
           {      # normal KC type Q-matrix
 
-          e$data$index<-do.call(paste,list(eval(parse(text=paste0("e$data$",components[k]))),e$data$Anon.Student.Id))
-          e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
-          if(i!="numer"){
+         # e$data$index<-do.call(paste,list(eval(parse(text=paste0("e$data$",components[k]))),e$data$Anon.Student.Id))
+          e$data[,index:=do.call(paste0,list(components[k],Anon.Student.Id))]
+          e$data[,indexcomp:=components[k]]
+         # e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
+          #e$data[,indexcomp:=do.call(texteval,list(paste0("e$data$",components[k])))]
+          if(i %in% c("numer","intercept")){
             e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
             e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
           }}
@@ -829,10 +829,16 @@ right = function (string, char){
 #' @return the vector of the lagged cumulative sum.
 #' @export
 countOutcome <-function(data,index,response) {
-  data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(response))))
-  data$temp[tolower(as.character(data$Outcome))==tolower(response)]<-
-    as.numeric(data$temp[tolower(as.character(data$Outcome))==tolower(response)])-1
-  as.numeric(data$temp)}
+  #data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(response))))
+  data[,temp:=cumsum(Outcome==response),by=index]
+  data[Outcome==response,temp:=temp-1,by=index]
+  #data$temp[tolower(as.character(data$Outcome))==tolower(response)]<-
+  #  as.numeric(data$temp[tolower(as.character(data$Outcome))==tolower(response)])-1
+  #as.numeric(data$temp)
+  data$temp
+  }
+
+
 
 countOutcomeDash <- function(times, scalev) {
   l <- length(times)
@@ -1106,3 +1112,6 @@ smallSet <- function(data,nSub){
   return(smalldata)
 }
 
+
+texteval<-function(stringv){ eval(parse(text=stringv))
+  }
