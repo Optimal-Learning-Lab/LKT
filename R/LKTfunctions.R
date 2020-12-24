@@ -62,12 +62,12 @@ LKT <- function(data,
                 verbose=TRUE,
                 epsilon=1e-4,
                 cost=512,
-                type=0){
-
+                type=0,maketimes=FALSE){
+if(maketimes){
   if (!("CF..reltime." %in% colnames(data))) {
     data$CF..reltime. <- practiceTime(data)  }
   if (!("CF..Time." %in% colnames(data))) {
-    data$CF..Time. <- data$CF..reltime.  }
+    data$CF..Time. <- data$CF..reltime.  }}
   if (!("Outcome" %in% colnames(data))) {
     data$Outcome <- ifelse(data$CF..ansbin. == 1, "CORRECT", "INCORRECT")  }
   if (!("CF..ansbin." %in% colnames(data))) {
@@ -174,11 +174,13 @@ LKT <- function(data,
            }
         else
           {      # normal KC type Q-matrix
-          e$data$index<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),e$data$Anon.Student.Id,sep="")
-          e$data$indexcomp<-paste(eval(parse(text=paste("e$data$",components[k],sep=""))),sep="")
-          #print(e$data$indexcomp[1:40])
-          e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
-          e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}}
+
+          e$data$index<-do.call(paste,list(eval(parse(text=paste0("e$data$",components[k]))),e$data$Anon.Student.Id))
+          e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
+          if(i!="numer"){
+            e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
+            e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
+          }}
 
 
       if(e$flag==TRUE | e$counter<2){
@@ -297,9 +299,9 @@ LKT <- function(data,
 
     colnames(e$modelvs)<-"coefficient"
 
-    
+
     e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
-    
+
 
     fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
 
@@ -782,7 +784,7 @@ LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE
 
 #' @title rlvl
 #' @description sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
-#' @export                              
+#' @export
 rlvl<-function(dat){
 if(dat$CF..ansbin.[1]==0){#find someone that starts with 1 and put it in front
   row1 = match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)
@@ -997,7 +999,7 @@ slideerrordec <- function(x, d) {
   for (i in 1:length(x) ) {
     v[i] <- errordec(x[1:i],d)  }
   }
-  
+
 # exponetial decy for trial
 expdec <- function (v,d){
   w<-length(v)
