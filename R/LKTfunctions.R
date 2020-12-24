@@ -780,6 +780,18 @@ LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE
   }
 }#end LKT_cv
 
+#' @title rlvl
+#' @description sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
+#' @export                              
+rlvl<-function(dat){
+if(dat$CF..ansbin.[1]==0){#find someone that starts with 1 and put it in front
+  row1 = match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)
+  temp_stu = dat$Anon.Student.Id[row1[which(dat$CF..ansbin.[row1]==1)[1]]]
+  idx = which(dat$Anon.Student.Id %in% as.character(temp_stu))
+  dat_new = rbind(dat[idx,],dat[-idx,])
+  return(dat_new)
+}else{return(dat)}
+}#end rlvl
 
 #Get feedback duration function, still experimental as awaiting response from Neil regarding a few questions 10/22/2018
 #High correlation between old export median RTs per sub and new export (r>.9).
