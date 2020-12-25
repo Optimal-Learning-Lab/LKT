@@ -179,7 +179,7 @@ LKT <- function(data,
           #print(e$data$indexcomp[1:200])
           # e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
           #e$data[,indexcomp:=do.call(texteval,list(paste0("e$data$",components[k])))]
-          if(i %in% c("numer","intercept")){
+          if(!(i %in% c("numer","intercept"))){
             e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
             e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
         }}
