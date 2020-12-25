@@ -63,11 +63,11 @@ LKT <- function(data,
                 epsilon=1e-4,
                 cost=512,
                 type=0,maketimes=FALSE){
-if(maketimes){
-  if (!("CF..reltime." %in% colnames(data))) {
-    data$CF..reltime. <- practiceTime(data)  }
-  if (!("CF..Time." %in% colnames(data))) {
-    data$CF..Time. <- data$CF..reltime.  }}
+  if(maketimes){
+    if (!("CF..reltime." %in% colnames(data))) {
+      data$CF..reltime. <- practiceTime(data)  }
+    if (!("CF..Time." %in% colnames(data))) {
+      data$CF..Time. <- data$CF..reltime.  }}
   if (!("Outcome" %in% colnames(data))) {
     data$Outcome <- ifelse(data$CF..ansbin. == 1, "CORRECT", "INCORRECT")  }
   if (!("CF..ansbin." %in% colnames(data))) {
@@ -164,55 +164,57 @@ if(maketimes){
             e$data$cor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))
             e$data$icor<-as.numeric(paste(eval(parse(text=paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$",KCs[[1]][3],",\"",KCs[[1]][4],"\",e$data$",KCs[[1]][1],",\"",KCs[[1]][2],"\")",sep="")))))}
         else
-           if (length(grep("__",components[k]))){
-          #   #need an index for each subcomponent of component
-          #   #need to count for all these indexes
-          #   #will do this in feature....
-           }
+          if (length(grep("__",components[k]))){
+            #   #need an index for each subcomponent of component
+            #   #need to count for all these indexes
+            #   #will do this in feature....
+          }
         else
-          {      # normal KC type Q-matrix
+        {      # normal KC type Q-matrix
 
-         # e$data$index<-do.call(paste,list(eval(parse(text=paste0("e$data$",components[k]))),e$data$Anon.Student.Id))
-          e$data[,index:=do.call(paste0,list(components[k],Anon.Student.Id))]
-          e$data[,indexcomp:=components[k]]
-         # e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
+          vec<-eval(parse(text=paste0("e$data$",components[k])))
+          e$data[,index:=do.call(paste0,list(vec,Anon.Student.Id))]
+          #print(e$data$index[1:200])
+          e$data[,indexcomp:=vec]
+          #print(e$data$indexcomp[1:200])
+          # e$data$indexcomp<-(eval(parse(text=paste0("e$data$",components[k]))))
           #e$data[,indexcomp:=do.call(texteval,list(paste0("e$data$",components[k])))]
           if(i %in% c("numer","intercept")){
             e$data$cor<-countOutcome(e$data,e$data$index,"CORRECT")
             e$data$icor<-countOutcome(e$data,e$data$index,"INCORRECT")}
-          }}
+        }}
 
 
       if(e$flag==TRUE | e$counter<2){
         e$flag<-FALSE
-      if (right(i,1)=="@"){
-        # random effect
-        eval(parse(text=paste("e$data$",components[k],
-                              "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
+        if (right(i,1)=="@"){
+          # random effect
+          eval(parse(text=paste("e$data$",components[k],
+                                "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                               parc,pard,pare,components[k])",sep="")))
-      } else{
-        # fixed effect
+        } else{
+          # fixed effect
 
-         # is.na(e$fixedpars[m]) | e$counter<2){
-        eval(parse(text=paste("e$data$",gsub("\\$","",i),gsub("[%]","",components[k]),
-                              "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
+          # is.na(e$fixedpars[m]) | e$counter<2){
+          eval(parse(text=paste("e$data$",gsub("\\$","",i),gsub("[%]","",components[k]),
+                                "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                               parc,pard,pare,components[k])",sep="")))
 
 
-        #}
-        if(!is.na(offsetvals[k]))
-        {
-        #fixed effects can have offsets
-        eval(parse(text=paste("e$data$offset_",gsub("\\$","",i),gsub("[%]","",components[k]),
-                               "<-offsetvals[k]*e$data$",gsub("\\$","",i),components[k],sep="")))
-        }}
-}
+          #}
+          if(!is.na(offsetvals[k]))
+          {
+            #fixed effects can have offsets
+            eval(parse(text=paste("e$data$offset_",gsub("\\$","",i),gsub("[%]","",components[k]),
+                                  "<-offsetvals[k]*e$data$",gsub("\\$","",i),components[k],sep="")))
+          }}
+      }
 
 
       if(  verbose){
-      cat(paste(i,components[k],if(exists("para")){para},
-                if(exists("parb")){parb},if(exists("parc")){parc},
-                if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
+        cat(paste(i,components[k],if(exists("para")){para},
+                  if(exists("parb")){parb},if(exists("parc")){parc},
+                  if(exists("pard")){pard},if(exists("pare")){pare},"\n"))}
 
 
       if(exists("para")){rm(para)}
@@ -234,7 +236,7 @@ if(maketimes){
           eval(parse(text=paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
                                 ,\":\",covariates[k]
                                 ,\"+\",eq,sep=\"\")")))
-          }
+        }
       }
       else if (right(i,1)=="@"){
         # add the random effect feature to the model with a coefficient per level
@@ -244,19 +246,19 @@ if(maketimes){
         # add the fixed effect feature to the model with the same coefficient for all levels
         if(is.na( offsetvals[k])){
           if(is.na(covariates[k])){
-          #standard way
+            #standard way
             eval(parse(text=paste("eq<-paste(i,gsub('[%]','',components[k]),\"+\",eq,sep=\"\")")))}
           else
           {
             eval(parse(text=paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k],\"+\",eq,sep=\"\")")))
           }
-            }
+        }
         else
-          {
-            eval(parse(text=paste("eq<-paste(\"offset(",
-                                 paste("offset_",i,gsub('[%]','',components[k]),sep=""),
-                                 ")+\",eq,sep=\"\")",sep="")))
-          }}}
+        {
+          eval(parse(text=paste("eq<-paste(\"offset(",
+                                paste("offset_",i,gsub('[%]','',components[k]),sep=""),
+                                ")+\",eq,sep=\"\")",sep="")))
+        }}}
     if(verbose){cat(paste(eq,"\n"))}
     e$form<-as.formula(paste(equation,eq,sep=""))
     if(any(grep("[@]",features)) & dualfit==FALSE){
@@ -277,37 +279,37 @@ if(maketimes){
             {
 
 
-#e$data<-e$data[order(-e$data$CF..ansbin.),]
+              #e$data<-e$data[order(-e$data$CF..ansbin.),]
 
-    predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
+              predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
 
-    predictset.csc <- new("matrix.csc", ra = predictset@x,
-                 ja = predictset@i + 1L,
-                 ia = predictset@p + 1L,
-                 dimension = predictset@Dim)
-    predictset.csr <- as.matrix.csr(predictset.csc)
-    predictset2<-predictset.csr
+              predictset.csc <- new("matrix.csc", ra = predictset@x,
+                                    ja = predictset@i + 1L,
+                                    ia = predictset@p + 1L,
+                                    dimension = predictset@Dim)
+              predictset.csr <- as.matrix.csr(predictset.csc)
+              predictset2<-predictset.csr
 
-    temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
-                    cost=cost,epsilon=epsilon,type=type)
+              temp<-LiblineaR(predictset2,e$data$CF..ansbin.,bias=0,
+                              cost=cost,epsilon=epsilon,type=type)
 
-    modelvs<-data.frame(temp$W)
+              modelvs<-data.frame(temp$W)
 
-    colnames(modelvs)<-colnames(predictset)
+              colnames(modelvs)<-colnames(predictset)
 
-    e$modelvs<-t(modelvs)
+              e$modelvs<-t(modelvs)
 
-    colnames(e$modelvs)<-"coefficient"
-
-
-    e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
+              colnames(e$modelvs)<-"coefficient"
 
 
-    fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
+              e$data$pred<-predict(temp,predictset2,proba=TRUE)$probabilities[,1]
 
-   # e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
 
-    }}
+              fitstat<- sum(log(ifelse(e$data$CF..ansbin.==1,e$data$pred,1-e$data$pred)))
+
+              # e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
+
+            }}
 
     if(dualfit==TRUE && elastic==FALSE){      #fix for Liblin
       rt.pred=exp(1)^(-(predict(temp)[which(e$data$CF..ansbin.==1)]))
@@ -328,9 +330,9 @@ if(maketimes){
       e$mcfad<-round(1-fitstat[1]/e$nullfit[1],4)
       if(verbose){
         cat(paste("McFadden's R2 logistic:",e$mcfad,"\n"))
-      cat(paste("LogLike logistic:",round(fitstat,8),"\n"))}
+        cat(paste("LogLike logistic:",round(fitstat,8),"\n"))}
       if(length(seedparameters)>0 & verbose)
-        {cat(paste("step par values ="))
+      {cat(paste("step par values ="))
         cat(seedparameters,sep=",")
         cat(paste("\n\n"))}
       -fitstat[1]}
@@ -386,8 +388,8 @@ if(maketimes){
     Scalar<-coef(e$lm.rt)[2]
     Intercept<-coef(e$lm.rt)[1]
     if(verbose){cat(paste("Failure latency: ",failureLatency,"\n"))
-    cat(paste("Latency Scalar: ",Scalar,"\n",
-              "Latency Intercept: ",Intercept,"\n",sep=''))}}
+      cat(paste("Latency Scalar: ",Scalar,"\n",
+                "Latency Intercept: ",Intercept,"\n",sep=''))}}
 
   #e$data$pred<-predict(e$temp,type="response")  #fix for Liblin
 
@@ -400,7 +402,7 @@ if(maketimes){
                   "latencymodel"=if(exists("e$lm.rt")){e$lm.rt},
                   "optimizedpars"=if(exists("optimizedpars")){optimizedpars},
                   "subjectrmse"= if ("pred" %in% colnames(e$data)) {aggregate((e$data$pred-e$data$CF..ansbin.)^2,
-                                                                             by=list(e$data$Anon.Student.Id),FUN=mean)},
+                                                                              by=list(e$data$Anon.Student.Id),FUN=mean)},
                   "newdata"= e$data)
   return (results)
 }
@@ -577,24 +579,24 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     #print(data$temp[1:100])
     return(data$temp)}
   if(feat=="clinesuc"){
-      data$temp<-0
-      data$div<-0
-      for (m in strsplit(fcomp,"__")[[1]]){
-        #print(m)
-        data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
-        data$cor<-countOutcome(data,data$index,"CORRECT")
-        data$icor<-countOutcome(data,data$index,"INCORRECT")
-        #print((eval(parse(text=paste("data$",m,sep=""))))[1:100])
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"__")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print((eval(parse(text=paste("data$",m,sep=""))))[1:100])
 
-        #print(((data$cor))[1:100])
-        data$temp<-data$temp+(data$cor)*eval(parse(text=paste("data$",m,sep="")))
-        #print(data$temp[1:100])
-        data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
-        #print(data$div[1:100])
-      }
-      data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+      #print(((data$cor))[1:100])
+      data$temp<-data$temp+(data$cor)*eval(parse(text=paste("data$",m,sep="")))
       #print(data$temp[1:100])
-      return(data$temp)}
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
   if(feat=="logfail"){return(log(1+data$icor))}
   if(feat=="linefail"){return(data$icor)}
   if(feat=="clogfail"){
@@ -615,22 +617,22 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     #print(data$temp[1:100])
     return(data$temp)}
   if(feat=="clinefail"){
-      data$temp<-0
-      data$div<-0
-      for (m in strsplit(fcomp,"__")[[1]]){
-        #print(m)
-        data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
-        data$cor<-countOutcome(data,data$index,"CORRECT")
-        data$icor<-countOutcome(data,data$index,"INCORRECT")
-        #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
-        data$temp<-data$temp+(data$icor)*eval(parse(text=paste("data$",m,sep="")))
-        #print(data$temp[1:100])
-        data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
-        #print(data$div[1:100])
-      }
-      data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    data$temp<-0
+    data$div<-0
+    for (m in strsplit(fcomp,"__")[[1]]){
+      #print(m)
+      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
+      #print(((data$cor+data$icor)*eval(parse(text=paste("data$",m,sep=""))))[1:100])
+      data$temp<-data$temp+(data$icor)*eval(parse(text=paste("data$",m,sep="")))
       #print(data$temp[1:100])
-      return(data$temp)}
+      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
+      #print(data$div[1:100])
+    }
+    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
+    #print(data$temp[1:100])
+    return(data$temp)}
   if(feat=="recencyfail"){
     eval(parse(text=paste("data$rec <- data$",fcomp,"spacing",sep="")))
     eval(parse(text=paste("data$prev <- data$",fcomp,"prev",sep="")))
@@ -678,16 +680,14 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     data$temp<-0
     data$div<-0
     for (m in strsplit(fcomp,"__")[[1]]){
-      #print(m)
-      data$index<-paste(eval(parse(text=paste("data$",m,sep=""))),data$Anon.Student.Id,sep="")
-      #print((ave(data$CF..ansbin.,data$index,FUN=function(x) slidelogitdec(x,par1))*eval(parse(text=paste("data$",m,sep=""))))[1:100])
-      data$temp<-data$temp+ave(data$CF..ansbin.,data$index,FUN=function(x) slidelogitdec(x,par1))*eval(parse(text=paste("data$",m,sep="")))
-      #print(data$temp[1:100])
-      data$div<-data$div+eval(parse(text=paste("data$",m,sep="")))
-      #print(data$div[1:100])
+      data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
+      data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
+      data[mn==1,temptemp:=slidelogitdec(CF..ansbin.,par1),by=index]
+      data[is.na(temptemp),temptemp:=0]
+      data[,temp:=temp+temptemp*as.numeric(mn)]
+      data$div<-data$div+as.numeric(data$mn)
     }
-    data$temp<-ifelse(data$div!=0,data$temp/data$div,0)
-    #print(data$temp[1:100])
+    data$temp<- fifelse(data$div!=0,data$temp/data$div,0)
     return(data$temp)}
   if(feat=="prop"){ifelse(is.nan(data$cor/(data$cor+data$icor)),.5,data$cor/(data$cor+data$icor))}
 }
@@ -732,9 +732,9 @@ LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE
       F2 <- which(foldIDX[,i]==2)#fold 2
       trainfold1 = val[F1,]
       modelob1 = LKT(data=trainfold1,
-          components=componentl,features=featl,offsetvals=offsetl,
-          fixedpars=fixedl,seedpars=seedl,
-          dualfit=dualfit,interc=interc,elastic=elastictest)
+                     components=componentl,features=featl,offsetvals=offsetl,
+                     fixedpars=fixedl,seedpars=seedl,
+                     dualfit=dualfit,interc=interc,elastic=elastictest)
       glm1=modelob1$model
       dat1 = glm1$data #test is val with columns for F1,F2 etc created inside modeloptim()
       trainfold2 = val[F2,]
@@ -786,13 +786,13 @@ LKT_cv <- function(componentl,featl,offsetl=NA,fixedl,seedl=NA,elastictest=FALSE
 #' @description sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
 #' @export
 rlvl<-function(dat){
-if(dat$CF..ansbin.[1]==0){#find someone that starts with 1 and put it in front
-  row1 = match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)
-  temp_stu = dat$Anon.Student.Id[row1[which(dat$CF..ansbin.[row1]==1)[1]]]
-  idx = which(dat$Anon.Student.Id %in% as.character(temp_stu))
-  dat_new = rbind(dat[idx,],dat[-idx,])
-  return(dat_new)
-}else{return(dat)}
+  if(dat$CF..ansbin.[1]==0){#find someone that starts with 1 and put it in front
+    row1 = match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)
+    temp_stu = dat$Anon.Student.Id[row1[which(dat$CF..ansbin.[row1]==1)[1]]]
+    idx = which(dat$Anon.Student.Id %in% as.character(temp_stu))
+    dat_new = rbind(dat[idx,],dat[-idx,])
+    return(dat_new)
+  }else{return(dat)}
 }#end rlvl
 
 #Get feedback duration function, still experimental as awaiting response from Neil regarding a few questions 10/22/2018
@@ -836,7 +836,7 @@ countOutcome <-function(data,index,response) {
   #  as.numeric(data$temp[tolower(as.character(data$Outcome))==tolower(response)])-1
   #as.numeric(data$temp)
   data$temp
-  }
+}
 
 
 
@@ -954,9 +954,9 @@ countOutcomeOther <-function(data,index,item,sourcecol,sourc,targetcol,target) {
 practiceTime <-function(data) {   temp<-rep(0,length(data$CF..ansbin.))
 for (i in unique(data$Anon.Student.Id)){
   if(length(data$Duration..sec.[data$Anon.Student.Id==i])>1){
-  temp[data$Anon.Student.Id==i]<-
-    c(0,cumsum(data$Duration..sec.[data$Anon.Student.Id==i])
-      [1:(length(cumsum(data$Duration..sec.[data$Anon.Student.Id==i]))-1)])}}
+    temp[data$Anon.Student.Id==i]<-
+      c(0,cumsum(data$Duration..sec.[data$Anon.Student.Id==i])
+        [1:(length(cumsum(data$Duration..sec.[data$Anon.Student.Id==i]))-1)])}}
 return(temp)}
 
 # computes spacing from prior repetition for index (in seconds)
@@ -970,12 +970,12 @@ return(temp)}
 
 componentprev <-function(data,index,answers) {
   temp<-rep(0,length(data$CF..ansbin.))
-for (i in unique(index)){
-  lv<-length(data$CF..ansbin.[index==i])
-  if (lv>1){
-    temp[index==i]<-  c(0,answers[index==i][1:(lv-1)])
-  }}
-return(temp)}
+  for (i in unique(index)){
+    lv<-length(data$CF..ansbin.[index==i])
+    if (lv>1){
+      temp[index==i]<-  c(0,answers[index==i][1:(lv-1)])
+    }}
+  return(temp)}
 
 # computes mean spacing
 meanspacingf <-function(data,index,spacings) {temp<-rep(0,length(data$CF..ansbin.))    #computes mean spacing
@@ -984,7 +984,7 @@ for (i in unique(index)){
   if(j>1){temp[index==i][2]<- -1}
   if(j==3){temp[index==i][3]<-spacings[index==i][2]}
   if(j>3){temp[index==i][3:j]<- cumsum(spacings[index==i][2:(j-1)])/(1:(j-2))}}
-   # runmean(spacings[index==i][2:(j-1)],k=25,alg=c("exact"),align=c("right"))}}
+# runmean(spacings[index==i][2:(j-1)],k=25,alg=c("exact"),align=c("right"))}}
 return(temp)}
 
 laggedspacingf <-function(data,index,spacings) {temp<-rep(0,length(data$CF..ansbin.))
@@ -1004,7 +1004,7 @@ slideerrordec <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x) ) {
     v[i] <- errordec(x[1:i],d)  }
-  }
+}
 
 # exponetial decy for trial
 expdec <- function (v,d){
@@ -1114,4 +1114,4 @@ smallSet <- function(data,nSub){
 
 
 texteval<-function(stringv){ eval(parse(text=stringv))
-  }
+}
