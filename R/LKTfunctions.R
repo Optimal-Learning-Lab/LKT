@@ -994,6 +994,7 @@ slideerrordec <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x) ) {
     v[i] <- errordec(x[1:i],d)  }
+  return(c(0,v[1:length(x)-1]))
 }
 
 # exponetial decy for trial
