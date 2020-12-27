@@ -433,6 +433,8 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
     data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
     #print(names(data))
+    data$cor<-countOutcome(data,data$index,"CORRECT")
+    data$icor<-countOutcome(data,data$index,"INCORRECT")
     data[,temptemp:=cor+icor,by=index]
     #data[is.na(temptemp),temptemp:=0]
     data[,temp:=temp+temptemp*as.numeric(mn)]
@@ -447,6 +449,8 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
       data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
       data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
       #print(names(data))
+      data$cor<-countOutcome(data,data$index,"CORRECT")
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
       data[,temptemp:=log(1+icor+cor),by=index]
       #data[is.na(temptemp),temptemp:=0]
       data[,temp:=temp+temptemp*as.numeric(mn)]
@@ -564,7 +568,8 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     for (m in strsplit(fcomp,"__")[[1]]){
       data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
       data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
-      #print(names(data))
+      #print(data$index[1:20])
+      data$cor<-countOutcome(data,data$index,"CORRECT")
       data[,temptemp:=log(1+cor),by=index]
       #data[is.na(temptemp),temptemp:=0]
       data[,temp:=temp+temptemp*as.numeric(mn)]
@@ -578,6 +583,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
     data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
     data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
     #print(names(data))
+    data$cor<-countOutcome(data,data$index,"CORRECT")
     data[,temptemp:=cor,by=index]
     #data[is.na(temptemp),temptemp:=0]
     data[,temp:=temp+temptemp*as.numeric(mn)]
@@ -594,6 +600,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
       data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
       data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
       #print(names(data))
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
       data[,temptemp:=log(1+icor),by=index]
       #data[is.na(temptemp),temptemp:=0]
       data[,temp:=temp+temptemp*as.numeric(mn)]
@@ -608,6 +615,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
       data[,mn:=do.call(paste0,list(eval(parse(text=paste("data$",m,sep="")))))]
       data[,index:=do.call(paste,list(mn,Anon.Student.Id,sep="-"))]
       #print(names(data))
+      data$icor<-countOutcome(data,data$index,"INCORRECT")
       data[,temptemp:=icor,by=index]
       #data[is.na(temptemp),temptemp:=0]
       data[,temp:=temp+temptemp*as.numeric(mn)]
