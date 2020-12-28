@@ -481,7 +481,17 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
 
   if(feat=="recency"){
     eval(parse(text=paste("data$rec <- data$",fcomp,"spacing",sep="")))
-    return(ifelse(data$rec==0,0,data$rec^-par1))}
+    #print(paste("data$rec <- data$",fcomp,"spacing",sep=""))
+    #print(data$rec[1:500])
+    #print(data$Anon.Student.Idspacing[1:500])
+    #print(ifelse(data$rec==0,0,as.integer(data$rec)^-par1)[1:500])
+    #print(data$rec)
+    data$rec[is.na(data$rec)]<-0
+    #print(data$rec)
+    data[,temp:=as.integer(rec)^-par1]
+    #print(data$temp)
+    #print(ifelse(is.infinite(data$temp),0,data$temp))
+    return(ifelse(is.infinite(data$temp),0,data$temp))}
   if(feat=="expdecafm"){return(ave(rep(1,length(data$CF..ansbin.)),index,FUN=function(x) slideexpdec(x,par1)))}
   if(feat=="base"){
     data$mintime <- ave(data$CF..Time.,index, FUN=min)
