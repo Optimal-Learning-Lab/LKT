@@ -672,7 +672,7 @@ computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcom
   if(feat=="linecomp"){return((data$cor-data$icor))}
   if(feat=="logit"){
     return(log((.1+par1*30+data$cor)/(.1+par1*30+data$icor)))}
-  if(feat=="errordec"){return(ave(data$pred-data$CF..ansbin.,index,FUN=function(x) slideerrordec(x,par1)))}
+  if(feat=="errordec"){return(ave(data$pred_ed-data$CF..ansbin.,index,FUN=function(x) slideerrordec(x,par1)))}
   if(feat=="propdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec(x,par1)))}
   if(feat=="propdec2"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidepropdec2(x,par1)))}
   if(feat=="logitdec"){return(ave(data$CF..ansbin.,index,FUN=function(x) slidelogitdec(x,par1)))}
