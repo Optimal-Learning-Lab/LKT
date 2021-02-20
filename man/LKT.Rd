@@ -14,7 +14,13 @@ LKT(
   covariates = NA,
   dualfit = FALSE,
   interc = FALSE,
-  elastic = FALSE
+  elastic = FALSE,
+  verbose = TRUE,
+  epsilon = 1e-04,
+  cost = 512,
+  type = 0,
+  maketimes = FALSE,
+  bias = 0
 )
 }
 \arguments{
