@@ -320,7 +320,7 @@ LKT <- function(data,
             }}
 
     if(dualfit==TRUE && elastic==FALSE){      #fix for Liblin
-      rt.pred=exp(1)^(-(predict(temp)[which(e$data$CF..ansbin.==1)]))
+      rt.pred=exp(-qlogis(e$data$pred[which(e$data$CF..ansbin.==1)]))
       outVals = boxplot(e$data$Duration..sec.,plot=FALSE)$out
       outVals = which(e$data$Duration..sec. %in% outVals)
       e$data$Duration..sec.=as.numeric(e$data$Duration..sec.)
@@ -328,6 +328,7 @@ LKT <- function(data,
         e$data$Duration..sec.[outVals] = quantile(e$data$Duration..sec.,.95)}# Winsorize outliers
       the.rt=e$data$Duration..sec.[which(e$data$CF..ansbin.==1)]
       e$lm.rt<-lm(the.rt~as.numeric(rt.pred))
+      #print(e$lm.rt)
       fitstat2<-cor(the.rt,predict(e$lm.rt,type="response"))^2
       if(verbose){cat(paste("R2 (cor squared) latency: ",fitstat2,"\n",sep=''))}
     }
@@ -399,22 +400,17 @@ LKT <- function(data,
       cat(paste("Latency Scalar: ",Scalar,"\n",
                 "Latency Intercept: ",Intercept,"\n",sep=''))}}
 
-  #e$data$pred<-predict(e$temp,type="response")  #fix for Liblin
-
-
   results <- list("model" = e$temp,
                   "coefs" = e$modelvs,
                   "r2"=e$mcfad,
                   "prediction" = if ("pred" %in% colnames(e$data)) {e$data$pred},
                   "nullmodel"=e$nullmodel,
-                  "latencymodel"=if(exists("e$lm.rt")){e$lm.rt},
+                  "latencymodel"=if(dualfit==TRUE){list(e$lm.rt,failureLatency)},
                   "optimizedpars"=if(exists("optimizedpars")){optimizedpars},
                   "subjectrmse"= if ("pred" %in% colnames(e$data)) {aggregate((e$data$pred-e$data$CF..ansbin.)^2,
                                                                               by=list(e$data$Anon.Student.Id),FUN=mean)},
                   "newdata"= e$data)
-  return (results)
-}
-
+  return (results)}
 
 #' @title computefeatures
 #' @description Compute feature describing prior practice effect.
