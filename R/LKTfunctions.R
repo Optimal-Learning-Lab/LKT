@@ -51,6 +51,8 @@ computeSpacingPredictors <- function (data, KCs){
 #'             features=c("logitdec","logitdec$","lineafm$"),
 #'             fixedpars=c(.9,.85))
 #' print(summary(modelob$model))
+#' @importFrom data.table ":="
+NULL
 
 LKT <- function(data,
                 components,
@@ -421,6 +423,8 @@ LKT <- function(data,
 #' @param index2 a component levels index
 #' @param fcomp the component  name.
 #' @return a vector suitable for regression input.
+#' @importFrom data.table ":="
+NULL
 computefeatures <- function(data,feat,par1,par2,index,index2,par3,par4,par5,fcomp){
   # fixed features
   feat<-gsub("[$@]","",feat)
@@ -830,6 +834,8 @@ right = function (string, char){
 #'
 #' @return the vector of the lagged cumulative sum.
 #' @export
+#' @importFrom data.table ":="
+NULL
 countOutcome <-function(data,index,response) {
   #data$temp<-ave(as.character(data$Outcome),index,FUN =function(x) as.numeric(cumsum(tolower(x)==tolower(response))))
   data[,temp:=cumsum(Outcome==response),by=index]
