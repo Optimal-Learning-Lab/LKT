@@ -11,13 +11,21 @@ computefeatures(data, feat, par1, par2, index, index2, par3, par4, par5, fcomp)
 
 \item{feat}{is the feature to be computed.}
 
+\item{par1}{nonlinear parameters used for nonlinear features.}
+
+\item{par2}{nonlinear parameters used for nonlinear features.}
+
 \item{index}{a student by component levels index}
 
 \item{index2}{a component levels index}
 
-\item{fcomp}{the component  name.}
+\item{par3}{nonlinear parameters used for nonlinear features.}
 
-\item{par1-5}{nonlinear parameters used for nonlinear features.}
+\item{par4}{nonlinear parameters used for nonlinear features.}
+
+\item{par5}{nonlinear parameters used for nonlinear features.}
+
+\item{fcomp}{the component  name.}
 }
 \value{
 a vector suitable for regression input.

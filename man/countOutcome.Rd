@@ -7,7 +7,11 @@
 countOutcome(data, index, response)
 }
 \arguments{
-\item{response}{}
+\item{data}{the dataset to compute an outcome vector for}
+
+\item{index}{the subsets to count over}
+
+\item{response}{the actually response value being counted}
 }
 \value{
 the vector of the lagged cumulative sum.

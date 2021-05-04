@@ -43,6 +43,18 @@ LKT(
 \item{interc}{TRUE or FALSE, include a global intercept.}
 
 \item{elastic}{glmnet, cv.glmnet, cva.glmnet or FALSE.}
+
+\item{verbose}{provides more output in some cases.}
+
+\item{epsilon}{passed to LiblineaR}
+
+\item{cost}{passsed to LiblineaR}
+
+\item{type}{passsed to LiblineaR}
+
+\item{maketimes}{Boolean indicating whether to create time based features (or may be precomputed)}
+
+\item{bias}{passsed to LiblineaR}
 }
 \value{
 list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", and "newdata"
@@ -51,13 +63,15 @@ list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpar
 Compute a logistic regression model of learning for input data.
 }
 \examples{
-colnames(data)[1]="Anon.Student.Id"
-colnames(data)[3]="CF..ansbin."
-colnames(data)[6]="Duration..sec." #only necessary for time based features
-data<-computeSpacingPredictors(data,"Skill") #only necessary for time based features
-modelob<-LKT(data=data,
-            components=c("Anon.Student.Id","Skill","Skill"),
-            features=c("logitdec","logitdec$","lineafm$"),
-            fixedpars=c(.9,.85))
+colnames(data)[1] <- "Anon.Student.Id"
+colnames(data)[3] <- "CF..ansbin."
+colnames(data)[6] <- "Duration..sec." # only necessary for time based features
+data <- computeSpacingPredictors(data, "Skill") # only necessary for time based features
+modelob <- LKT(
+  data = data,
+  components = c("Anon.Student.Id", "Skill", "Skill"),
+  features = c("logitdec", "logitdec$", "lineafm$"),
+  fixedpars = c(.9, .85)
+)
 print(summary(modelob$model))
 }

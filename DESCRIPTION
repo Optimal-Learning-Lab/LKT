@@ -1,16 +1,29 @@
 Package: LKT
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+    person(given = "Philip I.",
+           family = "Pavlik Jr.",
+           role = c("cre"),
+           email = "imrryr@gmail.com",
+           comment = c(ORCID = "0000-0001-6467-9452D"))
+Description: Computes Logistic Knowledge Tracing.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports:
+    lme4 (>= 1.1-23),
+    pROC (>= 1.16.2),
+    SparseM (>= 1.78),
+    utils,
+    Matrix,
+    methods,
+    knitr,
+    data.table (>= 1.13.2),
+    LiblineaR (>= 2.10-8),
+    glmnet (>= 4.0-2),
+    glmnetUtils (>= 1.1.8),
+    caret
