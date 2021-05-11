@@ -1035,7 +1035,9 @@ LKT_cv <- function(componentl, featl, offsetl = NA, fixedl, seedl = NA, elastict
 
 #' @title rlvl
 #' @description sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
-#' @export
+#' @param dat copy of main data frame.
+#' @return dataframe with 1 as first value in CF..ansbin. column
+#' @export sorted dataframe
 rlvl <- function(dat) {
   if (dat$CF..ansbin.[1] == 0) { # find someone that starts with 1 and put it in front
     row1 <- match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)
