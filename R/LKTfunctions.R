@@ -444,6 +444,7 @@ LKT <- function(data,
     if (elastic == FALSE) {
       e$nullmodel <- glm(as.formula(paste("CF..ansbin.~ 1", sep = "")), data = e$data, family = binomial(logit))
       e$nullfit <- logLik(e$nullmodel)
+      e$loglike <- fitstat
       e$mcfad <- round(1 - fitstat[1] / e$nullfit[1], 6)
       if (verbose) {
         cat(paste("McFadden's R2 logistic:", e$mcfad, "\n"))
@@ -538,7 +539,8 @@ LKT <- function(data,
         by = list(e$data$Anon.Student.Id), FUN = mean
       )
     },
-    "newdata" = e$data
+    "newdata" = e$data,
+    "loglike" = e$loglike
   )
   return(results)
 }
