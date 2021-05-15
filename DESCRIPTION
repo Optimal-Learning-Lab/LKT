@@ -1,12 +1,18 @@
 Package: LKT
-Title: What the Package Does (One Line, Title Case)
+Title: Fit Logistic Knowledge Tracing Models to Student Data
 Version: 1.0
 Authors@R: 
-    person(given = "Philip I.",
+    c(person(given = "Philip I.",
            family = "Pavlik Jr.",
-           role = c("cre"),
+           role = c("aut","ctb","cre"),
            email = "imrryr@gmail.com",
-           comment = c(ORCID = "0000-0001-6467-9452D"))
+           comment = c(ORCID = "0000-0001-6467-9452D")),
+      person(given = "Luke G.",
+           family = "Eglington",
+           role = c("aut","ctb"),
+           email = "luke.eglington.mail@gmail.com",
+           comment = c(ORCID = "0000-0002-8432-9203"))
+           )
 Description: Computes Logistic Knowledge Tracing.
 License: GPL-3
 Encoding: UTF-8
