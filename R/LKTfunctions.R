@@ -1,3 +1,6 @@
+
+
+
 #' @importFrom graphics boxplot
 #' @importFrom methods new
 #' @importFrom stats aggregate as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
@@ -60,20 +63,22 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param type passsed to LiblineaR
 #' @param maketimes Boolean indicating whether to create time based features (or may be precomputed)
 #' @param bias passsed to LiblineaR
-#' @return list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", and "newdata"
+#' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "loglike"
 #' @export
 #' @examples
-#' colnames(data)[1] <- "Anon.Student.Id"
-#' colnames(data)[3] <- "CF..ansbin."
-#' colnames(data)[6] <- "Duration..sec." # only necessary for time based features
-#' data <- computeSpacingPredictors(data, "Skill") # only necessary for time based features
+#' temp <- samplelkt
+#' temp$CF..ansbin.<-ifelse(temp$Outcome=="CORRECT",1,ifelse(temp$Outcome=="INCORRECT",0,-1))
+#' temp <- data.table::setDT(rlvl(temp))
+#' temp <- computeSpacingPredictors(temp, "KC..Default.")
+#' temp <- temp[temp$CF..ansbin==0 | temp$CF..ansbin.==1,]
+#' temp$KC..Default.<-substr(temp$KC..Default.,1,10)
 #' modelob <- LKT(
-#'   data = data,
-#'   components = c("Anon.Student.Id", "Skill", "Skill"),
+#'   data = temp,
+#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
 #'   features = c("logitdec", "logitdec$", "lineafm$"),
 #'   fixedpars = c(.9, .85)
 #' )
-#' print(summary(modelob$model))
+#' print(modelob$coefs)
 LKT <- function(data,
                 components,
                 features,
@@ -1039,7 +1044,7 @@ LKT_cv <- function(componentl, featl, offsetl = NA, fixedl, seedl = NA, elastict
 #' @description sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
 #' @param dat copy of main data frame.
 #' @return dataframe with 1 as first value in CF..ansbin. column
-#' @export sorted dataframe
+#' @export
 rlvl <- function(dat) {
   if (dat$CF..ansbin.[1] == 0) { # find someone that starts with 1 and put it in front
     row1 <- match(unique(dat$Anon.Student.Id), dat$Anon.Student.Id)

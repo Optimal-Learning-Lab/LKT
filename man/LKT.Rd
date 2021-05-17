@@ -57,21 +57,23 @@ LKT(
 \item{bias}{passsed to LiblineaR}
 }
 \value{
-list of values "model", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", and "newdata"
+list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "loglike"
 }
 \description{
 Compute a logistic regression model of learning for input data.
 }
 \examples{
-colnames(data)[1] <- "Anon.Student.Id"
-colnames(data)[3] <- "CF..ansbin."
-colnames(data)[6] <- "Duration..sec." # only necessary for time based features
-data <- computeSpacingPredictors(data, "Skill") # only necessary for time based features
+temp <- samplelkt
+temp$CF..ansbin.<-ifelse(temp$Outcome=="CORRECT",1,ifelse(temp$Outcome=="INCORRECT",0,-1))
+temp <- data.table::setDT(rlvl(temp))
+temp <- computeSpacingPredictors(temp, "KC..Default.")
+temp <- temp[temp$CF..ansbin==0 | temp$CF..ansbin.==1,]
+temp$KC..Default.<-substr(temp$KC..Default.,1,10)
 modelob <- LKT(
-  data = data,
-  components = c("Anon.Student.Id", "Skill", "Skill"),
+  data = temp,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec$", "lineafm$"),
   fixedpars = c(.9, .85)
 )
-print(summary(modelob$model))
+print(modelob$coefs)
 }

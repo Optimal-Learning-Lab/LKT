@@ -6,6 +6,12 @@
 \usage{
 rlvl(dat)
 }
+\arguments{
+\item{dat}{copy of main data frame.}
+}
+\value{
+dataframe with 1 as first value in CF..ansbin. column
+}
 \description{
 sorts dataframe so first student is one with an initial CF..ansbin.==1. Hack to deal with liblinear reference levels
 }
