@@ -440,7 +440,6 @@ LKT <- function(data,
                                         ia = predictsetf1@p + 1L,
                                         dimension = predictsetf1@Dim)
                 predictsetf1.csr <- as.matrix.csr(predictsetf1.csc)
-                predictsetf1.2<-predictsetf1.csr
                 idx2 = which(val$folds==i)
                 e2_tmp = e$data[idx2,]
                 predictsetf2=slice(t(predictset),idx2)
@@ -450,19 +449,18 @@ LKT <- function(data,
                                         ia = predictsetf2@p + 1L,
                                         dimension = predictsetf2@Dim)
                 predictsetf2.csr <- as.matrix.csr(predictsetf2.csc)
-                predictsetf2.2<-predictsetf2.csr
                 tempTr<-LiblineaR(predictsetf1.csr,e1_tmp$CF..ansbin.,bias=0,
                                   cost=512,epsilon=.0001,type=0)
                 #fit test data too to get null model for mcfad
                 if(tempTr$ClassNames[1]==0){tempTr$W=tempTr$W*(-1)}
                 
-                pred3<<-predict(tempTr,predictsetf2.csr,proba=TRUE)$probabilities[,1]
-                e1_ansbin <<-e1_tmp$CF..ansbin.
-                e2_ansbin <<-e2_tmp$CF..ansbin.
+                pred3<-predict(tempTr,predictsetf2.csr,proba=TRUE)$probabilities[,1]
+                e1_ansbin <-e1_tmp$CF..ansbin.
+                e2_ansbin <-e2_tmp$CF..ansbin.
                 #mcfad time
-                cv_fitstat<<- sum(log(ifelse(e2_ansbin==1,pred3,1-pred3)))
-                cv_nullmodel<<-glm(as.formula(paste("CF..ansbin.~ 1",sep="")),data=e2_tmp,family=binomial(logit))
-                cv_nullfit<<-logLik(cv_nullmodel)
+                cv_fitstat<- sum(log(ifelse(e2_ansbin==1,pred3,1-pred3)))
+                cv_nullmodel<-glm(as.formula(paste("CF..ansbin.~ 1",sep="")),data=e2_tmp,family=binomial(logit))
+                cv_nullfit<-logLik(cv_nullmodel)
                 cv_mcfad[i]= round(1-cv_fitstat/cv_nullfit[1],6) 
                 print(paste("length of testand pred vectors:",length(e2_tmp$CF..ansbin.)," ",length(pred3)))
                 print(paste("fold:",i))
