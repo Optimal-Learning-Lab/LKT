@@ -410,6 +410,7 @@ LKT <- function(data,
                               bias = bias,
                               cost = cost, epsilon = epsilon, type = type
             )
+            if(temp$ClassNames[1]==0){temp$W=temp$W*(-1)}
             
             modelvs <- data.frame(temp$W)
             
