@@ -55,6 +55,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
 #' @param dualfit TRUE or FALSE, fit a simple latency using logit.
+#' @param cv TRUE or FALSE, if TRUE runs 5-fold student-stratified cv
 #' @param interc TRUE or FALSE, include a global intercept.
 #' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
 #' @param verbose provides more output in some cases.
@@ -425,14 +426,11 @@ LKT <- function(data,
 
             if(cv==TRUE){
               #all in one version, run through it 5 times
-              cv_rmse<-rep(0,length(unique(val$folds)))
-              cv_mcfad<-rep(0,length(unique(val$folds)))
-              for(i in 1:length(unique(val$folds))){
-                idx1 = which(e$data$folds!=i)#ifelse(val$folds==1,1,0)
-                # e_tmp = e
+              cv_rmse<-rep(0,length(unique(e$data$folds)))
+              cv_mcfad<-rep(0,length(unique(e$data$folds)))
+              for(i in 1:length(unique(e$data$folds))){
+                idx1 = which(e$data$folds!=i)
                 e1_tmp = e$data[idx1,]
-                # predictset<-sparse.model.matrix(e$form,e$data)
-                # tmp = predictset
 
                 predictsetf1=slice(t(predictset),idx1)
                 predictsetf1=t(predictsetf1)
@@ -1340,6 +1338,8 @@ splittimes <- function(times) {
 
 #' @title smallSet
 #' @export
+#' @param data Dataframe of student data
+#' @param nSub Number of students
 smallSet <- function(data, nSub) {
   totsub <- length(unique(data$Anon.Student.Id))
   datasub <- unique(data$Anon.Student.Id)
