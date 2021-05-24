@@ -14,6 +14,7 @@ LKT(
   covariates = NA,
   dualfit = FALSE,
   interc = FALSE,
+  cv = FALSE,
   elastic = FALSE,
   verbose = TRUE,
   epsilon = 1e-04,
@@ -65,7 +66,7 @@ Compute a logistic regression model of learning for input data.
 \examples{
 temp <- samplelkt
 temp$CF..ansbin.<-ifelse(temp$Outcome=="CORRECT",1,ifelse(temp$Outcome=="INCORRECT",0,-1))
-temp <- data.table::setDT(rlvl(temp))
+temp <- data.table::setDT(temp)
 temp <- computeSpacingPredictors(temp, "KC..Default.")
 temp <- temp[temp$CF..ansbin==0 | temp$CF..ansbin.==1,]
 temp$KC..Default.<-substr(temp$KC..Default.,1,10)
