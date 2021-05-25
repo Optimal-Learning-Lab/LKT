@@ -6,6 +6,11 @@
 \usage{
 smallSet(data, nSub)
 }
+\arguments{
+\item{data}{Dataframe of student data}
+
+\item{nSub}{Number of students}
+}
 \description{
 smallSet
 }

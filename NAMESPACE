@@ -3,7 +3,6 @@
 export(LKT)
 export(computeSpacingPredictors)
 export(countOutcome)
-export(rlvl)
 export(smallSet)
 import(LiblineaR)
 import(Matrix)

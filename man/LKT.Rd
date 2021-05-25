@@ -43,6 +43,8 @@ LKT(
 
 \item{interc}{TRUE or FALSE, include a global intercept.}
 
+\item{cv}{TRUE or FALSE, if TRUE runs 5-fold student-stratified cv}
+
 \item{elastic}{glmnet, cv.glmnet, cva.glmnet or FALSE.}
 
 \item{verbose}{provides more output in some cases.}

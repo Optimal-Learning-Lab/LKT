@@ -1,6 +1,6 @@
 ---
 title: "Basic_Operations"
-author: "Vignette Author"
+author: "Philip I. Pavlik Jr."
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -104,13 +104,10 @@ Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr*
 
 ## More Examples
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+The data set for examples is shown below:
 
 ```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+knitr::kable(head(LKT::samplelkt, 10))
 ```
 
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+> LKT paper under review ([arxiv](https://arxiv.org/abs/2005.00869))
