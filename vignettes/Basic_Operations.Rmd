@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 To use LKT, one needs to have:
 * Terms of the model, each including a component level that can be characterized by a feature that describes change across repetitions.
-* 	A sequence of learner event data with subject and correctness columns (at minimum).
+* 	A sequence of learner event data with user id and correctness columns (at barest minimum).
 
 ## Component Level
 
@@ -75,13 +75,13 @@ These are the functions for computing the effect of the components’ histories 
 
 ## Feature Types
 
-The standard feature type (except for intercept, which is always “extended”) is fit with the same coefficient for all levels of the component factor. Features may also be extended with the \$ operator, which causes LKT to “extend” the feature to fit a coefficient for each level of the component factor. The most straightforward example of this extension is for KCs. Typically, models have used a different coefficient for each knowledge component. For example, in AFM, each KC gets a coefficient to characterize how fast it is learned across opportunities specified in the notation with a \$ operator in LKT. If a \$ operator is not present, a single coefficient is fit for the feature. Not using the \$ operator is particularly relevant when finding a student-level predictor, since the $ operator would produce a coefficient for each student, indicating the different effects of the feature depending on the student. In this paper, we are specifically focused on models that generalize some model for a domain to a new set of students, so we wish to avoid models that require individual student parameters of any sort. For this reason, we do not extend the student operator.
+The standard feature type (except for intercept, which is always “extended”) is fit with the same coefficient for all levels of the component factor. Features may also be extended with the \$ operator, which causes LKT to “extend” the feature to fit a coefficient for each level of the component factor. The most straightforward example of this extension is for KCs. Typically, models have used a different coefficient for each knowledge component. For example, in AFM, each KC gets a coefficient to characterize how fast it is learned across opportunities specified in the notation with a \$ operator in LKT. If a \$ operator is not present, a single coefficient is fit for the feature. 
 
 Intercept features can also be modified with the @ operator, which produces random intercepts instead of the default fixed intercepts. This feature was included primarily to show the initial comparisons of options for modeling student individual differences in this paper. For this paper, we wished to compare fixed-effect and random-effect intercepts with other methods for identifying subject variability, like propdec, propdec2, and logitdec.
 	
 ## Learner Data Requirements
 
-The LKT model relies on data being in the DataShop format, but only some columns are needed for the models. The data must consist of practice events for each student, which each record the time of occurrence and outcome and includes column(s) identifying the item id and any groupings of items into KCs. The preprocessing stage precomputes time values from timestamps, sorts the data, filters unwanted events, adds a binary (0–1) outcome column, computes spacing within any requested components, selects an amount of data to process, and provides limits for minimum observations per component level overall or by minimum observations per component level within-subjects.
+The LKT model relies on data being in the DataShop format, but only some columns are needed for the models. See the data example below for the minimal format. Data is assumed to be consecutive, grouped by user ids.
 
 
 

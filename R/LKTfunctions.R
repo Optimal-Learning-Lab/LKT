@@ -74,7 +74,32 @@ computeSpacingPredictors <- function(data, KCs) {
 #' temp <- temp[temp$CF..ansbin==0 | temp$CF..ansbin.==1,]
 #' temp$KC..Default.<-substr(temp$KC..Default.,1,10)
 #' modelob <- LKT(
-#'   data = temp,
+#'   data = temp, interc=TRUE,
+#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#'   features = c("logitdec", "logitdec", "lineafm"),
+#'   seedpars = c(.9, .85)
+#' )
+#' print(modelob$coefs)
+#'
+#' modelob <- LKT(
+#'   data = temp, interc=TRUE,
+#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#'   features = c("logitdec", "logitdec", "lineafm"),
+#'   fixedpars = c(.9, .85)
+#' )
+#' print(modelob$coefs)
+#'
+#' modelob <- LKT(
+#'   data = temp, interc=TRUE,
+#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#'   features = c("logitdec", "logitdec", "lineafm"),
+#'   offsetvals = c(NA,0.7658972,NA),
+#'   fixedpars = c(.9, .85)
+#' )
+#' print(modelob$coefs)
+#'
+#' modelob <- LKT(
+#'   data = temp, interc=TRUE,
 #'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
 #'   features = c("logitdec", "logitdec$", "lineafm$"),
 #'   fixedpars = c(.9, .85)
