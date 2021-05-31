@@ -1,14 +1,6 @@
-
-
-
 #' @importFrom graphics boxplot
 #' @importFrom methods new
 #' @importFrom stats aggregate as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
-
-#' @importFrom utils globalVariables
-utils::globalVariables(c("index",'Anon.Student.Id','indexcomp','dat',
-                         'mn','temptemp','icor','CF..ansbin.',
-                         'temp','Outcome'))
 
 #' @title computeSpacingPredictors
 #' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
@@ -265,7 +257,7 @@ LKT <- function(data,
             #   #will do this in feature....
           }
         else { # normal KC type Q-matrix
-
+          Anon.Student.Id<-index<-indexcomp<-NULL
           vec <- eval(parse(text = paste0("e$data$", components[k])))
           e$data[, index := do.call(paste0, list(vec, Anon.Student.Id))]
           # print(e$data$index[1:200])
@@ -611,6 +603,7 @@ LKT <- function(data,
 #' @param fcomp the component  name.
 #' @return a vector suitable for regression input.
 computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, par5, fcomp) {
+  mn<-Anon.Student.Id<-temptemp<-icor<-CF..ansbin.<-NULL
   # fixed features
   feat <- gsub("[$@]", "", feat)
   if (feat == "intercept") {
@@ -1012,6 +1005,7 @@ slice <- function(tSparse, index) {
 #' @return the vector of the lagged cumulative sum.
 #' @export
 countOutcome <- function(data, index, response) {
+  temp <- Outcome <- NULL
   data[, temp := cumsum(Outcome == response), by = index]
   data[Outcome == response, temp := temp - 1, by = index]
   data$temp
