@@ -8,7 +8,6 @@ LKT(
   data,
   components,
   features,
-  offsetvals = NA,
   fixedpars = NA,
   seedpars = NA,
   covariates = NA,
@@ -30,8 +29,6 @@ LKT(
 \item{components}{A vector of factors that can be used to compute each features for each subject.}
 
 \item{features}{a vector methods to use to compute a feature for the component.}
-
-\item{offsetvals}{a vector of set coefficients, or NA values, to fix coefficients set and leave NA to be solved.}
 
 \item{fixedpars}{a vector of parameters for all features+components.}
 
@@ -82,20 +79,21 @@ print(modelob$coefs)
 
 modelob <- LKT(
   data = temp, interc=TRUE,
-  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-  features = c("logitdec", "logitdec", "lineafm"),
-  fixedpars = c(.9, .85)
+  components = c("Anon.Student.Id", "KC..Default."),
+  features = c("logitdec", "lineafm"),
+  fixedpars = c(.9)
 )
 print(modelob$coefs)
+print(modelob$loglik)
 
 modelob <- LKT(
   data = temp, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec", "lineafm"),
-  offsetvals = c(NA,0.7658972,NA),
   fixedpars = c(.9, .85)
 )
 print(modelob$coefs)
+print(modelob$loglik)
 
 modelob <- LKT(
   data = temp, interc=TRUE,

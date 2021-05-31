@@ -50,7 +50,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
 #' @param components A vector of factors that can be used to compute each features for each subject.
 #' @param features a vector methods to use to compute a feature for the component.
-#' @param offsetvals a vector of set coefficients, or NA values, to fix coefficients set and leave NA to be solved.
 #' @param fixedpars a vector of parameters for all features+components.
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
@@ -83,20 +82,21 @@ computeSpacingPredictors <- function(data, KCs) {
 #'
 #' modelob <- LKT(
 #'   data = temp, interc=TRUE,
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("logitdec", "logitdec", "lineafm"),
-#'   fixedpars = c(.9, .85)
+#'   components = c("Anon.Student.Id", "KC..Default."),
+#'   features = c("logitdec", "lineafm"),
+#'   fixedpars = c(.9)
 #' )
 #' print(modelob$coefs)
+#' print(modelob$loglik)
 #'
 #' modelob <- LKT(
 #'   data = temp, interc=TRUE,
 #'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
 #'   features = c("logitdec", "logitdec", "lineafm"),
-#'   offsetvals = c(NA,0.7658972,NA),
 #'   fixedpars = c(.9, .85)
 #' )
 #' print(modelob$coefs)
+#' print(modelob$loglik)
 #'
 #' modelob <- LKT(
 #'   data = temp, interc=TRUE,
@@ -108,7 +108,6 @@ computeSpacingPredictors <- function(data, KCs) {
 LKT <- function(data,
                 components,
                 features,
-                offsetvals = NA,
                 fixedpars = NA,
                 seedpars = NA,
                 covariates = NA,
@@ -152,11 +151,6 @@ LKT <- function(data,
       eq <- "1"
     } else {
       eq <- "0"
-    }
-    if (interc == TRUE & !is.na(offsetvals[length(features) + 1]))
-      # last offset is fixed intercept
-    {
-      eq <- paste("0+offset(rep(", offsetvals[length(features) + 1], ",nrow(e$data)))", sep = "")
     }
 
     e$counter <- e$counter + 1
@@ -299,22 +293,10 @@ LKT <- function(data,
         } else {
           # fixed effect
 
-          # is.na(e$fixedpars[m]) | e$counter<2){
           eval(parse(text = paste("e$data$", gsub("\\$", "", i), gsub("[%]", "", components[k]),
                                   "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                               parc,pard,pare,components[k])",
-                                  sep = ""
-          )))
-
-
-          # }
-          if (!is.na(offsetvals[k])) {
-            # fixed effects can have offsets
-            eval(parse(text = paste("e$data$offset_", gsub("\\$", "", i), gsub("[%]", "", components[k]),
-                                    "<-offsetvals[k]*e$data$", gsub("\\$", "", i), components[k],
-                                    sep = ""
-            )))
-          }
+                                  sep = "")))
         }
       }
 
@@ -375,22 +357,13 @@ LKT <- function(data,
       }
       else {
         # add the fixed effect feature to the model with the same coefficient for all levels
-        if (is.na(offsetvals[k])) {
-          if (is.na(covariates[k])) {
+         if (is.na(covariates[k])) {
             # standard way
             eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\"+\",eq,sep=\"\")")))
           }
           else {
             eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k],\"+\",eq,sep=\"\")")))
           }
-        }
-        else {
-          eval(parse(text = paste("eq<-paste(\"offset(",
-                                  paste("offset_", i, gsub("[%]", "", components[k]), sep = ""),
-                                  ")+\",eq,sep=\"\")",
-                                  sep = ""
-          )))
-        }
       }
     }
     if (verbose) {
