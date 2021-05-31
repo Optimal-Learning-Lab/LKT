@@ -437,7 +437,7 @@ LKT <- function(data,
                                         ia = predictsetf1@p + 1L,
                                         dimension = predictsetf1@Dim)
                 predictsetf1.csr <- as.matrix.csr(predictsetf1.csc)
-                idx2 = which(val$folds==i)
+                idx2 = which(e$data$folds==i)
                 e2_tmp = e$data[idx2,]
                 predictsetf2=slice(t(predictset),idx2)
                 predictsetf2=t(predictsetf2)
