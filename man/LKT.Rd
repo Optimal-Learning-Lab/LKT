@@ -76,14 +76,6 @@ modelob <- LKT(
   seedpars = c(.9, .85)
 )
 print(modelob$coefs)
-
-modelob <- LKT(
-  data = temp, interc=TRUE,
-  components = c("Anon.Student.Id", "KC..Default."),
-  features = c("logitdec", "lineafm"),
-  fixedpars = c(.9)
-)
-print(modelob$coefs)
 print(modelob$loglik)
 
 modelob <- LKT(
@@ -102,4 +94,23 @@ modelob <- LKT(
   fixedpars = c(.9, .85)
 )
 print(modelob$coefs)
+print(modelob$loglik)
+
+modelob <- LKT(
+  data = temp, interc=TRUE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("logitdec", "logitdec", "lineafm"),
+  fixedpars = c(.9, .85),cv=TRUE
+)
+print(modelob$coefs)
+print(modelob$loglik)
+
+modelob <- LKT(
+  data = temp, interc=TRUE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("logitdec", "logitdec$", "lineafm$"),
+  fixedpars = c(.9, .85),cv=TRUE
+)
+print(modelob$coefs)
+print(modelob$loglik)
 }
