@@ -46,7 +46,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
 #' @param dualfit TRUE or FALSE, fit a simple latency using logit.
-#' @param cv TRUE or FALSE, if TRUE runs 5-fold student-stratified cv
+#' @param cv TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds
 #' @param interc TRUE or FALSE, include a global intercept.
 #' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
 #' @param verbose provides more output in some cases.
@@ -427,10 +427,10 @@ LKT <- function(data,
 
             if(cv==TRUE){
               #all in one version, run through it 5 times
-              cv_rmse<-rep(0,length(unique(e$data$folds)))
-              cv_mcfad<-rep(0,length(unique(e$data$folds)))
-              for(i in 1:length(unique(e$data$folds))){
-                idx1 = which(e$data$folds!=i)
+              cv_rmse<-rep(0,length(unique(e$data$fold)))
+              cv_mcfad<-rep(0,length(unique(e$data$fold)))
+              for(i in 1:length(unique(e$data$fold))){
+                idx1 = which(e$data$fold!=i)
                 e1_tmp = e$data[idx1,]
 
                 predictsetf1=slice(t(predictset),idx1)
@@ -440,7 +440,7 @@ LKT <- function(data,
                                         ia = predictsetf1@p + 1L,
                                         dimension = predictsetf1@Dim)
                 predictsetf1.csr <- as.matrix.csr(predictsetf1.csc)
-                idx2 = which(e$data$folds==i)
+                idx2 = which(e$data$fold==i)
                 e2_tmp = e$data[idx2,]
                 predictsetf2=slice(t(predictset),idx2)
                 predictsetf2=t(predictsetf2)
@@ -462,12 +462,10 @@ LKT <- function(data,
                 cv_nullmodel<-glm(as.formula(paste("CF..ansbin.~ 1",sep="")),data=e2_tmp,family=binomial(logit))
                 cv_nullfit<-logLik(cv_nullmodel)
                 cv_mcfad[i]= round(1-cv_fitstat/cv_nullfit[1],6)
-                print(paste("length of testand pred vectors:",length(e2_tmp$CF..ansbin.)," ",length(pred3)))
                 print(paste("fold:",i))
                 # print(sqrt(mean((e2_tmp$CF..ansbin.-pred3)^2)))
                 cv_rmse[i] = sqrt(mean((e2_tmp$CF..ansbin.-pred3)^2))
               }
-              print("5-fold CV RMSE:")
 
               e$cv_res = data.frame("rmse" = cv_rmse,"mcfad" = cv_mcfad)
             }else{e$cv_res = data.frame("rmse" = rep(NA,5),"mcfad" = rep(NA,5))}
