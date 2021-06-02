@@ -40,7 +40,7 @@ LKT(
 
 \item{interc}{TRUE or FALSE, include a global intercept.}
 
-\item{cv}{TRUE or FALSE, if TRUE runs 5-fold student-stratified cv}
+\item{cv}{TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds}
 
 \item{elastic}{glmnet, cv.glmnet, cva.glmnet or FALSE.}
 
@@ -95,6 +95,18 @@ modelob <- LKT(
 )
 print(modelob$coefs)
 print(modelob$loglik)
+
+temp=samplelkt# of course we don't need to do this, could just add fold to samplelkt, did it so your code is used
+unq = sample(unique(temp$Anon.Student.Id))
+sfold = rep(1:2,length.out=length(unq))
+temp$fold = rep(0,length(temp[,1]))
+for(i in 1:2){temp$fold[which(temp$Anon.Student.Id \%in\% unq[which(sfold==i)])]=i}
+modelob <- LKT(
+     data = temp, interc=TRUE,
+      components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+      features = c("logitdec", "logitdec", "lineafm"),
+      fixedpars = c(.9, .85),cv=TRUE
+  )
 
 modelob <- LKT(
   data = temp, interc=TRUE,

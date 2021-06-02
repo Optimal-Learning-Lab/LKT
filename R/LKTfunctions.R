@@ -91,6 +91,18 @@ computeSpacingPredictors <- function(data, KCs) {
 #' print(modelob$coefs)
 #' print(modelob$loglik)
 #'
+#' temp <- samplelkt
+#' unq <- sample(unique(temp$Anon.Student.Id))
+#' sfold <- rep(1:2,length.out=length(unq))
+#' temp$fold <- rep(0,length(temp[,1]))
+#' for(i in 1:2){temp$fold[which(temp$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
+#' modelob <- LKT(
+#'      data = temp, interc=TRUE,
+#'       components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#'       features = c("logitdec", "logitdec", "lineafm"),
+#'       fixedpars = c(.9, .85),cv=TRUE
+#'   )
+#'
 #' modelob <- LKT(
 #'   data = temp, interc=TRUE,
 #'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
