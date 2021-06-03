@@ -83,26 +83,7 @@ Intercept features can also be modified with the @ operator, which produces rand
 
 The LKT model relies on data being in the DataShop format, but only some columns are needed for the models. See the data example below for the minimal format. Data is assumed to be consecutive, grouped by user ids.
 
-
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
+## Exampl Data
 
 The data set for examples is shown below:
 

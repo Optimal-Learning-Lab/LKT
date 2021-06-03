@@ -73,7 +73,7 @@ modelob <- LKT(
   data = temp, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec", "lineafm"),
-  seedpars = c(.9, .85)
+  fixedpars = c(.9, .85)
 )
 print(modelob$coefs)
 print(modelob$loglik)
@@ -82,10 +82,11 @@ modelob <- LKT(
   data = temp, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec", "lineafm"),
-  fixedpars = c(.9, .85)
+  seedpars = c(.9, .85)
 )
 print(modelob$coefs)
 print(modelob$loglik)
+
 
 modelob <- LKT(
   data = temp, interc=TRUE,
@@ -96,33 +97,33 @@ modelob <- LKT(
 print(modelob$coefs)
 print(modelob$loglik)
 
-temp=samplelkt# of course we don't need to do this, could just add fold to samplelkt, did it so your code is used
-unq = sample(unique(temp$Anon.Student.Id))
-sfold = rep(1:2,length.out=length(unq))
-temp$fold = rep(0,length(temp[,1]))
-for(i in 1:2){temp$fold[which(temp$Anon.Student.Id \%in\% unq[which(sfold==i)])]=i}
+# this example illustrates how mean fit is worse for CV
+# compared to the first example above. In this case,
+# this is mainly do to the small dataset allowing overgeneralization
+# despite the model only having 4 coefficients
+temp <- samplelkt
+unq <- sample(unique(temp$Anon.Student.Id))
+sfold <- rep(1:5,length.out=length(unq))
+temp$fold <- rep(0,length(temp[,1]))
+for(i in 1:5){temp$fold[which(temp$Anon.Student.Id \%in\% unq[which(sfold==i)])]=i}
 modelob <- LKT(
      data = temp, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
       features = c("logitdec", "logitdec", "lineafm"),
       fixedpars = c(.9, .85),cv=TRUE
   )
+print(modelob$cv_res)
+print(mean(modelob$cv_res$rmse))
+print(mean(modelob$cv_res$mcfad))
 
-modelob <- LKT(
-  data = temp, interc=TRUE,
-  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-  features = c("logitdec", "logitdec", "lineafm"),
-  fixedpars = c(.9, .85),cv=TRUE
-)
-print(modelob$coefs)
-print(modelob$loglik)
-
+# this example illustrates the limitation of CV when data does not contain
+# sufficient examples of each predictor
 modelob <- LKT(
   data = temp, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec$", "lineafm$"),
   fixedpars = c(.9, .85),cv=TRUE
 )
-print(modelob$coefs)
-print(modelob$loglik)
+print(modelob$cv_res)
+
 }
