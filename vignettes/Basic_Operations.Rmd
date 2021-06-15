@@ -91,4 +91,4 @@ The data set for examples is shown below:
 knitr::kable(head(LKT::samplelkt, 10))
 ```
 
-> LKT paper under review ([arxiv](https://arxiv.org/abs/2005.00869))
+> LKT paper under review please see Pavlik, Eglington, and Harrel-Williams (2021) <arXiv:2005.00869>

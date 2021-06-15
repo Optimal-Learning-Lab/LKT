@@ -82,7 +82,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' print(modelob$coefs)
 #' print(modelob$loglik)
 #'
-#'
 #' modelob <- LKT(
 #'   data = temp, interc=TRUE,
 #'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
@@ -113,13 +112,13 @@ computeSpacingPredictors <- function(data, KCs) {
 #'
 #' # this example illustrates the limitation of CV when data does not contain
 #' # sufficient examples of each predictor
-#' modelob <- LKT(
-#'   data = temp, interc=TRUE,
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("logitdec", "logitdec$", "lineafm$"),
-#'   fixedpars = c(.9, .85),cv=TRUE
-#' )
-#' print(modelob$cv_res)
+#' #modelob <- LKT(
+#' #  data = temp, interc=TRUE,
+#' #  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#' #  features = c("logitdec", "logitdec$", "lineafm$"),
+#' #  fixedpars = c(.9, .85),cv=TRUE
+#' #)
+#' #print(modelob$cv_res)
 #'
 LKT <- function(data,
                 components,

@@ -13,7 +13,7 @@ Authors@R:
            email = "luke.eglington.mail@gmail.com",
            comment = c(ORCID = "0000-0002-8432-9203"))
            )
-Description: Computes Logistic Knowledge Tracing (LKT) which is a general method for tracking human learning in an educational software system. The paper cited in the vignette includes details. LKT is a method to compute features of student data that are used as predictors of subsequent performance. LKT allows great flexibility in the choice of predicitve components and features computed for these predictive components. The system is built on top of LiblineaR, which enables extremely fast solutions compared to base glm in R.
+Description: Computes Logistic Knowledge Tracing ('LKT') which is a general method for tracking human learning in an educational software system. Please see Pavlik, Eglington, and Harrel-Williams (2021) <arXiv:2005.00869>. 'LKT' is a method to compute features of student data that are used as predictors of subsequent performance. 'LKT' allows great flexibility in the choice of predictive components and features computed for these predictive components. The system is built on top of 'LiblineaR', which enables extremely fast solutions compared to base glm() in R.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

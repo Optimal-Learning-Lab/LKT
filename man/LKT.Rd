@@ -87,7 +87,6 @@ modelob <- LKT(
 print(modelob$coefs)
 print(modelob$loglik)
 
-
 modelob <- LKT(
   data = temp, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
@@ -118,12 +117,12 @@ print(mean(modelob$cv_res$mcfad))
 
 # this example illustrates the limitation of CV when data does not contain
 # sufficient examples of each predictor
-modelob <- LKT(
-  data = temp, interc=TRUE,
-  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-  features = c("logitdec", "logitdec$", "lineafm$"),
-  fixedpars = c(.9, .85),cv=TRUE
-)
-print(modelob$cv_res)
+#modelob <- LKT(
+#  data = temp, interc=TRUE,
+#  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#  features = c("logitdec", "logitdec$", "lineafm$"),
+#  fixedpars = c(.9, .85),cv=TRUE
+#)
+#print(modelob$cv_res)
 
 }
