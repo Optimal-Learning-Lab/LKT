@@ -93,5 +93,16 @@ modelob <- LKT(
 #Random effects (intercepts only, solved with lmer)
 
 #Crossvalidation
+#make folds
+unq = sample(unique(val$Anon.Student.Id))
+sfold = rep(1:5,length.out=length(unq))
+val$fold = rep(0,length(val[,1]))
+for(i in 1:5){val$fold[which(val$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
 
-
+#AFM minus student intercept
+modelob <- LKT(
+  data = val, interc=TRUE,
+  components = c("KC..Default.","KC..Default."),
+  features = c("intercept", "lineafm"),
+  cv = TRUE)
+modelob$cv_res
