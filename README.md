@@ -70,20 +70,15 @@ PFA fixed effect version
     #   this needs to be added to the data as it is collected
     val$pred<-modelob$prediction
 
-PFA random effect version too slow for seminar and mostly just to allow comparison models (impractical)
-=======================================================================================================
+### PFA random effect version too slow for seminar and mostly just to allow comparison models (impractical)
 
-modelob &lt;- LKT(
-==================
+### modelob &lt;- LKT(
 
-data = val, interc=TRUE,
-========================
+### data = val, interc=TRUE,
 
-components = c(“Anon.Student.Id”, “KC..Default.”, “KC..Default.”, “KC..Default.”),
-==================================================================================
+### components = c(“Anon.Student.Id”, “KC..Default.”, “KC..Default.”, “KC..Default.”),
 
-features = c(“intercept@”, “intercept”, “linesuc”,“linefail”))
-==============================================================
+### features = c(“intercept@”, “intercept”, “linesuc”,“linefail”))
 
 \#PFA using difficulty sensitive predictors (composite model requiring
 pred from prior model)
@@ -101,7 +96,8 @@ pred from prior model)
     ## McFadden's R2 logistic: 0.383228 
     ## LogLike logistic: -790.39658068
 
-\#RPFA
+RPFA
+====
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -117,7 +113,8 @@ pred from prior model)
     ## McFadden's R2 logistic: 0.394814 
     ## LogLike logistic: -775.54966768
 
-\#Recency tracing with logitdec
+Recency tracing with logitdec
+=============================
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -133,7 +130,8 @@ pred from prior model)
     ## McFadden's R2 logistic: 0.420591 
     ## LogLike logistic: -742.51607213
 
-\#Recency tracing with RPFA propdec2 feature
+Recency tracing with RPFA propdec2 feature
+==========================================
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -1986,7 +1984,8 @@ pred from prior model)
     ## LogLike logistic: -711.40435967 
     ## step par values =0.6393307,0.2219302
 
-\#PPE
+PPE
+===
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -2002,7 +2001,8 @@ pred from prior model)
     ## McFadden's R2 logistic: 0.447458 
     ## LogLike logistic: -708.08582913
 
-\#base4
+base4
+=====
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -2022,7 +2022,8 @@ pred from prior model)
 the main R code for package
 \#<a href="https://github.com/Optimal-Learning-Lab/LKT/blob/master/R/LKTfunctions.R" class="uri">https://github.com/Optimal-Learning-Lab/LKT/blob/master/R/LKTfunctions.R</a>
 
-\#Covariates
+Covariates
+==========
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -2037,8 +2038,10 @@ the main R code for package
     ## McFadden's R2 logistic: 0.209249 
     ## LogLike logistic: -1013.35259968
 
-\#Crossvalidation \#make folds
+Crossvalidation
+===============
 
+    # make folds
     unq = sample(unique(val$Anon.Student.Id))
     sfold = rep(1:5,length.out=length(unq))
     val$fold = rep(0,length(val[,1]))
@@ -2059,7 +2062,7 @@ the main R code for package
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] -0.0698592
+    ## [1] -0.0647124
 
     #complex AFM minus student intercept
     modelob <- LKT(
