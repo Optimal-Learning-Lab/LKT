@@ -71,19 +71,19 @@ PFA fixed effect version
     val$pred<-modelob$prediction
 
 PFA random effect version too slow for seminar and mostly just to allow comparison models (impractical)
-=======================================================================================================
+-------------------------------------------------------------------------------------------------------
 
 modelob &lt;- LKT(
-==================
+------------------
 
 data = val, interc=TRUE,
-========================
+------------------------
 
 components = c(“Anon.Student.Id”, “KC..Default.”, “KC..Default.”, “KC..Default.”),
-==================================================================================
+----------------------------------------------------------------------------------
 
 features = c(“intercept@”, “intercept”, “linesuc”,“linefail”))
-==============================================================
+--------------------------------------------------------------
 
 \#PFA using difficulty sensitive predictors (composite model requiring
 pred from prior model)
@@ -2059,7 +2059,7 @@ the main R code for package
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] -0.0698592
+    ## [1] -0.0431272
 
     #complex AFM minus student intercept
     modelob <- LKT(
