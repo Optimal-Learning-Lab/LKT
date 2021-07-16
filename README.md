@@ -70,6 +70,7 @@ PFA fixed effect version
     #   this needs to be added to the data as it is collected
     val$pred<-modelob$prediction
 
+<<<<<<< HEAD
 ### PFA random effect version too slow for seminar and mostly just to allow comparison models (impractical)
 
 ### modelob &lt;- LKT(
@@ -79,6 +80,22 @@ PFA fixed effect version
 ### components = c(“Anon.Student.Id”, “KC..Default.”, “KC..Default.”, “KC..Default.”),
 
 ### features = c(“intercept@”, “intercept”, “linesuc”,“linefail”))
+=======
+PFA random effect version too slow for seminar and mostly just to allow comparison models (impractical)
+-------------------------------------------------------------------------------------------------------
+
+modelob &lt;- LKT(
+------------------
+
+data = val, interc=TRUE,
+------------------------
+
+components = c(“Anon.Student.Id”, “KC..Default.”, “KC..Default.”, “KC..Default.”),
+----------------------------------------------------------------------------------
+
+features = c(“intercept@”, “intercept”, “linesuc”,“linefail”))
+--------------------------------------------------------------
+>>>>>>> e57f76f55bc7166cc265a1bced55a5c842f42327
 
 \#PFA using difficulty sensitive predictors (composite model requiring
 pred from prior model)
@@ -2062,7 +2079,11 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
+<<<<<<< HEAD
     ## [1] -0.0647124
+=======
+    ## [1] -0.0431272
+>>>>>>> e57f76f55bc7166cc265a1bced55a5c842f42327
 
     #complex AFM minus student intercept
     modelob <- LKT(
