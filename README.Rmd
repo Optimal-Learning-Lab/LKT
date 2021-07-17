@@ -1,6 +1,8 @@
 ---
 title: "LKT Examples"
 output: md_document
+bibliography: LKT cites.ris
+csl: apa.csl
 ---
 
 # LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/package=LKT)
@@ -35,7 +37,7 @@ val$Duration..sec.<-(val$CF..End.Latency.+val$CF..Review.Latency.+500)/1000
 val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, forgetting features to run
 ```
 
-# AFM fixed effect version
+# Additive Factors Model (AFM) fixed effect version
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
@@ -43,7 +45,7 @@ modelob <- LKT(
   features = c("intercept", "intercept", "lineafm"))
 ```
 
-# PFA fixed effect version
+# Performance Factors Analysis (PFA) fixed effect version
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
@@ -69,7 +71,7 @@ modelob <- LKT(
   features = c("intercept", "intercept", "diffcorComp","linefail"))
 ```
 
-# RPFA
+# Recent Performance Factors Analysis (RPFA)
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
@@ -96,7 +98,7 @@ modelob <- LKT(
   fixedpars=c(NA,NA))
 ```
 
-# PPE
+# Performance Prediction Equation (PPE)
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
@@ -152,3 +154,14 @@ modelob <- LKT(
   cv = TRUE)
 mean(modelob$cv_res$mcfad)
 ```
+---
+nocite: | 
+  @138 @236 @251 @305 @358 @387 @402 @441 @549 @678 @741 @741 @970 @1000
+  @1057 @1133 @1316 @1439 @1501 @1524 @1637 @1964 @2066 @2126 @2131 @2194 @2272 @2311 @2334
+  @2337 @2405 @2474 @2475 @2594 @2669 @2683 @2743 @2744 @2749 @2784 @2795 @2840 @2962 @2973
+  @2975 @3002 @3006 @3029 @3046 @3051 @3061 @3062 @3081 @3097 @3104 @3131 @3250 @3252 @3264
+  @3265 @3266 @3267 @3268 @3269 @3275 @3276
+...
+
+# References
+

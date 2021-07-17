@@ -1,0 +1,1558 @@
+﻿TY  - BOOK
+AU  - Gelman, Andrew
+AU  - Hill, Jennifer
+DO  - http://doi:10.1017/CBO9780511790942
+J2  - Data Anal. Regression Multilevel/Heirarchical Models
+PB  - Cambridge Univ. Press, Cambridge, U.K.
+PY  - 2006
+SN  - 1139460935
+ST  - Data analysis using regression and multilevel/hierarchical models
+TI  - Data analysis using regression and multilevel/hierarchical models
+ID  - 2194
+ER  - 
+
+TY  - CHAP
+A2  - Beck, Joseph
+AB  - Although many talented researchers have created excellent
+tools for computer-assisted instruction and intelligent
+tutoring systems, creating high-quality, effective, scalable
+but individualized tools for learning at a low cost is still an
+open research challenge. Many learning tools create
+complex models of student behavior that require extensive
+time on the part of subject experts, as well as cognitive
+science researchers, to create effective help and feedback
+strategies. In this research, we propose a different approach,
+called the q-matrix method, where data from student
+behavior is “mined” to create concept models of the
+material being taught. These models are then used to both
+understand student behavior and direct learning paths for
+future students. We describe the q-matrix method and
+present preliminary results that imply that the method can
+effectively predict which concepts need further review.
+AU  - Barnes, T
+CY  - Pittsburgh, PA, USA
+DO  - http://doi:10.1.1.531.3631
+J2  - 20th Nat. Conf. American Association for Artificial Intelligence, Educational Data Mining Workshop
+L1  - internal-pdf://0871809530/2005-Barnes-1719.pdf
+PB  - AAAI Press
+PY  - 2005
+SP  - 39-46
+ST  - The Q-matrix method: Mining student response data for knowledge
+T2  - American Association for Artificial Intelligence 2005 Educational Data Mining Workshop
+TI  - The Q-matrix method: Mining student response data for knowledge
+Y2  - Jul. 9-13
+ID  - 2066
+ER  - 
+
+TY  - CHAP
+A2  - Lynch, Collin
+A2  - Merceron, Agathe
+A2  - Desmarais, Michel
+A2  - Nkambou, Roger
+AU  - Cao, Meng
+AU  - Pavlik Jr, Philip I.
+AU  - Bidelman, Gavin M.
+J2  - 11th Int. Conf. Educational Data Mining
+PY  - 2019
+SP  - 516-519
+ST  - Incorporating Prior Practice Difficulty into Performance Factor Analysis to Model Mandarin Tone Learning
+T2  - Proceedings of the 11th International Conference on Educational Data Mining
+TI  - Incorporating Prior Practice Difficulty into Performance Factor Analysis to Model Mandarin Tone Learning
+Y2  - Jul. 15-18
+ID  - 3131
+ER  - 
+
+TY  - CHAP
+AB  - This study examined the effectiveness of an educational data mining
+method – Learning Factors Analysis (LFA) – on improving the learning efficiency
+in the Cognitive Tutor curriculum. LFA uses a statistical model to predict how
+students perform in each practice of a knowledge component (KC), and identifies
+over-practiced or under-practiced KCs. By using the LFA findings on the
+Cognitive Tutor geometry curriculum, we optimized the curriculum with the goal
+of improving student learning efficiency. With a control group design, we
+analyzed the learning performance and the learning time of high school students
+participating in the Optimized Cognitive Tutor geometry curriculum. Results were
+compared to students participating in the traditional Cognitive Tutor geometry
+curriculum. Analyses indicated that students in the optimized condition saved a
+significant amount of time in the optimized curriculum units, compared with the
+time spent by the control group. There was no significant difference in the learning
+performance of the two groups in either an immediate post test or a two-week-later
+retention test. Findings support the use of this data mining technique to improve
+learning efficiency with other computer-tutor-based curricula.
+AU  - Cen, Hao
+AU  - Koedinger, Kenneth R.
+AU  - Junker, Brian
+CY  - Los Angeles, CA, USA
+DO  - http://doi:10.1.1.142.7340
+J2  - 13th Int. Conf. Artificial Intelligence in Education
+L1  - internal-pdf://3084921292/2007-Cen-1725.pdf
+PY  - 2007
+SP  - 511-518
+ST  - Is over practice necessary? – Improving learning efficiency with the Cognitive Tutor through educational data mining
+T2  - 13th Int. Conf. Artif. Intell. Educ.
+TI  - Is over practice necessary? – Improving learning efficiency with the Cognitive Tutor through educational data mining
+Y2  - Jul. 9-13
+ID  - 2272
+ER  - 
+
+TY  - CHAP
+A2  - Pechenizkiy, Mykola
+A2  - Calders, Toon
+A2  - Conati, Christina
+A2  - Ventura, Sebastián
+A2  - Romero , Cristobal
+A2  - Stamper, John
+AB  - In this paper, we proposed a new cognitive modeling approach: Instructional Factors Analysis Model (IFM). It belongs to a
+class of Knowledge-Component-based cognitive models. More specifically, IFM is targeted for modeling student’s performance
+when multiple types of instructional interventions are involved and some of them may not generate a direct observation of
+students’ performance. We compared IFM to two other pre-existing cognitive models: Additive Factor Models (AFMs) and
+Performance Factor Models (PFMs). The three methods differ mainly on how a student’s previous experience on a Knowledge
+Component is counted into multiple categories. Among the three models, instructional interventions without immediate direct
+observations can be easily incorporate into the AFM and IFM models. Therefore, they are further compared on two important
+tasks—unseen student prediction and unseen step prediction—and to determine whether the extra flexibility afforded by addi-
+tional parameters leads to better models, or just to over fitting. Our results suggested that, for datasets involving multiple types
+of learning interventions, dividing student learning opportunities into multiple categories is beneficial in that IFMout-performed
+both AFM and PFM models on various tasks. However, the relative performance of the IFM models depends on the specific
+prediction task; so, experimenters facing a novel task should engage in some measure of model selection.
+AU  - Chi, Min
+AU  - Koedinger, Kenneth R.
+AU  - Gordon, Geoff
+AU  - Jordan, Pamela
+AU  - VanLehn, Kurt
+CY  - Eindhoven, The Netherlands
+DO  - http://doi:10.1.1.230.9907
+J2  - 4th Int. Conf. Educational Data Mining
+L1  - internal-pdf://3953927538/2011-Chi-3889.pdf
+PY  - 2011
+SP  - 61-70
+ST  - Instructional factors analysis: A cognitive model for multiple instructional interventions
+T2  - 4th Int. Conf. Educ. Data Min.
+TI  - Instructional factors analysis: A cognitive model for multiple instructional interventions
+Y2  - Jul. 6-8
+ID  - 2743
+ER  - 
+
+TY  - CHAP
+A2  - Papafragou, A.
+A2  - Grodner, D.
+A2  - Mirman, D.
+A2  - Trueswell, J.C.
+AU  - Collins, Michael G
+AU  - Gluck, Kevin A
+AU  - Walsh, Mathew
+AU  - Krusmark, Michael
+AU  - Gunzelmann, Glenn
+CY  - Austin, TX, USA
+J2  - CogSci 2016
+L1  - internal-pdf://1009437918/paper0026.pdf
+PB  - Cognitive Science Society
+PY  - 2016
+SP  - 75-80
+ST  - Using prior data to inform model parameters in the predictive performance equation
+T2  - Proceedings of the 38th Annual Conference of the Cognitive Science Society
+TI  - Using prior data to inform model parameters in the predictive performance equation
+Y2  - Aug. 10-13
+ID  - 3046
+ER  - 
+
+TY  - CHAP
+A2  - Frasson, C.
+A2  - Gauthier, G.
+A2  - McCalla, G.
+AB  - The ACT Programming Languages Tutor helps students as they write
+short computer programs. The tutor is constructed around a set of several
+hundred programming rules that allows the program to solvexerisestep
+by-step ... along with the student. Thipapetevaluates the tut6t'sstlldent
+modeling procedure which employs an overlay of these programming rules.
+The tutor maintains an estimate of the
+probability that the student has learned
+each rule, based on the student's performance. These estimates are used to
+guide remediation and implement mastery learning. The predictive validity of
+these probability estimates for posttest a.nd tutor performance is assessed.
+AU  - Corbett, Albert T.
+AU  - Anderson, John R.
+CY  - Montréal, Canada
+DO  - http://doi:10.1007/3-540-55606-0_49
+J2  - 2nd Int. Conf. Intelligent Tutoring Systems
+L1  - internal-pdf://0666233175/1992-Corbett-1096.pdf
+PB  - Springer-Verlag
+PY  - 1992
+SP  - 413-420
+ST  - Student modeling and mastery learning in a computer-based programming tutor
+T2  - Intelligent Tutoring Systems: Second International Conference on Intelligent Tutoring Systems
+TI  - Student modeling and mastery learning in a computer-based programming tutor
+Y2  - Jun. 10-12
+ID  - 970
+ER  - 
+
+TY  - CHAP
+A2  - Stamper, J.
+A2  - Pardos, Zachary A.
+A2  - Mavrikis, M.
+A2  - McLaren, Bruce
+AU  - Galyardt, April
+AU  - Goldin, Ilya
+CY  - London, United Kingdom
+DO  - http://doi:10.1.1.660.8376
+J2  - 7th Int. Conf. Educational Data Mining
+PY  - 2014
+SP  - 411-412
+ST  - Recent-performance factors analysis
+T2  - Proceedings of 7th International Conference on Educational Data Mining
+TI  - Recent-performance factors analysis
+Y2  - Jul. 4-7
+ID  - 2962
+ER  - 
+
+TY  - CHAP
+A2  - Santos, Olga C.
+A2  - Boticario, Jesus G.
+A2  - Romero, Cristobal
+A2  - Pechenizkiy, Mykola
+A2  - Merceron, Agathe
+A2  - Mitros, Piotr
+A2  - Luna, José María
+A2  - Mihaescu, Cristian
+A2  - Moreno, Pablo
+A2  - Hershkovitz, Arnon
+A2  - Ventura, Sebastian
+A2  - Desmarais, Michel
+AU  - Goldin, Ilya M
+AU  - Galyardt, April
+CY  - Cordova, Spain
+J2  - 8th Int. Conf. Educational Data Mining
+PY  - 2015
+SP  - 548-551
+ST  - Convergent validity of a student model: Recent-performance factors analysis
+T2  - Proceedings of 8th International Conference on Educational Data Mining
+TI  - Convergent validity of a student model: Recent-performance factors analysis
+VL  - 548-5551
+Y2  - Jul. 26-29
+ID  - 3006
+ER  - 
+
+TY  - CHAP
+A2  - Aleven, Vincent
+A2  - Kay, Judy
+A2  - Mostow, Jack
+AB  - Student modeling is very important for ITS due to its ability to make inferences about latent student attributes. Although knowledge tracing (KT) is a well-established technique, the approach used to fit the model is still a major issue as different model-fitting approaches lead to different parameter estimates. Performance Factor Analysis, a competing approach, predicts student performance based on the item difficulty and student historical performances. In this study, we compared these two models in terms of their predictive accuracy and parameter plausibility. For the knowledge tracing model, we also examined different model fitting algorithms: Expectation Maximization (EM) and Brute Force (BF). Our results showed that KT+EM is better than KT+BF and comparable with PFA in predictive accuracy. We also examined whether the models’ estimated parameter values were plausible. We found that by tweaking PFA, we were able to obtain more plausible parameters than with KT.
+AU  - Gong, Yue
+AU  - Beck, Joseph
+AU  - Heffernan, Neil T.
+CY  - Pittsburgh, PA, USA
+DO  - http://doi:10.1007/978-3-642-13388-6_8
+J2  - 10th Int. Conf. Intelligent Tutoring Systems
+L1  - internal-pdf://2544503728/2010-Gong-3694.pdf
+PB  - Springer Berlin / Heidelberg
+PY  - 2010
+SP  - 35-44
+ST  - Comparing knowledge tracing and performance factor analysis by using multiple model fitting procedures
+T2  - 10th International Conference of Intelligent Tutoring Systems
+T3  - Lecture Notes in Computer Science
+TI  - Comparing knowledge tracing and performance factor analysis by using multiple model fitting procedures
+UR  - http://dx.doi.org/10.1007/978-3-642-13388-6_8
+VL  - 6094
+Y2  - Jun. 14-18
+ID  - 2669
+ER  - 
+
+TY  - CHAP
+A2  - Romero , Cristobal
+A2  - Ventura, S.
+A2  - Pechenizkiy, Mykola
+AU  - Koedinger, Kenneth R.
+AU  - Baker, Ryan SJd
+AU  - Cunningham, Kyle
+AU  - Skogsholm, Alida
+AU  - Leber, Brett
+AU  - Stamper, John
+CY  - CRC Press, Boca Raton, FL, USA
+DO  - http://doi:10.1201/B10274-6
+J2  - Handb. Educ. Data Min.
+PB  - CRC Press
+PY  - 2010
+SP  - 43-56
+ST  - A data repository for the EDM community: The PSLC DataShop
+T2  - Handbook of Educational Data Mining
+TI  - A data repository for the EDM community: The PSLC DataShop
+VL  - 43
+ID  - 2683
+ER  - 
+
+TY  - CHAP
+A2  - Woolf, Beverly
+A2  - Aimer, Esma
+A2  - Nkambou, Roger
+AB  - How to best sequence instruction in a collection of basic facts is a
+problem often faced by intelligent tutoring systems. To solve this problem, the
+following work details two tests of a system to provide drill practice (test trials
+with feedback) for
+schedule determined to be optimal according to a cognitive model. In the first
+test, students chose between an optimized version and a version that merely cy-
+cled the vocabulary items. Examination of the time on task data revealed a pref-
+erence for practice based on the decisions of the cognitive model.
+, Kenneth R. Koedinger1
+,
+foreign language vocabulary learning using a practice
+In the second
+test, the system was used to train the component parts of Chinese characters and
+measure the transfer of knowledge to subsequent learning of Chinese charac-
+ters. Chinese character learning was improved for students with the relevant
+optimized training.
+AU  - Pavlik Jr., Philip I.
+AU  - Bolster, Thomas
+AU  - Wu, Suemei
+AU  - Koedinger, Kenneth R.
+AU  - MacWhinney, Brian
+CA  - Paper 30% acceptance rate
+CY  - Montreal, Canada
+J2  - 9th Int. Conf. Intelligent Tutoring Systems
+L1  - internal-pdf://3066526442/2008-Pavlik Jr-1789.pdf
+LB  - Paper 30% acceptance rate
+PY  - 2008
+RI  - Paper 30% acceptance rate
+SP  - 593–602
+ST  - Using optimally selected drill practice to train basic facts
+T2  - Proceedings of the 9th International Conference on Intelligent Tutoring Systems
+TI  - Using optimally selected drill practice to train basic facts
+Y2  - Jun. 23-27
+ID  - 2475
+ER  - 
+
+TY  - CHAP
+A2  - Dimitrova, Vania
+A2  - Mizoguchi, Riichiro
+A2  - Boulay, Benedict du
+A2  - Graesser, Arthur
+AB  - Knowledge tracing (KT)[1] has been used in various forms for adaptive computerized instruction for more than 40 years. However, despite its long history of application, it is difficult to use in domain model search procedures, has not been used to capture learning where multiple skills are needed to perform a single action, and has not been used to compute latencies of actions. On the other hand, existing models used for educational data mining (e.g. Learning Factors Analysis (LFA)[2]) and model search do not tend to allow the creation of a “model overlay” that traces predictions for individual students with individual skills so as to allow the adaptive instruction to automatically remediate performance. Because these limitations make the transition from model search to model application in adaptive instruction more difficult, this paper describes our work to modify an existing data mining model so that it can also be used to select practice adaptively. We compare this new adaptive data mining model (PFA, Performance Factors Analysis) with two versions of LFA and then compare PFA with standard KT.
+AU  - Pavlik Jr., Philip I.
+AU  - Cen, Hao
+AU  - Koedinger, Kenneth R.
+CA  - Paper 29% acceptance rate
+CY  - Brighton, England
+DO  - http://doi:10.3233/978-1-60750-028-5-531
+J2  - 14th Int. Conf. Artificial Intelligence in Education
+L1  - internal-pdf://2563566454/AIED 2009 final Pavlik Cen Keodinger corrected.doc
+LB  - Paper 29% acceptance rate
+PY  - 2009
+RI  - Paper 29% acceptance rate
+SP  - 531–538
+ST  - Performance factors analysis -- A new alternative to knowledge tracing
+T2  - Proceedings of the 14th International Conference on Artificial Intelligence in Education
+TI  - Performance factors analysis -- A new alternative to knowledge tracing
+Y2  - Jul. 6-10
+ID  - 2594
+ER  - 
+
+TY  - CHAP
+AU  - Pavlik Jr., Philip I.
+AU  - Olney, Andrew M.
+AU  - Banker, Amanda
+AU  - Eglington, Luke
+AU  - Yarbro, Jeffrey
+J2  - 21st Int. Conf. on Artificial Intelligence in Education, 2nd Workshop on Intelligent Textbooks
+L1  - internal-pdf://1249533522/Pavlik Jr-2020-The Mobile Fact and Concept Tex.pdf
+PB  - In CEUR workshop proceedings (Vol. 2674).
+PY  - 2020
+SP  - 35–49
+ST  - The Mobile Fact and Concept Textbook System (MoFaCTS)
+T2  - 21st International Conference on Artificial Intelligence in Education (AIED 2020) Second Workshop on Intelligent Textbooks
+TI  - The Mobile Fact and Concept Textbook System (MoFaCTS)
+Y2  - Jul. 6-10
+ID  - 3250
+ER  - 
+
+TY  - CHAP
+A2  - Biswas, Gautam
+A2  - Bull, Susan
+A2  - Kay, Judy
+A2  - Mitrovic, Antonija
+AB  - Transfer of learning to new or different contexts has always been a chief concern of education because unlike training for a specific job, education must establish skills without knowing exactly how those skills might be called upon. Research on transfer can be difficult, because it is often superficially unclear why transfer occurs or, more frequently, does not, in a particular paradigm. While initial results with Learning Factors Transfer (LiFT) analysis (a search procedure using Performance Factors Analysis, PFA) show that more predictive models can be built by paying attention to these transfer factors [1, 2], like proceeding models such as AFM (Additive Factors Model) [3], these models rely on a Q-matrix analysis that treats skills as discrete units at transfer. Because of this discrete treatment, the models are more parsimonious, but may lose resolution on aspects of component transfer. To improve understanding of this transfer, we develop new logistic regression model variants that predict learning differences as a function of the context of learning. One advantage of these models is that they allow us to disentangle learning of transferable knowledge from the actual transfer performance episodes.
+AU  - Pavlik Jr., Philip I.
+AU  - Yudelson, Michael
+AU  - Koedinger, Kenneth R.
+CA  - Paper 32% acceptance rate
+CY  - Auckland, New Zealand
+DO  - http://doi:10.1007/978-3-642-21869-9_34
+J2  - 15th Int. Conf. Artificial Intelligence in Education
+L1  - internal-pdf://2630173046/2011-Pavlik Jr-3884.pdf
+LB  - Paper 32% acceptance rate
+PB  - Springer
+PY  - 2011
+RI  - Paper 32% acceptance rate
+SP  - 256–263
+ST  - Using contextual factors analysis to explain transfer of least common multiple skills
+T2  - 15th International Conference Artificial Inteligence in Education
+T3  - Lecture Notes in Computer Science
+TI  - Using contextual factors analysis to explain transfer of least common multiple skills
+UR  - http://dx.doi.org/10.1007/978-3-642-21869-9_34
+VL  - 6738
+Y2  - Jun. 28 - Jul. 2
+ID  - 2784
+ER  - 
+
+TY  - CHAP
+A2  - Looi, C.K.
+A2  - McCalla, G.
+A2  - Bredeweg, B.
+A2  - Breuker, J.
+AB  - Middle school mathematics teachers are often forced to choose between
+assisting students' development and assessing students' abilities because of limited
+classroom time available. To help teachers make better use of their time, we are
+integrating assistance and assessment by utilizing a web-based system
+("Assistment") that will offer instruction to students while providing a more detailed
+evaluation of their abilities to the teacher than is possible under current approaches.
+An initial version of the Assistment system was created and used last May with
+about 200 students and 800 students are using it this year once every two weeks. The
+hypothesis is that Assistments both assist students while also assessing them. This
+paper describes the Assistment system and some preliminary results.
+AU  - Razzaq, L.
+AU  - Feng, M.
+AU  - Nuzzo-Jones, G.
+AU  - Heffernan, Neil T.
+AU  - Koedinger, Kenneth R.
+AU  - Junker, B.
+AU  - Ritter, Steven
+AU  - Knight, A.
+AU  - Aniszczyk, C.
+AU  - Chokesy, S.
+AU  - Livak, T.
+AU  - Mercado, E.
+AU  - Turner, T. E.
+AU  - Upalekar, R.
+AU  - Walanoski, J. A.
+AU  - Macasek, M. A.
+AU  - Rasmussen, K. P.
+CY  - Amsterdam, The Netherlands
+DO  - http://doi:10.1.1.76.6212
+J2  - 12th Int. Conf. Artificial Intelligence in Education
+L1  - internal-pdf://2740313426/2005-Razzaq-831.pdf
+PB  - ISO Press
+PY  - 2005
+SP  - 555-562
+ST  - The Assistment Project: Blending assessment and assisting
+T2  - Proceedings of the 12th International Conference on Artificial Intelligence In Education
+TI  - The Assistment Project: Blending assessment and assisting
+Y2  - Jul. 18-22
+ID  - 2131
+ER  - 
+
+TY  - CHAP
+AU  - Settles, Burr
+AU  - Meeder, Brendan
+CY  - Berlin, Germany
+J2  - Proc. 54th Association for Computational Linguistics
+PY  - 2016
+SP  - 1848-1858
+ST  - A trainable spaced repetition model for language learning
+T2  - Proceedings of the 54th annual meeting of the association for computational linguistics (volume 1: long papers)
+TI  - A trainable spaced repetition model for language learning
+Y2  - Aug. 7-12
+ID  - 3268
+ER  - 
+
+TY  - CHAP
+A2  - Embretson, Susan
+AU  - Spada, H.
+AU  - McGaw, B.
+CY  - Academic, Orlando, FL, USA
+DO  - http://doi:10.1016/B978-0-12-238180-5.50010-0
+J2  - Test Des. Dev. Psychol. Psychometrics
+L1  - internal-pdf://3652557951/1985-Spada-3894.pdf
+PB  - Academic Press
+PY  - 1985
+SP  - 169-194
+ST  - The assessment of learning effects with linear logistic test models
+T2  - Test design: Developments in psychology and psychometrics
+TI  - The assessment of learning effects with linear logistic test models
+ID  - 741
+ER  - 
+
+TY  - CHAP
+A2  - Biswas, Gautam
+A2  - Bull, Susan
+A2  - Kay, Judy
+A2  - Mitrovic, Antonija
+AB  - We show how data visualization and modeling tools can be used with human input to improve student models. We present strategies for discovering potential flaws in existing student models and use them to identify improvements in a Geometry model. A key discovery was that the student model should distinguish problem steps requiring problem decomposition planning and execution from problem steps requiring just execution of problem decomposition plans. This change to the student model better fits student data not only in the original data set, but also in two other data sets from different sets of students. We also show how such student model changes can be used to modify a tutoring system, not only in terms of the usual student model effects on the tutor’s problem selection, but also in driving the creation of new problems and hint messages.
+AU  - Stamper, John
+AU  - Koedinger, Kenneth
+CY  - Auckland, New Zealand
+DO  - http://doi:10.1007/978-3-642-21869-9_46
+J2  - 15th Int. Conf. Artificial Intelligence in Education
+L1  - internal-pdf://4126623929/AIED2011-Stamper-Koedinger.pdf
+PB  - Springer
+PY  - 2011
+SN  - 978-3-642-21868-2
+SP  - 353-360
+ST  - Human-machine student model discovery and improvement using DataShop
+T2  - Artificial Intelligence in Education
+T3  - Lecture Notes in Computer Science
+TI  - Human-machine student model discovery and improvement using DataShop
+UR  - http://dx.doi.org/10.1007/978-3-642-21869-9_46
+VL  - 6738
+Y2  - Jun. 28 - Jul. 2
+ID  - 2795
+ER  - 
+
+TY  - CHAP
+A2  - Rowe, Jonathan
+A2  - Snow, Erica
+AU  - Stamper, John
+AU  - Koedinger, Kenneth
+AU  - Pavlik Jr., Philip I. 
+AU  - Rose, Carolyn
+AU  - Liu, Ran
+AU  - Eagle, Michael
+AU  - Yudelson, Michael
+AU  - Veeramachaneni, Kalyan
+CY  - Raleigh, NC, USA
+J2  - 9th Int. Conf. on Educational Data Mining
+PY  - 2016
+ST  - Educational data analysis using LearnSphere workshop
+T2  - Proceedings of the EDM 2016 Workshops and Tutorials co-located with the 9th International Conference on Educational Data Mining
+TI  - Educational data analysis using LearnSphere workshop
+UR  - http://ceur-ws.org/Vol-1633/
+Y2  - Jun. 29 - Jul. 2
+ID  - 3061
+ER  - 
+
+TY  - CHAP
+AB  - chapter: Describes some probabilistic arguments that can help select a functional form to describe the time course of retention in human memory. Functions with flat or rising hazard functions (e.g., those based on exponential or Gumbel distributions) appear unsatisfactory, particularly for long-term retention. Functions with declining hazard functions appear more satisfactory (e.g., those based on Pareto or Weibull distributions, or on mixtures of exponentials). Models based on ensembles of separate traces are considered. Measures of retention, characteristics of memory performance, probabilistic representations, and multiple traces are discussed. (PsycINFO Database Record (c) 2002 APA, all rights reserved)
+AD  - 1. U California, Los Angeles, CA, US
+AN  - 223
+AU  - Wickens, Thomas D.
+AU  - Izawa, Chizuko
+CY  - Lawrence Erlbaum, Mahwah, NJ
+DO  - http://doi:10.1006/jmps.2000.1306
+J2  - On human memory: Evolution, progress, and reflections on the 30th anniversary of the Atkinson-Shiffrin model
+KW  - Human
+Measurement
+Memory
+Models
+Performance
+probabilistic representations & characteristics of performance & measures of time course of retention in human memory
+Retention
+Time
+US
+L1  - internal-pdf://0354820723/1999-Wickens-367.pdf
+PB  - Lawrence Erlbaum, Mahwah, NJ
+PY  - 1999
+SP  - 245-266
+ST  - Measuring the time course of retention
+T2  - On human memory: Evolution, progress, and reflections on the 30th anniversary of the Atkinson-Shiffrin model
+TI  - Measuring the time course of retention
+ID  - 1524
+ER  - 
+
+TY  - JOUR
+AB  - What is the strength of a memory trace that has received various practices at times t-sub(j ) in the past? The strength accumulation equation proposes the following: strength = Sigmat-sub(j)-super(-d), where the summation is over the practices of the trace. This equation predicts both the power law of practice and the power law of retention. This article reports the fits of the predictions of this equation to 5 experiments. Across these experiments, participants received as many as 240 trials of practice distributed over intervals as long as 400 days. The experiments also varied whether participants were just practicing retrieving an item or practicing applying a relatively complex rule. A model based on this equation successfully fit all the data when it was assumed that the passage of psychological time slowed after the experimental session. The strength accumulation equation was compared with other conceptions of the retention function and the relationship of the retention function to the practice function. (PsycINFO Database Record (c) 2000 APA, all rights reserved)
+AD  - Carnegie Mellon U, Dept of Psychology, Pittsburgh, PA, US
+AN  - 95
+AU  - Anderson, John R.
+AU  - Fincham, Jon M.
+AU  - Douglass, Scott
+DA  - 1999
+DO  - http://doi:10.1037/0278-7393.25.5.1120
+IS  - 5
+J2  - J. Exp. Psychol. Learn. Mem. Cogn.
+KW  - Adulthood (18 yrs & older)
+Empirical Study
+Forgetting
+Human
+Longitudinal Study
+Mathematical Modeling
+Memory
+Memory Training
+Practice
+Prediction
+relationship between effects of practice & forgetting,college students,4 day study,test of strength accumulation equation
+Retention
+Time
+US
+L1  - internal-pdf://3659004677/1999-Anderson-228.pdf
+PY  - 1999
+SP  - 1120-1136
+ST  - Practice and retention: A unifying analysis
+T2  - Journal of Experimental Psychology: Learning, Memory, & Cognition
+TI  - Practice and retention: A unifying analysis
+VL  - 25
+ID  - 1439
+ER  - 
+
+TY  - JOUR
+AB  - Analyzes the steps involved in deriving an optimal teaching strategy for instructional situations where a model-theoretic account of the learning process can be given. 2 examples derived from the author's research are considered: optimizing primary-grade instruction in initial reading, and optimizing 2nd-language learning by college students. In both cases, the optimal model-theoretic strategy yields large gains when compared with other strategies in widespread use in the schools. It is stated that these examples illustrate the relationship between a theory of learning and its corresponding theory of instruction. (22 ref.) (PsycINFO Database Record (c) 2006 APA, all rights reserved)
+AD  - Stanford U
+AN  - 1973-07713-001
+AU  - Atkinson, Richard C.
+DA  - 1972
+DO  - http://doi:10.1037/h0033572
+IS  - 10
+J2  - Am. Psychol.
+KW  - School Learning
+Teaching Methods
+L1  - internal-pdf://2996114953/1972-Atkinson-956.pdf
+PY  - 1972
+SN  - 0003-066X
+SP  - 921-931
+ST  - Ingredients for a theory of instruction
+T2  - American Psychologist
+TI  - Ingredients for a theory of instruction
+VL  - 27
+ID  - 358
+ER  - 
+
+TY  - JOUR
+AB  - Benjamini and Hochberg suggest that the false discovery rate may be the appropriate error rate to control in many applied multiple testing problems. A simple procedure was given there as an FDR controlling procedure for independent test statistics and was shown to be much more powerful than comparable procedures which control the traditional familywise error rate. We prove that this same procedure also controls the false discovery rate when the test statistics have positive regression dependency on each of the test statistics corresponding to the true null hypotheses. This condition for positive dependency is general enough to cover many problems of practical interest, including the comparisons of many treatments with a single control, multivariate normal test statistics with positive correlation matrix and multivariate $t$. Furthermore, the test statistics may be discrete, and the tested hypotheses composite without posing special difficulties. For all other forms of dependency, a simple conservative modification of the procedure controls the false discovery rate. Thus the range of problems for which a procedure with proven FDR control can be offered is greatly increased.
+AU  - Benjamini, Yoav
+AU  - Yekutieli, Daniel
+DA  - 2001
+DO  - http://doi:10.1214/aos/1013699998
+IS  - 4
+J2  - Ann. Stat.
+KW  - Multiple comparisons procedures
+FDR
+Simes'equality
+Hochberg's procedure
+MTP2 densities
+positive regression dependency
+unidimensional latent variables
+discrete test statistics
+multiple endpoints many-to-one comparisons
+comparisons with control
+LA  - en
+PY  - 2001
+SN  - 0090-5364
+SP  - 1165-1188
+ST  - The control of the false discovery rate in multiple testing under dependency
+T2  - Ann. Statist.
+TI  - The control of the false discovery rate in multiple testing under dependency
+UR  - https://projecteuclid.org:443/euclid.aos/1013699998
+VL  - 29
+ID  - 1637
+ER  - 
+
+TY  - JOUR
+AB  - In three experiments, we investigated whether memory tests enhance learning and reduce forgetting more than additional study opportunities do. Subjects learned obscure facts (Experiments 1 and 2) or Swahili-English word pairs (Experiment 3) by either completing a test with feedback (test/study) or receiving an additional study opportunity (study). Recall was tested after 5 min or 1, 2, 7, 14, or 42 days. We explored forgetting by means of an ANOVA and also by fitting a power function to the data. In all three experiments, testing enhanced overall recall more than restudying did. According to the power function, in two out of three experiments, testing also reduced forgetting more than restudying did, although this was not always the case according to the ANOVA. We discuss the implications of these results both for approaches to measuring forgetting and for the use of tests in promoting long-term retention. The stimuli used in these experiments may be found at www.psychonomic.org/archive. (PsycINFO Database Record (c) 2008 APA, all rights reserved)
+AD  - University of California, San Diego, La Jolla, CA, US scarpenter@ucsd.edu
+University of California, San Diego, La Jolla, CA, US
+Carpenter, Shana K. Department of Psychology, University of California, San Diego, La Jolla, CA, US, scarpenter@ucsd.edu
+AN  - 2008-03230-016
+AU  - Carpenter, Shana K.
+AU  - Pashler, Harold
+AU  - Wixted, John T.
+AU  - Vul, Edward
+DA  - 2008
+DO  - http://doi:10.3758/mc.36.2.438
+IS  - 2
+J2  - Mem. Cogn.
+KW  - Learning
+Measurement
+Memory
+learning
+forgetting
+tests effects
+memory tests
+2343 Learning & Memory
+Human
+Male
+Female
+Adulthood (18 yrs & older)
+Young Adulthood (18-29 yrs)
+Thirties (30-39 yrs)
+Middle Age (40-64 yrs)
+L1  - internal-pdf://1694916154/2008-Carpenter-2565.pdf
+LA  - English
+M3  - Journal Article
+PY  - 2008
+SN  - 0090-502X
+SP  - 438-448
+ST  - The effects of tests on learning and forgetting
+T2  - Memory & Cognition
+TI  - The effects of tests on learning and forgetting
+VL  - 36
+ID  - 2405
+ER  - 
+
+TY  - JOUR
+AU  - Carvalho, P. F.
+AU  - Goldstone, R. L.
+DA  - 2019
+DO  - 10.31234/osf.io/8psa4
+J2  - PsyArXiv
+PY  - 2019
+SP  - 1-42
+ST  - A computational model of context-dependent encodings during category learning
+T2  - PsyArXiv
+TI  - A computational model of context-dependent encodings during category learning
+ID  - 3276
+ER  - 
+
+TY  - JOUR
+AB  - Examined the efficacy of modeling students' changing knowledge state during skill acquisition. Exp 1 examined validity of predictions made by the student model, regarding students' completion of tutor exercises. Exp 2, 3 and 4 studied the external validity of the model in predicting test performance. College students were taught to write short programs with the ACT Programming Tutor (APT). APT allowed the tutor to solve exercises along with the Ss, and provided the necessary assistance. As Ss worked, APT allowed the tutor to maintain an estimate of the probabilty that Ss had learnt each rule in the ideal model, in a process called knowledge tracing. The tutor presented an individualized sequence of exercises to Ss, based on these probability estimates, until Ss had mastered each rule. Studies on the empirical validity of knowledge tracing have led to modifications in the program. (PsycINFO Database Record (c) 2006 APA, all rights reserved)
+AD  - Carnegie Mellon U, School of Computer Science, Human Computer Interaction Inst, Pittsburgh, PA, US
+AN  - 1996-29060-001
+AU  - Corbett, Albert T.
+AU  - Anderson, John R.
+DA  - 1994
+DO  - http://doi:10.1007/BF01099821
+IS  - 4
+J2  - User Model. User-Adapted Interact.
+KW  - Expert Systems
+Knowledge Level
+Skill Learning
+Statistical Validity
+Models
+L1  - internal-pdf://2957389657/1995-Corbett-1129.pdf
+PY  - 1994
+SN  - 0924-1868
+SP  - 253–278
+ST  - Knowledge tracing: Modeling the acquisition of procedural knowledge
+T2  - User Modeling and User-Adapted Interaction
+TI  - Knowledge tracing: Modeling the acquisition of procedural knowledge
+VL  - 4
+ID  - 1133
+ER  - 
+
+TY  - JOUR
+AB  - In this paper we elaborate on the potential of the lmer function from the lme4 package
+in R for item response (IRT) modeling. In line with the package, an IRT framework is
+described based on generalized linear mixed modeling. The aspects of the framework refer
+to (a) the kind of covariates – their mode (person, item, person-by-item), and their being
+external vs. internal to responses, and (b) the kind of effects the covariates have – fixed
+vs. random, and if random, the mode across which the effects are random (persons, items).
+Based on this framework, three broad categories of models are described: Item covariate
+models, person covariate models, and person-by-item covariate models, and within each
+category three types of more specific models are discussed. The models in question are
+explained and the associated lmer code is given. Examples of models are the linear
+logistic test model with an error term, differential item functioning models, and local item
+dependency models. Because the lme4 package is for univariate generalized linear mixed
+models, neither the two-parameter, and three-parameter models, nor the item response
+models for polytomous response data, can be estimated with the lmer function.
+AU  - De Boeck, Paul
+AU  - Bakker, Marjan
+AU  - Zwitser, Robert
+AU  - Nivard, Michel
+AU  - Hofman, Abe
+AU  - Tuerlinckx, Francis
+AU  - Partchev, Ivailo
+DA  - 2011
+DO  - http://doi:10.18637/jss.v039.i12
+IS  - 12
+J2  - J. Stat. Software
+L1  - internal-pdf://0979117629/2011-De Boeck-12829.pdf
+PY  - 2011
+SN  - 1548-7660
+SP  - 1-28
+ST  - The estimation of item response models with the lmer function from the lme4 package in R
+T2  - Journal of Statistical Software
+TI  - The estimation of item response models with the lmer function from the lme4 package in R
+VL  - 39
+ID  - 2744
+ER  - 
+
+TY  - JOUR
+AB  - Decades of research has shown that spacing practice trials over time can improve later memory, but there are few concrete recommendations concerning how to optimally space practice. We show that existing recommendations are inherently suboptimal due to their insensitivity to time costs and individual- and item-level differences. We introduce an alternative approach that optimally schedules practice with a computational model of spacing in tandem with microeconomic principles. We simulated conventional spacing schedules and our adaptive model-based approach. Simulations indicated that practicing according to microeconomic principles of efficiency resulted in substantially better memory retention than alternatives. The simulation results provided quantitative estimates of optimal difficulty that differed markedly from prior recommendations but still supported a desirable difficulty framework. Experimental results supported simulation predictions, with up to 40% more items recalled in conditions where practice was scheduled optimally according to the model of practice. Our approach can be readily implemented in online educational systems that adaptively schedule practice and has significant implications for millions of students currently learning with educational technology.
+AU  - Eglington, Luke G.
+AU  - Pavlik Jr, Philip I.
+DA  - 2020
+DO  - 10.1038/s41539-020-00074-4
+IS  - 1
+J2  - npj Sci. Learn.
+PY  - 2020
+SN  - 2056-7936
+SP  - 15
+ST  - Optimizing practice scheduling requires quantitative tracking of individual item performance
+T2  - npj Science of Learning
+TI  - Optimizing practice scheduling requires quantitative tracking of individual item performance
+UR  - https://doi.org/10.1038/s41539-020-00074-4
+VL  - 5
+ID  - 3252
+ER  - 
+
+TY  - JOUR
+AB  - The present paper consists of a theoretical and an empirical part: First Rasch's test model for items with two answer categories is considered under the assumption of linear constraints on the item parameters (‘linear logistic model’). It is shown that this model is appropriate for the analysis of subject areas in instructional research if the subject area comprises tasks or items which are solved by the pupil by combination of a certain number of cognitive operations or rules. An empirical investigation was made which showed that the psychological complexity of problems in elementary differential calculus, as taught in secondary school mathematics, can be approximately explained through the assumption of seven psychologically meaningful operations. The psychological contribution of this analysis does not lie in a mere statistical description of item difficulties, but rather in the testing of hypotheses as to which steps (operations) in solving a problem are to be viewed as psychological units. It was seen, for instance, that differentiation of a polynomial is to be considered a single operation psychologically, which is mastered and correctly combined with the other operations or not, and that the complexity of a task is primarily determined by the combination of different operations and is not increased significantly when the same operation occurs repeatedly within the problem.
+AU  - Fischer, Gerhard H.
+DA  - 1973
+DO  - http://doi:10.1016/0001-6918(73)90003-6
+IS  - 6
+J2  - Acta Psychol.
+L1  - internal-pdf://1301098396/1973-Fischer-12813.pdf
+PY  - 1973
+SN  - 0001-6918
+SP  - 359-374
+ST  - The linear logistic test model as an instrument in educational research
+T2  - Acta Psychologica
+TI  - The linear logistic test model as an instrument in educational research
+UR  - http://www.sciencedirect.com/science/article/pii/0001691873900036
+VL  - 37
+ID  - 402
+ER  - 
+
+TY  - JOUR
+AU  - Galyardt, April
+AU  - Goldin, Ilya
+DA  - 2015
+DO  - https://doi.org/10.5281/zenodo.3554671
+IS  - 2
+J2  - J. Educ. Data Min.
+L1  - internal-pdf://3952917540/2015-Galyardt-13189.pdf
+PY  - 2015
+SN  - 2157-2100
+SP  - 83-108
+ST  - Move your lamp post: Recent data reflects learner knowledge better than older data
+T2  - Journal of Educational Data Mining
+TI  - Move your lamp post: Recent data reflects learner knowledge better than older data
+VL  - 7
+ID  - 3002
+ER  - 
+
+TY  - JOUR
+AU  - Gervet, Theophile
+AU  - Koedinger, Ken
+AU  - Schneider, Jeff
+AU  - Mitchell, Tom
+DA  - 2020
+IS  - 3
+J2  - J. Educ. Data Min.
+PY  - 2020
+SN  - 2157-2100
+SP  - 31-54
+ST  - When is Deep Learning the Best Approach to Knowledge Tracing?
+T2  - JEDM| Journal of Educational Data Mining
+TI  - When is Deep Learning the Best Approach to Knowledge Tracing?
+VL  - 12
+ID  - 3267
+ER  - 
+
+TY  - JOUR
+AB  - Student modeling is a fundamental concept applicable to a variety of intelligent tutoring systems (ITS). However, there is not a lot of practical guidance on how to construct and train such models. This paper compares two approaches for student modeling, Knowledge Tracing (KT) and Performance Factors Analysis (PFA), by evaluating their predictive accuracy on individual student practice opportunities. We explore the space of design decisions for each approach and find a set of “best practices” for each. In a head to head comparison, we find that PFA has considerably higher predictive accuracy than KT. In addition to being more accurate, we found that PFA's parameter estimates were more plausible. Our best-performing model was a variant of PFA that ignored the tutor's transfer model; that is, it assumed all skills influenced performance on all problems. One possible implication is that this result is a general one suggesting there is benefit from considering models that incorporate information from more than the typical handful of skills associated with a problem in the transfer model. Alternately, an explanation for this result is the transfer model that our tutor uses is particularly weak. We also found that both KT and PFA have relatively low predictive accuracy for cases where students generate incorrect responses, and 2/3 of the model's errors are false positives, indicating a better means of determining when students will make mistakes is needed.
+AU  - Gong, Yue
+AU  - Beck, Joseph E.
+AU  - Heffernan, Neil T.
+DA  - 2011
+DO  - http://doi:10.3233/JAI-2011-016
+IS  - 1
+J2  - Int. J. Artif. Intell. Educ.
+L1  - internal-pdf://4063963779/2011-Gong-13064.pdf
+PY  - 2011
+SP  - 27-46
+ST  - How to construct more accurate student models: Comparing and optimizing knowledge tracing and performance factor analysis
+T2  - International Journal of Artificial Intelligence in Education
+TI  - How to construct more accurate student models: Comparing and optimizing knowledge tracing and performance factor analysis
+UR  - http://dx.doi.org/10.3233/JAI-2011-016
+VL  - 21
+ID  - 2749
+ER  - 
+
+TY  - JOUR
+AB  - Several laboratory studies have demonstrated the effectiveness of presenting students with "Reflection Questions" immediately after they have solved quantitative problems (1, 2). The main goal of the two experiments described in this paper was to determine if the positive results of post-practice reflection from laboratory studies hold up in an actual classroom setting. We added prototype reflective dialogues to the Andes physics tutoring system (3, 4) and evaluated them in a course at the US Naval Academy. Consistent with prior research, the dialogues promoted conceptual understanding of physics. However, measures of retention and transfer to problem-solving ability showed only a marginal effect of completing the reflective dialogues, in the first experiment.
+AU  - Katz, Sandra
+AU  - Connelly, John
+AU  - Wilson, Christine
+DA  - 2007
+DO  - http://doi:10.5555/1563601.1563669
+J2  - Front. Artif. Intell. Appl.
+PY  - 2007
+SP  - 425-432
+ST  - Out of the lab and into the classroom: An evaluation of reflective dialogue in Andes
+T2  - Frontiers in Artificial Intelligence and Applications
+TI  - Out of the lab and into the classroom: An evaluation of reflective dialogue in Andes
+VL  - 158
+ID  - 2311
+ER  - 
+
+TY  - JOUR
+AB  - Adaptive training is training in which the problem, the stimulus, or the task is varied as a function of how well the trainee performs. The concept and techniques of adaptive training are introduced and a comparison drawn between different methods of adaptation. The preferred method keeps measured performance constant by changing the difficulty of the task. Fundamental characteristics of adaptive trainers are enumerated and contrasted with fixed trainers. The implementation of an adaptive training system is then discussed under the following headings, (1) choosing an adaptive variable, (2) measuring performance, (3) the adaptive logic, (4) error standard and difficulty level, and (5) knowledge-of-results displays. A concluding section cautions against expecting adaptive techniques to correct training devices with inherently poor training validity.
+AU  - Kelley, Charles R.
+DA  - 1969
+DO  - http://doi:10.1177/001872086901100602
+IS  - 6
+J2  - Hum. Factors
+PY  - 1969
+SN  - 0018-7208
+SP  - 547-556
+ST  - What is adaptive training?
+T2  - Human Factors
+TI  - What is adaptive training?
+UR  - https://doi.org/10.1177/001872086901100602
+VL  - 11
+Y2  - 2019/05/12
+ID  - 305
+ER  - 
+
+TY  - JOUR
+AB  - During each school semester, students face an onslaught of material to be learned. Students work hard to achieve initial mastery of the material, but when they move on, the newly learned facts, concepts, and skills degrade in memory. Although both students and educators appreciate that review can help stabilize learning, time constraints result in a trade-off between acquiring new knowledge and preserving old knowledge. To use time efficiently, when should review take place? Experimental studies have shown benefits to long-term retention with spaced study, but little practical advice is available to students and educators about the optimal spacing of study. The dearth of advice is due to the challenge of conducting experimental studies of learning in educational settings, especially where material is introduced in blocks over the time frame of a semester. In this study, we turn to two established models of memory—ACT-R and MCM—to conduct simulation studies exploring the impact of study schedule on long-term retention. Based on the premise of a fixed time each week to review, converging evidence from the two models suggests that an optimal review schedule obtains significant benefits over haphazard (suboptimal) review schedules. Furthermore, we identify two scheduling heuristics that obtain near optimal review performance: (a) review the material from μ-weeks back, and (b) review material whose predicted memory strength is closest to a particular threshold. The former has implications for classroom instruction and the latter for the design of digital tutors.
+AU  - Khajah, Mohammad M.
+AU  - Lindsey, Robert V.
+AU  - Mozer, Michael C.
+DA  - 2014
+DO  - http://doi:10.1111/tops.12077
+IS  - 1
+J2  - Top. Cogn. Sci.
+KW  - Spacing effect
+Memory model
+ACT-R
+MCM
+Optimization
+Learning
+Review
+L1  - internal-pdf://0942316444/2014-Khajah-13053.pdf
+PY  - 2014
+SN  - 1756-8765
+SP  - 157-169
+ST  - Maximizing students' retention via spaced review: Practical guidance from computational models of memory
+T2  - Topics in Cognitive Science
+TI  - Maximizing students' retention via spaced review: Practical guidance from computational models of memory
+UR  - http://dx.doi.org/10.1111/tops.12077
+VL  - 6
+ID  - 2973
+ER  - 
+
+TY  - JOUR
+AB  - Despite the accumulation of substantial cognitive science research relevant to education, there remains confusion and controversy in the application of research to educational practice. In support of a more systematic approach, we describe the Knowledge-Learning-Instruction (KLI) framework. KLI promotes the emergence of instructional principles of high potential for generality, while explicitly identifying constraints of and opportunities for detailed analysis of the knowledge students may acquire in courses. Drawing on research across domains of science, math, and language learning, we illustrate the analyses of knowledge, learning, and instructional events that the KLI framework affords. We present a set of three coordinated taxonomies of knowledge, learning, and instruction. For example, we identify three broad classes of learning events (LEs): (a) memory and fluency processes, (b) induction and refinement processes, and (c) understanding and sense-making processes, and we show how these can lead to different knowledge changes and constraints on optimal instructional choices.
+AU  - Koedinger, Kenneth R.
+AU  - Corbett, Albert T.
+AU  - Perfetti, Charles
+DA  - 2012
+DO  - http://doi:10.1111/j.1551-6709.2012.01245.x
+IS  - 5
+J2  - Cogn. Sci.
+KW  - Instructional principles
+Learning principles
+Knowledge representation
+Cognitive modeling
+Education
+Experimentation
+Cognitive task analysis
+L1  - internal-pdf://2645842666/2012-Koedinger-4140.pdf
+PY  - 2012
+SN  - 1551-6709
+SP  - 757-798
+ST  - The knowledge-learning-instruction framework: Bridging the science-practice chasm to enhance robust student learning
+T2  - Cognitive Science
+TI  - The knowledge-learning-instruction framework: Bridging the science-practice chasm to enhance robust student learning
+UR  - http://dx.doi.org/10.1111/j.1551-6709.2012.01245.x
+VL  - 36
+ID  - 2840
+ER  - 
+
+TY  - JOUR
+AU  - Koedinger, Kenneth R.
+AU  - Yudelson, Michael V.
+AU  - Pavlik, Philip I.
+CA  - Journal article
+DA  - 2016
+DO  - http://doi:10.1111/tops.12208
+J2  - Top. Cogn. Sci.
+KW  - Naturally occurring data
+Faculty theory of transfer
+Component theory of transfer
+Model comparison
+Learning curves
+L1  - internal-pdf://3845115711/Koedinger_et_al-2016-Topics_in_Cognitive_Scien.pdf
+PY  - 2016
+SN  - 1756-8765
+SP  - published online
+ST  - Testing theories of transfer using error rate learning curves
+T2  - Topics in Cognitive Science
+TI  - Testing theories of transfer using error rate learning curves
+UR  - http://dx.doi.org/10.1111/tops.12208
+ID  - 3051
+ER  - 
+
+TY  - JOUR
+AB  - Human memory is imperfect; thus, periodic review is required for the long-term preservation of knowledge and skills. However, students at every educational level are challenged by an ever-growing amount of material to review and an ongoing imperative to master new material. We developed a method for efficient, systematic, personalized review that combines statistical techniques for inferring individual differences with a psychological theory of memory. The method was integrated into a semester-long middle-school foreign-language course via retrieval-practice software. Using a cumulative exam administered after the semester’s end, we compared time-matched review strategies and found that personalized review yielded a 16.5% boost in course retention over current educational practice (massed study) and a 10.0% improvement over a one-size-fits-all strategy for spaced study.
+AU  - Lindsey, Robert V.
+AU  - Shroyer, Jeffery D.
+AU  - Pashler, Harold
+AU  - Mozer, Michael C.
+DA  - 2014
+DO  - http://doi:10.1177/0956797613504302
+J2  - Psych. Sci.
+L1  - internal-pdf://3188760218/2014-Lindsey-12861.pdf
+PY  - 2014
+SP  - 639-647
+ST  - Improving students’ long-term knowledge retention through personalized review
+T2  - Psychological Science
+TI  - Improving students’ long-term knowledge retention through personalized review
+UR  - http://pss.sagepub.com/content/early/2014/01/17/0956797613504302.abstract
+ID  - 2975
+ER  - 
+
+TY  - JOUR
+AB  - Making the single assumption that "… the trait or ability under discussion can be thought of as an ordered variable represented numerically in a single dimension," 14 conclusions are deduced with respect to test scores, true scores, and ability. (PsycINFO Database Record (c) 2016 APA, all rights reserved)
+AU  - Lord, Frederic M.
+DA  - 1953
+DO  - http://doi:10.1177/001316445301300401
+J2  - Educ. Psychol. Meas.
+PY  - 1953
+SN  - 1552-3888(Electronic),0013-1644(Print)
+SP  - 517-549
+ST  - The relation of test score to the trait underlying the test
+T2  - Educational and Psychological Measurement
+TI  - The relation of test score to the trait underlying the test
+VL  - 13
+ID  - 138
+ER  - 
+
+TY  - JOUR
+AB  - This paper discusses the simple open student models used in two of our constraint-based tutors, SQL-Tutor and KERMIT, and their effects on self-assessment. The systems present a high-level abstraction of the detailed information contained in the student model, in terms of skill meters representing the student's progress on domain concepts. SQL-Tutor presents the open student model when the student requires it, or when selecting new problems. KERMIT, on the other hand, continuously displays a high-level summary of the student's progress, while more detailed information is available on request. Our results show that even simple open student models can have important positive effects on learning and students' meta-cognitive skills. Students appreciated having access to their models, and they felt this feature contributed to their understanding of the domain. Performance of less able students becomes significantly better than that of their peers of similar abilities without access to their models. We have also seen that open student models can help students learn to select better problems.
+AU  - Mitrovic, Antonija
+AU  - Martin, Brent
+DA  - 2007
+DO  - http://doi:10.1007/3-540-47952-X_31
+IS  - 2
+J2  - Int. J. Artif. Intell. Educ.
+PY  - 2007
+SP  - 121-144
+ST  - Evaluating the effect of open student models on self-assessment
+T2  - International Journal of Artificial Intelligence in Education
+TI  - Evaluating the effect of open student models on self-assessment
+UR  - http://iospress.metapress.com/content/XL475M4828420465
+VL  - 17
+ID  - 2334
+ER  - 
+
+TY  - JOUR
+AU  - Pardos, Zachary
+AU  - Dadu, A.
+DA  - 2018
+DO  - http://doi:10.5281/zenodo.3554689
+IS  - 2
+J2  - J. Educ. Data Min.
+PY  - 2018
+SP  - 1-27
+ST  - dAFM: Fusing psychometric and connectionist modeling for Q-matrix refinement
+T2  - Journal of Educational Data Mining
+TI  - dAFM: Fusing psychometric and connectionist modeling for Q-matrix refinement
+VL  - 10
+ID  - 3097
+ER  - 
+
+TY  - JOUR
+AB  - Two different methods of practice are available in the learning of simple information, test practice or study practice. Of these two methods of learning, research has generally shown that test practice is superior to study practice. However, this research has not considered the testing advantage with respect to the fact that test learning is uncertain (i.e. if recall fails, nothing appears to be learned) or with respect to the fact that study learning depends greatly on the duration of the study event. The following work clarifies these issues by presenting an integrated computational model of the relative costs and benefits of testing compared to study presentation [based on the ACT-R theory of declarative memory; Anderson, J.R. & Schooler, L.J. (1991). Psychological Science 2: 396–408; Pavlik Jr., P.I.. & Anderson, J.R. (2005). Cognitive Science 29: 559–586]. This model was applied to determine how test and study practice can be optimally employed to improve learning and provides a framework for understanding the effects of mnemonic strategies in simple memory tasks.
+AU  - Pavlik Jr., Philip I.
+CA  - Journal article
+DA  - 2007
+DO  - http://doi:10.1007/s11251-006-9013-2
+J2  - Instructional Sci.
+L1  - internal-pdf://3531228655/2007-Pavlik Jr-1625.pdf
+LB  - Journal article
+PY  - 2007
+RI  - Journal article
+SP  - 407–441
+ST  - Understanding and applying the dynamics of test practice and study practice
+T2  - Instructional Science
+TI  - Understanding and applying the dynamics of test practice and study practice
+VL  - 35
+ID  - 2347
+ER  - 
+
+TY  - JOUR
+AB  - An experiment was performed to investigate the effects of practice and spacing on retention of Japanese-English vocabulary paired associates. The relative benefit of spacing increased with increased practice and with longer retention intervals. Data were fitted with an activation-based memory model, which proposes that each time an item is practiced it receives an increment of strength but that these increments decay as a power function of time. The rate of decay for each presentation depended on the activation at the time of the presentation. This mechanism limits long-term benefits from further practice at higher levels of activation and produces the spacing effect and its observed interactions with practice and retention interval. The model was compared with another model of the spacing effect (Raaijmakers, 2003) and was fit to some results from the literature on spacing and memory. (PsycINFO Database Record (c) 2006 APA, all rights reserved)
+AD  - Psychology Department, Carnegie Mellon University, Pittsburgh, PA, US ppavlik@andrew.cmu.edu
+Psychology Department, Carnegie Mellon University, Pittsburgh, PA, US
+AN  - 2005-11173-003
+AU  - Pavlik Jr., Philip I.
+AU  - Anderson, John R.
+CA  - Journal article
+DA  - 2005
+DO  - http://doi:10.1207/s15516709cog0000_14
+IS  - 4
+J2  - Cogn. Sci.
+KW  - Forgetting
+Memory
+Retention
+Vocabulary
+Models
+L1  - internal-pdf://1025694668/2005-Pavlik Jr-830.pdf
+LB  - Journal article
+PY  - 2005
+RI  - Journal article
+SN  - 0364-0213
+SP  - 559–586
+ST  - Practice and forgetting effects on vocabulary memory: An activation-based model of the spacing effect
+T2  - Cognitive Science
+TI  - Practice and forgetting effects on vocabulary memory: An activation-based model of the spacing effect
+VL  - 29
+ID  - 2126
+ER  - 
+
+TY  - JOUR
+AB  - By balancing the spacing effect against the effects of recency and frequency, this paper explains how practice may be scheduled to maximize learning and retention. In an experiment, an optimized condition using an algorithm determined with this method was compared with other conditions. The optimized condition showed significant benefits with large effect sizes for both improved recall and recall latency. The optimization method achieved these benefits by using a modeling approach to develop a quantitative algorithm, which dynamically maximizes learning by determining for each item when the balance between increasing temporal spacing (that causes better long-term recall) and decreasing temporal spacing (that reduces the failure related time cost of each practice) means that the item is at the spacing interval where long-term gain per unit of practice time is maximal. As practice repetitions accumulate for each item, items become stable in memory and this optimal interval increases.
+AU  - Pavlik Jr., Philip I.
+AU  - Anderson, John R.
+CA  - Journal article
+DA  - 2008
+DO  - http://doi:10.1037/1076-898X.14.2.101
+IS  - 2
+J2  - J. Exp. Psychol. Appl.
+L1  - internal-pdf://3682695695/2008-Pavlik Jr-1624.pdf
+LB  - Journal article
+PY  - 2008
+RI  - Journal article
+SP  - 101–117
+ST  - Using a model to compute the optimal schedule of practice
+T2  - Journal of Experimental Psychology: Applied
+TI  - Using a model to compute the optimal schedule of practice
+VL  - 14
+ID  - 2474
+ER  - 
+
+TY  - JOUR
+AU  - Pavlik Jr., Philip I.
+AU  - Yudelson, Michael
+AU  - Koedinger, Kenneth R.
+CA  - Journal article
+DA  - 2015
+DO  - http://doi:10.1007/s40593-015-0039-y
+J2  - Int. J. Artif. Intell. Educ.
+KW  - Human learning
+Pedagogical strategy
+Transfer of learning
+Student modelling
+L1  - internal-pdf://2150942216/2015-Pavlik Jr-13067.pdf
+LA  - English
+PY  - 2015
+SN  - 1560-4292
+SP  - 346-379
+ST  - A measurement model of microgenetic transfer for improving instructional outcomes
+T2  - International Journal of Artificial Intelligence in Education
+TI  - A measurement model of microgenetic transfer for improving instructional outcomes
+UR  - http://dx.doi.org/10.1007/s40593-015-0039-y
+VL  - 25
+ID  - 3029
+ER  - 
+
+TY  - JOUR
+AB  - Learner modeling is a basis of personalized, adaptive learning. The research literature provides a wide range of modeling approaches, but it does not provide guidance for choosing a model suitable for a particular situation. We provide a systematic and up-to-date overview of current approaches to tracing learners’ knowledge and skill across interaction with multiple items, focusing in particular on the widely used Bayesian knowledge tracing and logistic models. We discuss factors that influence the choice of a model and highlight the importance of the learner modeling context: models are used for different purposes and deal with different types of learning processes. We also consider methodological issues in the evaluation of learner models and their relation to the modeling context. Overall, the overview provides basic guidelines for both researchers and practitioners and identifies areas that require further clarification in future research.
+AU  - Pelánek, Radek
+DA  - 2017
+DO  - http://doi:10.1007/s11257-017-9193-2
+IS  - 3
+J2  - User Model. User-Adapted Interact.
+PY  - 2017
+SN  - 1573-1391
+SP  - 313-350
+ST  - Bayesian knowledge tracing, logistic models, and beyond: an overview of learner modeling techniques
+T2  - User Modeling and User-Adapted Interaction
+TI  - Bayesian knowledge tracing, logistic models, and beyond: an overview of learner modeling techniques
+UR  - https://doi.org/10.1007/s11257-017-9193-2
+VL  - 27
+ID  - 3081
+ER  - 
+
+TY  - JOUR
+AB  - unassigned: Latencies in paired-associate learning were examined for 10 trials beginning after the last error on an individual pair. Latencies decreased over the 1st 8 of these trials, the largest decrease occurring from the 1st to the 2nd trial after the last error. (PsycINFO Database Record (c) 2000 APA, all rights reserved)
+AD  - Indiana U
+AN  - 16
+AU  - Peterson, Lloyd R.
+DA  - 1965
+DO  - http://doi:10.3758/BF03343385
+IS  - 6
+J2  - Psychonomic Sci.
+KW  - Learning
+LEARNING/PAIRED ASSOCIATE,LATENCIES IN,AFTER LAST ERROR; LEARNING
+No terms assigned
+Paired Associate Learning
+L1  - internal-pdf://1474818301/1965-Peterson-319.pdf
+PY  - 1965
+SP  - 167-168
+ST  - Paired-associate latencies after the last error
+T2  - Psychonomic Science
+TI  - Paired-associate latencies after the last error
+VL  - 2
+ID  - 236
+ER  - 
+
+TY  - JOUR
+AB  - An approach to item analysis is described by means of which the difficulty of an item and the ability of an individual may sometimes be assessed without reference to the norms provided by some population. The model employed in the analysis could also be used to study any situation in which a number of subjects perform a series of tasks having the same two alternative responses. Some particular uses of the model are discussed briefly.
+AU  - Rasch, G.
+DA  - 1966
+DO  - http://doi:10.1111/j.2044-8317.1966.tb00354.x
+IS  - 1
+J2  - Br. J. Math. Stat. Psychol.
+L1  - internal-pdf://1083634901/1966-Rasch-12812.pdf
+PY  - 1966
+SN  - 2044-8317
+SP  - 49-57
+ST  - An item analysis which takes individual differences into account
+T2  - British Journal of Mathematical and Statistical Psychology
+TI  - An item analysis which takes individual differences into account
+UR  - http://dx.doi.org/10.1111/j.2044-8317.1966.tb00354.x
+VL  - 19
+ID  - 251
+ER  - 
+
+TY  - JOUR
+AB  - The shift with practice from use of generic, multistep problem-solving strategies to fast and relatively effortless memory-based strategies, was explored in 2 experiments using pseudoarithmetic tasks. A complete transition to the memory strategy occurred by about the 60th exposure to each problem. The power law of practice did not hold in the overall data for either the mean or the standard deviation of response latency, but it did hold within each strategy (algorithm or retrieval). Learning was highly specific to the practiced problems. These results constitute the 1st clear demonstration of a skill for which the power law does not apply overall. The results do not support the instance theory of automatization (G. D. Logan, 1988) but are consistent with an alternative component power laws (CMPL) theory that assumes that because of intrinsic attentional limitations, only 1 strategy can be executed at a time. (PsycINFO Database Record (c) 2000 APA, all rights reserved)
+AD  - U California-San Diego, Dept of Psychology, La Jolla, CA, US
+AN  - 5
+AU  - Rickard, Timothy C.
+DA  - 1997
+DO  - http://doi:10.1037/0096-3445.126.3.288
+IS  - 3
+J2  - J. Exp. Psychol. Gen.
+KW  - Adulthood (18 yrs & older)
+Cognitive Processes
+Empirical Study
+Human
+Learning Strategies
+Memory
+skill acquisition & strategy shifting,college students,test of instance theory of automatization vs alternative component power laws
+Skill Learning
+Strategies
+Theories
+US
+L1  - internal-pdf://4151150944/1997-Rickard-535.pdf
+PY  - 1997
+SP  - 288-311
+ST  - Bending the power law: A CMPL theory of strategy shifts and the automatization of cognitive skills
+T2  - Journal of Experimental Psychology: General
+TI  - Bending the power law: A CMPL theory of strategy shifts and the automatization of cognitive skills
+VL  - 126
+ID  - 1316
+ER  - 
+
+TY  - JOUR
+AB  - A reanalysis of the numerosity judgment data described in T. J. Palmeri (see record 1997-03378-004) showed that the mean latency exhibits clear deviations from the power function as predicted by the component power laws (CMPL) theory of strategy shifting (T. C. Rickard, 1997). The variance of the latency systematically increases and then decreases with practice for large numerosities, a result that is also consistent with the CMPL theory. Neither of these results are predicted by existing versions of either the exemplar-based random walk or the instance theories. These findings suggest that numerosity judgment, like other skills, reflects one at a time rather than concurrent execution of algorithmic and memory retrieval strategies. (PsycINFO Database Record (c) 2000 APA, all rights reserved)
+AD  - U California-San Diego, Dept of Psychology, La Jolla, CA, US
+AN  - 3
+AU  - Rickard, Timothy C.
+DA  - 1999
+DO  - http://doi:10.1037/0278-7393.25.2.532
+IS  - 2
+J2  - J. Exp. Psychol. Learn. Mem. Cogn.
+KW  - Adulthood (18 yrs & older)
+Classification (Cognitive Process)
+Comment
+Empirical Study
+exemplar similarity,automaticity development measured by RT in random pattern numerosity judgments,college students,commentary
+Human
+Memory
+Numerosity Perception
+Pattern Discrimination
+Reaction Time
+Recognition (Learning)
+Stimulus Similarity
+Strategies
+US
+Young Adulthood (18-29 yrs)
+L1  - internal-pdf://1736644471/1999-Rickard-536.pdf
+PY  - 1999
+SP  - 532-542
+ST  - A CMPL alternative account of practice effects in numerosity judgment tasks
+T2  - Journal of Experimental Psychology: Learning, Memory, & Cognition
+TI  - A CMPL alternative account of practice effects in numerosity judgment tasks
+VL  - 25
+ID  - 1501
+ER  - 
+
+TY  - JOUR
+AB  - Abstract Using data to understand learning and improve education has great promise. However, the promise will not be achieved simply by AI and Machine Learning researchers developing innovative models that more accurately predict labeled data. As AI advances, modeling techniques and the models they produce are getting increasingly complex, often involving tens of thousands of parameters or more. Though strides towards interpretation of complex models are being made in core machine learning communities, it remains true in these cases of ?black box? modeling that research teams may have little possibility to peer inside to try understand how, why, or even whether such models will work when applied beyond the data on which they were built. Rather than relying on AI expertise alone, we suggest that learning engineering teams bring interdisciplinary expertise to bear to develop explanatory learner models that provide interpretable and actionable insights in addition to accurate prediction. We describe examples that illustrate use of different kinds of data (eg, click stream and discourse data) in different course content (eg, math and writing) and toward different goals (eg, improving student models and generating actionable feedback). We recommend learning engineering teams, shared infrastructure and funder incentives toward better explanatory learner model development that advances learning science, produces better pedagogical practices and demonstrably improves student learning. Practitioner Notes What is already known about this topic Researchers in learning analytics and educational data mining have been successful in creating innovative models of data that optimize prediction. Some of these models produce scientific or practical insights and fewer have been put into use and demonstrated to enhance student learning. What this paper adds We provide examples of development of explanatory models of learners that not only accurately predict data but also provide scientific insights and yield practical outcomes. In particular, researchers with expertise in cognitive science and math education content use AI-based data analytics to discover previously unrecognized barriers to geometry student learning. They use model-derived insights to redesign an online tutoring system and ?close-the-loop? by experimentally demonstrating that the new system produces better student learning than the original. Implications for practice and/or policy We define explanatory learning models and provide an articulation of a process for generating them that involves interdisciplinary teams employing human?computer interaction and learning engineering methods. Based on our experiences, we recommend learning engineering teams, shared infrastructure and funder incentives toward better explanatory learner model development that advances learning science, produces better pedagogical practices and demonstrably improves student learning.
+AU  - Rosé, Carolyn P.
+AU  - McLaughlin, Elizabeth A.
+AU  - Liu, Ran
+AU  - Koedinger, Kenneth R.
+DA  - 2019
+DO  - https://doi.org/10.1111/bjet.12858
+IS  - 6
+J2  - Br. J. Educ. Tech.
+M3  - https://doi.org/10.1111/bjet.12858
+N1  - https://doi.org/10.1111/bjet.12858
+PY  - 2019
+SN  - 0007-1013
+SP  - 2943-2958
+ST  - Explanatory learner models: Why machine learning (alone) is not the answer
+T2  - British Journal of Educational Technology
+TI  - Explanatory learner models: Why machine learning (alone) is not the answer
+UR  - https://doi.org/10.1111/bjet.12858
+VL  - 50
+Y2  - 2020/12/31
+ID  - 3269
+ER  - 
+
+TY  - JOUR
+AU  - Scheiblechner, H.
+DA  - 1972
+J2  - J. Exp. Appl. Psychol.
+PY  - 1972
+SP  - 476-506
+ST  - Das lernen und losen komplexer denkaufgaben
+T2  - Zeitschrift fur Experimentelle und Angewandte Psychologie
+TI  - Das lernen und losen komplexer denkaufgaben
+UR  - <Go to WoS>://A1993MJ80100006
+VL  - 19
+ID  - 387
+ER  - 
+
+TY  - JOUR
+AB  - Students can use an educational system’s help in unexpected
+ways. For example, they may bypass abstract hints in search of a concrete
+solution. This behavior has traditionally been labeled as a form of gaming
+or help abuse. We propose that some examples of this behavior are not
+abusive and that bottom-out hints can act as worked examples. We create
+a model for distinguishing good student use of bottom-out hints from bad
+student use of bottom-out hints by means of logged response times. We
+show that this model not only predicts learning, but captures behaviors
+related to self-explanation.
+AN  - ISI:A1993MJ80100006
+AU  - Segalowitz, N. S.
+AU  - Segalowitz, S. J.
+DA  - 1993
+DO  - http://doi:10.1017/S0142716400010845
+IS  - 3
+J2  - Appl. Psycholinguistics
+L1  - internal-pdf://3760587060/1993-Segalowitz-1582.pdf
+PY  - 1993
+SN  - 0142-7164
+SP  - 369-385
+ST  - Skilled performance, practice, and the differentiation of speed-up from automatization effects - evidence from 2nd-language word recognition
+T2  - Applied Psycholinguistics
+TI  - Skilled performance, practice, and the differentiation of speed-up from automatization effects - evidence from 2nd-language word recognition
+UR  - <Go to ISI>://A1993MJ80100006 
+VL  - 14
+ID  - 1057
+ER  - 
+
+TY  - JOUR
+AB  - Abstract The topic of multiple forms of memory is considered from a biological point of view. Fact-and-event (declarative, explicit) memory is contrasted with a collection of non conscious (non-declarative, implicit) memory abilities including skills and habits, priming, and simple conditioning. Recent evidence is reviewed indicating that declarative and non declarative forms of memory have different operating characteristics and depend on separate brain systems. A brain-systems framework for understanding memory phenomena is developed in light of lesion studies involving rats, monkeys, and humans, as well as recent studies with normal humans using the divided visual field technique, event-related potentials, and positron emission tomography (PET).
+AD  - Veterans Affairs Medical Center, San Diego and Department of Psychiatry, University of California School of Medicine.
+AN  - 23964880
+AU  - Squire, L. R.
+DA  - 1992
+DO  - http://doi:10.1162/jocn.1992.4.3.232
+DP  - NLM
+ET  - 1992/07/01
+IS  - 3
+J2  - J. Cogn. Neurosci.
+LA  - eng
+N1  - Squire, L R
+Journal Article
+United States
+J Cogn Neurosci. 1992 Summer;4(3):232-43. doi: 10.1162/jocn.1992.4.3.232.
+PY  - 1992
+SN  - 0898-929X (Print)
+0898-929x
+SP  - 232-43
+ST  - Declarative and nondeclarative memory: multiple brain systems supporting learning and memory
+T2  - Journal of Cognitive Neuroscience
+TI  - Declarative and nondeclarative memory: multiple brain systems supporting learning and memory
+VL  - 4
+ID  - 1000
+ER  - 
+
+TY  - JOUR
+AU  - Stamper, John
+AU  - Pardos, Zachary
+DA  - 2016
+DO  - http://doi:10.18608/jla.2016.32.16
+IS  - 2
+J2  - J. Learn. Anal.
+PY  - 2016
+SP  - 312-316
+ST  - The 2010 KDD Cup competition dataset: Engaging the machine learning community in predictive learning analytics
+T2  - Journal of Learning Analytics
+TI  - The 2010 KDD Cup competition dataset: Engaging the machine learning community in predictive learning analytics
+VL  - 3
+ID  - 3062
+ER  - 
+
+TY  - JOUR
+AB  - In this article we describe production compilation, a mechanism for modeling skill acquisition. Production compilation has been developed within the ACT-Rational cognitive architecture and consists of combining and specializing task-independent procedures into task-specific procedures. The benefit of production compilation for researchers in human factors is that it enables them to test the strengths and weaknesses of their task analyses and user models by allowing them to model the learning trajectory from the main task level and the unit task level down to the keystroke level. We provide an example of this process by developing and describing a model learning a simulated air traffic controller task. Actual or potential applications of this research include the evaluation of user interfaces, the design of systems that support learning, and the building of user models. (PsycINFO Database Record (c) 2007 APA, all rights reserved)
+AD  - Department of Artificial Intelligence, University of Groningen, Groningen, Netherlands niels@ai.rug.nl
+Department of Cognitive Science, Rensselaer Polytechnic Institute, Troy, NY, US
+Taatgen, Niels A. Artificial Intelligence, University of Groningen, 9712 TS, Groningen, Netherlands, niels@ai.rug.nl
+AN  - 2003-06835-005
+AU  - Taatgen, Niels A.
+AU  - Lee, Frank J.
+DA  - 2003
+DO  - http://doi:10.1518/hfes.45.1.61.27224
+IS  - 1
+J2  - Hum. Factors
+KW  - Computer Simulation
+Human Factors Engineering
+Human Machine Systems Design
+Skill Learning
+production compilation
+complex skill acquisition
+computational model
+human factors engineering
+Models
+4010 Human Factors Engineering
+L1  - internal-pdf://3831657559/2003-Taatgen-2548.pdf
+LA  - English
+M3  - Journal Article
+PY  - 2003
+SN  - 0018-7208
+SP  - 61-76
+ST  - Production compilation: Simple mechanism to model complex skill acquisition
+T2  - Human Factors
+TI  - Production compilation: Simple mechanism to model complex skill acquisition
+VL  - 45
+ID  - 1964
+ER  - 
+
+TY  - JOUR
+AB  - Introduces a new approach for representing large numbers of erroneous rules of operation found in a procedural domain of arithmetic. The model, based on item response theory, is capable of predicting the likelihood of each rule, remediating student misconceptions, and revealing weaknesses in instruction. The model is used to analyze the results of an arithmetic test administered to 172 8th graders. The new model, called rule space, challenges the credibility of the traditional right-or-wrong scoring procedure because the same response patterns are sometimes produced by 2 different erroneous rules. (27 ref) (PsycINFO Database Record (c) 2006 APA, all rights reserved)
+AD  - U Illinois, Computer-based Education Research Lab, Urbana-Champaign
+AN  - 1984-27365-001
+AU  - Tatsuoka, Kikumi K.
+DA  - 1983
+DO  - http://doi:10.1111/j.1745-3984.1983.tb00212.x
+IS  - 4
+J2  - J. Educ. Meas.
+KW  - Error Analysis
+Item Analysis (Statistical)
+Mathematics Achievement
+Junior High School Students
+Models
+L1  - internal-pdf://3747122227/1983-Tatsuoka-1558.pdf
+PY  - 1983
+SN  - 0022-0655
+SP  - 345-354
+ST  - Rule space: An approach for dealing with misconceptions based on item response theory
+T2  - Journal of Educational Measurement
+TI  - Rule space: An approach for dealing with misconceptions based on item response theory
+VL  - 20
+ID  - 678
+ER  - 
+
+TY  - JOUR
+AB  - A series of 3 experiments conducted with a total of 240 undergraduates reexamined the factors underlying the effect of recall trials on subsequent recall. In a free-recall memory task, Ss were given a series of presentation trials or recall trials following initial presentation and later tested for long-term retention. Overall results support the hypothesis that recall trials provide information about the recallability of each item and provide a re-presentation of each item recalled. These results are inconsistent with the notion that some retrieval process (e.g., learning to locate an item in memory) facilitates subsequent recall. Some apparently contradictory evidence is experimentally reconciled with this hypothesis, and some problems involved in interpreting other evidence are discussed. (16 ref) (PsycINFO Database Record (c) 2006 APA, all rights reserved)
+AD  - Kansas State U
+AN  - 1979-07761-001
+AU  - Thompson, Charles P.
+AU  - Wenger, Steven K.
+AU  - Bartling, Carl A.
+DA  - 1978
+DO  - http://doi:10.1037/0278-7393.4.3.210
+IS  - 3
+J2  - J. Exp. Psychol. Hum. Learn. Mem.
+KW  - Long Term Memory
+Practice
+Recall (Learning)
+Retention
+L1  - internal-pdf://2948884950/1978-Thompson-1014.pdf
+PY  - 1978
+SN  - 0096-1515
+SP  - 210-221
+ST  - How recall facilitates subsequent recall: A reappraisal
+T2  - Journal of Experimental Psychology: Human Learning & Memory
+TI  - How recall facilitates subsequent recall: A reappraisal
+VL  - 4
+ID  - 549
+ER  - 
+
+TY  - JOUR
+AB  - The spacing effect is one of the most widely replicated results in experimental psychology: Separating practice repetitions by a delay slows learning but enhances retention. The current study tested the suitability of the underlying, explanatory mechanism in three computational models of the spacing effect. The relearning of forgotten material was measured, as the models differ in their predictions of how the initial study conditions should affect relearning. Participants learned Japanese–English paired associates presented in a massed or spaced manner during an acquisition phase. They were tested on the pairs after retention intervals ranging from 1 to 21 days. Corrective feedback was given during retention tests to enable relearning. The results of 2 experiments showed that spacing slowed learning during the acquisition phase, increased retention at the start of tests, and accelerated relearning during tests. Of the 3 models, only 1, the predictive performance equation (PPE), was consistent with the finding of spacing-accelerated relearning. The implications of these results for learning theory and educational practice are discussed. (PsycINFO Database Record (c) 2018 APA, all rights reserved)
+AD  - Walsh, Matthew M.: The RAND Corporation, 4570 Fifth Avenue #600, Pittsburgh, PA, US, 15213, mwalsh@rand.org
+AU  - Walsh, Matthew M.
+AU  - Gluck, Kevin A.
+AU  - Gunzelmann, Glenn
+AU  - Jastrzembski, Tiffany
+AU  - Krusmark, Michael
+AU  - Myung, Jay I.
+AU  - Pitt, Mark A.
+AU  - Zhou, Ran
+DA  - 2018
+DO  - http://doi:10.1037/xge0000416
+IS  - 9
+J2  - J. Exp. Psychol. Gen.
+KW  - *Learning
+*Prediction
+*Relearning
+*Retention
+*Computational Modeling
+Feedback
+PY  - 2018
+SN  - 1939-2222(Electronic),0096-3445(Print)
+SP  - 1325-1348
+ST  - Mechanisms underlying the spacing effect in learning: A comparison of three computational models
+T2  - Journal of Experimental Psychology: General
+TI  - Mechanisms underlying the spacing effect in learning: A comparison of three computational models
+VL  - 147
+ID  - 3104
+ER  - 
+
+TY  - JOUR
+AB  - Considers that, in single-trace fragility theory, forgetting is produced by 2 factors, time and interference. Memory traces are assumed to have 2 partially coupled dynamic properties, strength and fragility. Strength determines the probability of correct recall and recognition, while fragility determines the susceptibility of the trace to the time-decay process but not to the interference process. Consolidation is assumed to be a continual reduction in the fragility of the memory trace rather than any change in strength or availability. Decreasing fragility accounts for the continually decreasing forgetting rate, the temporal character of retrograde amnesia and recovery therefrom, and the type of internal clock necessary for nonassociative recency judgments. Data are presented to indicate that interference is independent of the interval between original and interpolated learning, that nonassociative recency discriminability approaches a limit at about 30 min, and that the decay rate of long-term retention in amnesic patients is the same as in normal Ss. (18 ref) (PsycINFO Database Record (c) 2002 APA, all rights reserved)
+AD  - 1. U Oregon
+AN  - 18
+AU  - Wickelgren, Wayne A.
+DA  - 1974
+DO  - http://doi:10.3758/BF03198154
+IS  - 4
+J2  - Mem. Cogn.
+KW  - Associative Processes
+Forgetting
+Human
+Interference (Learning)
+Judgment
+Learning
+Long Term Memory
+Memory
+memory dynamics,single-trace fragility theory
+Memory Trace
+Proactive Inhibition
+Probability
+Recency Effect
+Retention
+Theories
+Time
+L1  - internal-pdf://1339309587/1974-Wickelgren-365.pdf
+PY  - 1974
+SP  - 775-780
+ST  - Single-trace fragility theory of memory dynamics
+T2  - Memory & Cognition
+TI  - Single-trace fragility theory of memory dynamics
+VL  - 2
+ID  - 441
+ER  - 
+
+TY  - JOUR
+AU  - Yan, V. X.
+AU  - Schuetze, B. A.
+AU  - Eglington, L. G.
+DA  - 2020
+DO  - 10.31234/osf.io/ur6g7
+J2  - PsyArXiv
+PY  - 2020
+SP  - 1-39
+ST  - A review of the interleaving effect: Theories and lessons for future research
+T2  - PsyArXiv
+TI  - A review of the interleaving effect: Theories and lessons for future research
+ID  - 3275
+ER  - 
+
+TY  - WEB
+AU  - Pavlik Jr, Philip I.
+AU  - Eglington, Luke G.
+M1  - Dec. 1,  2020
+ST  - LKT
+T2  - github.com
+TI  - LKT
+UR  - https://github.com/Optimal-Learning-Lab/LKT
+ID  - 3266
+ER  - 
+
+TY  - WEB
+AU  - Pittsburgh Science of Learning Center
+M1  - Dec. 1,  2020
+ST  - DataShop@CMU
+T2  - cmu.edu
+TI  - DataShop@CMU
+UR  - https://pslcdatashop.web.cmu.edu/
+ID  - 3264
+ER  - 
+
+TY  - WEB
+AU  - Pittsburgh Science of Learning Center
+M1  - Dec. 1,  2020
+ST  - DataShop@Memphis
+T2  - cmu.edu
+TI  - DataShop@Memphis
+UR  - https://datashop.memphis.edu
+ID  - 3265
+ER  - 
+
