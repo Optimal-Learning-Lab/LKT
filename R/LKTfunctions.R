@@ -45,7 +45,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param fixedpars a vector of parameters for all features+components.
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
-#' @param dualfit TRUE or FALSE, fit a simple latency using logit.
+#' @param dualfit TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.
 #' @param cv TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds
 #' @param interc TRUE or FALSE, include a global intercept.
 #' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
