@@ -1,10 +1,10 @@
 LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/package=LKT)
 ========================================================================================
 
-Examples
-========
+Examples below
+==============
 
-Please see the manual and vignette.
+Please see the manual and vignette for more information.
 
 Load data
 =========
@@ -81,8 +81,8 @@ interc=TRUE, components = c(“Anon.Student.Id”, “KC..Default.”,
 “KC..Default.”, “KC..Default.”), features = c(“intercept@”, “intercept”,
 “linesuc”,“linefail”))
 
-\#PFA using difficulty sensitive predictors (composite model requiring
-pred from prior model)
+PFA using difficulty sensitive predictors (composite model requiring pred from prior model)
+===========================================================================================
 
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -167,7 +167,7 @@ Recency tracing with RPFA propdec2 feature
     ## LogLike logistic: -24708.00405216 
     ## step par values =0.5,0.5
     ## 
-    ## Many iterations
+    ## Many search iterations
     ## 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
@@ -272,7 +272,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1749102
+    ## [1] 0.1748922
 
     #complex AFM minus student intercept
     modelob <- LKT(
@@ -289,7 +289,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1758528
+    ## [1] 0.1746848
 
 References
 ==========

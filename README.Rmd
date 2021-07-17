@@ -7,8 +7,8 @@ csl: apa.csl
 
 # LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/package=LKT)
 
-# Examples 
-Please see the manual and vignette.
+# Examples below
+Please see the manual and vignette for more information.
 
 # Load data
  
@@ -66,7 +66,7 @@ modelob <- LKT(
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
   features = c("intercept@", "intercept", "linesuc","linefail"))
 
-#PFA using difficulty sensitive predictors (composite model requiring pred from prior model)
+# PFA using difficulty sensitive predictors (composite model requiring pred from prior model)
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
