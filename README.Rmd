@@ -7,16 +7,19 @@ csl: apa.csl
 
 # LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/package=LKT)
 
-# Examples are here, but also please see the manual and vignette.
+# Examples 
+Please see the manual and vignette.
 
 # Load data
+ 
+Get the data free: https://datashop.memphis.edu/DatasetInfo?datasetId=1465
 ```{r}
 library(LKT)
 # data.table is the base data type
 library(data.table)
-datafile<-"C:\\Users\\ppavl\\OneDrive - The University of Memphis\\IES Data\\ds1465_tx_All_Data_64_2016_0720_222352.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+datafile<-"ds1465_tx_All_Data_64_2016_0720_222352.txt" 
 val<-read.table(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="\"")
-# val<-val[1:2000,]
+
 # make it a datatable
 val= setDT(val)
 

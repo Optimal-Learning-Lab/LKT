@@ -1,11 +1,16 @@
 LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/package=LKT)
 ========================================================================================
 
-Examples are here, but also please see the manual and vignette.
-===============================================================
+Examples
+========
+
+Please see the manual and vignette.
 
 Load data
 =========
+
+Get the data free:
+<a href="https://datashop.memphis.edu/DatasetInfo?datasetId=1465" class="uri">https://datashop.memphis.edu/DatasetInfo?datasetId=1465</a>
 
     library(LKT)
 
@@ -13,9 +18,9 @@ Load data
 
     # data.table is the base data type
     library(data.table)
-    datafile<-"C:\\Users\\ppavl\\OneDrive - The University of Memphis\\IES Data\\ds1465_tx_All_Data_64_2016_0720_222352.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+    datafile<-"ds1465_tx_All_Data_64_2016_0720_222352.txt" 
     val<-read.table(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="\"")
-    # val<-val[1:2000,]
+
     # make it a datatable
     val= setDT(val)
 
@@ -162,7 +167,7 @@ Recency tracing with RPFA propdec2 feature
     ## LogLike logistic: -24708.00405216 
     ## step par values =0.5,0.5
     ## 
-    ## Many iterations here
+    ## Many iterations
     ## 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
@@ -267,7 +272,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.17484
+    ## [1] 0.1749102
 
     #complex AFM minus student intercept
     modelob <- LKT(
@@ -284,7 +289,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1748892
+    ## [1] 0.1758528
 
 References
 ==========
