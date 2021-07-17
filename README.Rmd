@@ -89,6 +89,15 @@ modelob <- LKT(
   fixedpars=c(.9,.5))
 ```
 
+# Recency tracing with logitdec and transfer from cluster 
+```{r}
+modelob <- LKT(
+  data = val, interc=TRUE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.","KC..Cluster."),
+  features = c("intercept", "intercept", "logitdec","recency","logitdec"),
+  fixedpars=c(.9,.5,.5))
+```
+
 # Recency tracing with RPFA propdec2 feature
 ```{r}
 modelob <- LKT(
@@ -128,6 +137,15 @@ modelob <- LKT(
   components = c("Anon.Student.Id","KC..Default.","KC..Default."),
   features = c("logitdec", "logitdec", "lineafm"),fixedpars=c(.9,.8),
   covariates = c(NA,NA,"Level..Unitname."))
+```
+
+# individualized Additive Factors Model (iAFM) fixed effect version
+```{r}
+modelob <- LKT(
+  data = val, interc=TRUE,
+  components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+  features = c("intercept", "intercept", "lineafm"),
+  covariates = c(NA,NA,"Anon.Student.Id"))
 ```
 
 # Crossvalidation

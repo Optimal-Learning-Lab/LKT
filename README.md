@@ -126,6 +126,24 @@ Recency tracing with logitdec
     ## McFadden's R2 logistic: 0.330196 
     ## LogLike logistic: -25441.49445317
 
+Recency tracing with logitdec and transfer from cluster
+=======================================================
+
+    modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.","KC..Cluster."),
+      features = c("intercept", "intercept", "logitdec","recency","logitdec"),
+      fixedpars=c(.9,.5,.5))
+
+    ## intercept Anon.Student.Id      
+    ## intercept KC..Default.      
+    ## logitdec KC..Default. 0.9     
+    ## recency KC..Default. 0.5     
+    ## logitdec KC..Cluster. 0.5     
+    ## logitdecKC..Cluster.+recencyKC..Default.+logitdecKC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.330848 
+    ## LogLike logistic: -25416.73506278
+
 Recency tracing with RPFA propdec2 feature
 ==========================================
 
@@ -144,7 +162,7 @@ Recency tracing with RPFA propdec2 feature
     ## LogLike logistic: -24708.00405216 
     ## step par values =0.5,0.5
     ## 
-    ## Many search iterations removed here
+    ## Many iterations here
     ## 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
@@ -209,6 +227,22 @@ Covariates
     ## McFadden's R2 logistic: 0.187931 
     ## LogLike logistic: -30845.19646772
 
+individualized Additive Factors Model (iAFM) fixed effect version
+=================================================================
+
+    modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("intercept", "intercept", "lineafm"),
+      covariates = c(NA,NA,"Anon.Student.Id"))
+
+    ## intercept Anon.Student.Id      
+    ## intercept KC..Default.      
+    ## lineafm KC..Default.      
+    ## lineafmKC..Default.:Anon.Student.Id+interceptKC..Default.+interceptAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.301758 
+    ## LogLike logistic: -26521.6774637
+
 Crossvalidation
 ===============
 
@@ -233,7 +267,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.17434
+    ## [1] 0.17484
 
     #complex AFM minus student intercept
     modelob <- LKT(
@@ -250,7 +284,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1745476
+    ## [1] 0.1748892
 
 References
 ==========
