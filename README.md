@@ -46,14 +46,14 @@ Additive Factors Model (AFM) fixed effect version
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("intercept", "intercept", "lineafm"))
+      features = c("intercept", "intercept", "lineafm$"))
 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
-    ## lineafm KC..Default.      
-    ## lineafmKC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
-    ## McFadden's R2 logistic: 0.281072 
-    ## LogLike logistic: -27307.37706128
+    ## lineafm$ KC..Default.      
+    ## lineafmKC..Default.:e$data$KC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.2928 
+    ## LogLike logistic: -26861.92525814
 
 Performance Factors Analysis (PFA) fixed effect version
 =======================================================
@@ -61,15 +61,15 @@ Performance Factors Analysis (PFA) fixed effect version
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-      features = c("intercept", "intercept", "linesuc","linefail"))
+      features = c("intercept", "intercept", "linesuc$","linefail$"))
 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
-    ## linesuc KC..Default.      
-    ## linefail KC..Default.      
-    ## linefailKC..Default.+linesucKC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
-    ## McFadden's R2 logistic: 0.283685 
-    ## LogLike logistic: -27208.15355237
+    ## linesuc$ KC..Default.      
+    ## linefail$ KC..Default.      
+    ## linefailKC..Default.:e$data$KC..Default.+linesucKC..Default.:e$data$KC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.300378 
+    ## LogLike logistic: -26574.08259445
 
     # have to have prior predictions in data to do the next model in and adaptive system
     #   this needs to be added to the data as it is collected
@@ -94,8 +94,8 @@ PFA using difficulty sensitive predictors (composite model requiring pred from p
     ## diffcorComp KC..Default.      
     ## linefail KC..Default.      
     ## linefailKC..Default.+diffcorCompKC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
-    ## McFadden's R2 logistic: 0.287451 
-    ## LogLike logistic: -27065.0885832
+    ## McFadden's R2 logistic: 0.283155 
+    ## LogLike logistic: -27228.27353614
 
 Recent Performance Factors Analysis (RPFA)
 ==========================================
@@ -167,7 +167,7 @@ Recency tracing with RPFA propdec2 feature
     ## LogLike logistic: -24708.00405216 
     ## step par values =0.5,0.5
     ## 
-    ## Many search iterations
+    ## Solver iterates to find pars....
     ## 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
@@ -237,16 +237,17 @@ individualized Additive Factors Model (iAFM) fixed effect version
 
     modelob <- LKT(
       data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("intercept", "intercept", "lineafm"),
-      covariates = c(NA,NA,"Anon.Student.Id"))
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+      features = c("intercept", "intercept", "lineafm$","lineafm"),
+      covariates = c(NA,NA,NA,"Anon.Student.Id"))
 
     ## intercept Anon.Student.Id      
     ## intercept KC..Default.      
+    ## lineafm$ KC..Default.      
     ## lineafm KC..Default.      
-    ## lineafmKC..Default.:Anon.Student.Id+interceptKC..Default.+interceptAnon.Student.Id+1 
-    ## McFadden's R2 logistic: 0.301758 
-    ## LogLike logistic: -26521.6774637
+    ## lineafmKC..Default.:Anon.Student.Id+lineafmKC..Default.:e$data$KC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.312054 
+    ## LogLike logistic: -26130.59260418
 
 Crossvalidation
 ===============
@@ -272,7 +273,7 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1748922
+    ## [1] 0.1750296
 
     #complex AFM minus student intercept
     modelob <- LKT(
@@ -289,7 +290,32 @@ Crossvalidation
 
     mean(modelob$cv_res$mcfad)
 
-    ## [1] 0.1746848
+    ## [1] 0.174544
+
+------------------------------------------------------------------------
+
+nocite: | Lord (1953) Peterson (1965) Rasch (1966) Kelley (1969)
+Atkinson (1972) Scheiblechner (1972) Fischer (1973) Wickelgren (1974)
+Thompson et al. (1978) Tatsuoka (1983) Spada & McGaw (1985) Spada &
+McGaw (1985) Corbett & Anderson (1992) Squire (1992) Segalowitz &
+Segalowitz (1993) Corbett & Anderson (1994) Rickard (1997) Anderson et
+al. (1999) Rickard (1999) Wickens & Izawa (1999) Benjamini & Yekutieli
+(2001) Taatgen & Lee (2003) Barnes (2005) Pavlik Jr. & Anderson (2005)
+Razzaq et al. (2005) Gelman & Hill (2006) Cen et al. (2007) Katz et al.
+(2007) Mitrovic & Martin (2007) (<span class="citeproc-not-found"
+data-reference-id="2337">**???**</span>) Carpenter et al. (2008) Pavlik
+Jr. & Anderson (2008) Pavlik Jr. et al. (2008) Pavlik Jr. et al. (2009)
+Gong et al. (2010) Koedinger et al. (2010) Chi et al. (2011) De Boeck et
+al. (2011) Gong et al. (2011) Pavlik Jr. et al. (2011) Stamper &
+Koedinger (2011) Koedinger et al. (2012) Galyardt & Goldin (2014) Khajah
+et al. (2014) Lindsey et al. (2014) Galyardt & Goldin (2015) Goldin &
+Galyardt (2015) Pavlik Jr. et al. (2015) Collins et al. (2016) Koedinger
+et al. (2016) Stamper et al. (2016) Stamper & Pardos (2016) Pelánek
+(2017) Pardos & Dadu (2018) Walsh et al. (2018) Cao et al. (2019) Pavlik
+Jr. et al. (2020) Eglington & Pavlik Jr (2020) Learning Center (n.d.-a)
+Learning Center (n.d.-b) Pavlik Jr & Eglington (n.d.) Gervet et al.
+(2020) Settles & Meeder (2016) Rosé et al. (2019) Yan et al. (2020)
+Carvalho & Goldstone (2019)
 
 References
 ==========

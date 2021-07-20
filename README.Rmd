@@ -45,7 +45,7 @@ val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, f
 modelob <- LKT(
   data = val, interc=TRUE,
   components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-  features = c("intercept", "intercept", "lineafm"))
+  features = c("intercept", "intercept", "lineafm$"))
 ```
 
 # Performance Factors Analysis (PFA) fixed effect version
@@ -53,7 +53,7 @@ modelob <- LKT(
 modelob <- LKT(
   data = val, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-  features = c("intercept", "intercept", "linesuc","linefail"))
+  features = c("intercept", "intercept", "linesuc$","linefail$"))
 
 # have to have prior predictions in data to do the next model in and adaptive system
 #   this needs to be added to the data as it is collected
@@ -146,9 +146,9 @@ modelob <- LKT(
 ```{r}
 modelob <- LKT(
   data = val, interc=TRUE,
-  components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-  features = c("intercept", "intercept", "lineafm"),
-  covariates = c(NA,NA,"Anon.Student.Id"))
+  components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+  features = c("intercept", "intercept", "lineafm$","lineafm"),
+  covariates = c(NA,NA,NA,"Anon.Student.Id"))
 ```
 
 # Crossvalidation
