@@ -36,7 +36,7 @@ LKT(
 
 \item{covariates}{A list of components that interacts with component by feature in the main specification.}
 
-\item{dualfit}{TRUE or FALSE, fit a simple latency using logit.}
+\item{dualfit}{TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.}
 
 \item{interc}{TRUE or FALSE, include a global intercept.}
 

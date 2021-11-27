@@ -435,7 +435,7 @@ LKT <- function(data,
             colnames(e$modelvs) <- "coefficient"
 
 
-            e$data$pred <- predict(temp, predictset2, proba = TRUE)$probabilities[, 1]
+            e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],.00001),.99999)
 
             if(cv==TRUE){
               #all in one version, run through it 5 times

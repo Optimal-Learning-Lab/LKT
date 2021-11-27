@@ -43,7 +43,7 @@ val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, f
 # Additive Factors Model (AFM) fixed effect version
 ```{r}
 modelob <- LKT(
-  data = val, interc=TRUE,
+  data = val, interc=FALSE,
   components = c("Anon.Student.Id","KC..Default.","KC..Default."),
   features = c("intercept", "intercept", "lineafm$"))
 ```
@@ -51,9 +51,9 @@ modelob <- LKT(
 # Performance Factors Analysis (PFA) fixed effect version
 ```{r}
 modelob <- LKT(
-  data = val, interc=TRUE,
+  data = val, interc=FALSE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-  features = c("intercept", "intercept", "linesuc$","linefail$"))
+  features = c("intercept", "intercept", "linesuc","linefail"))
 
 # have to have prior predictions in data to do the next model in and adaptive system
 #   this needs to be added to the data as it is collected
@@ -79,8 +79,8 @@ modelob <- LKT(
 modelob <- LKT(
   data = val, interc=TRUE,
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-  features = c("intercept", "intercept", "propdec2","linefail"),
-  fixedpars=c(.9))
+  features = c("propdec2", "intercept", "propdec2$","linefail$"),
+  fixedpars=c(.9,.9))
 ```
 
 # Recency tracing with logitdec
