@@ -15,7 +15,7 @@ A data frame with 2074 rows and many variables:
 }
 }
 \source{
-\url{http://datashop.memphis.edu/}
+\url{https://datashop.memphis.edu/index.jsp}
 }
 \usage{
 samplelkt

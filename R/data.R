@@ -11,6 +11,6 @@
 #'   \item{Outcome}{unique identifier for each student}
 #'   ...
 #' }
-#' @source \url{http://datashop.memphis.edu/}
+#' @source <https://datashop.memphis.edu/index.jsp>
 "samplelkt"
 

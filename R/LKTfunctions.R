@@ -596,8 +596,8 @@ LKT <- function(data,
     "optimizedpars" = if (exists("optimizedpars")) {
       optimizedpars
     },
-    "subjectrmse" = if ("pred" %in% colnames(e$data)) {
-      aggregate((e$data$pred - e$data$CF..ansbin.)^2,
+    "studentRMSE" = if ("pred" %in% colnames(e$data)) {
+    aggregate((e$data$pred - e$data$CF..ansbin.)^2,
                 by = list(e$data$Anon.Student.Id), FUN = mean
       )
     },
@@ -605,6 +605,7 @@ LKT <- function(data,
     "cv_res" = e$cv_res,
     "loglike" = e$loglike
   )
+results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])
   return(results)
 }
 
@@ -621,6 +622,7 @@ LKT <- function(data,
 #' @param index2 a component levels index
 #' @param fcomp the component  name.
 #' @return a vector suitable for regression input.
+#' @export
 computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, par5, fcomp) {
   mn<-Anon.Student.Id<-temptemp<-icor<-CF..ansbin.<-NULL
   # fixed features
@@ -1020,7 +1022,6 @@ slice <- function(tSparse, index) {
 #' @param data the dataset to compute an outcome vector for
 #' @param index the subsets to count over
 #' @param response the actually response value being counted
-#'
 #' @return the vector of the lagged cumulative sum.
 #' @export
 countOutcome <- function(data, index, response) {

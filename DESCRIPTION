@@ -1,6 +1,6 @@
 Package: LKT
 Title: Logistic Knowledge Tracing
-Version: 1.0
+Version: 1.0.1
 Authors@R: 
     c(person(given = "Philip I.",
            family = "Pavlik Jr.",
@@ -13,24 +13,27 @@ Authors@R:
            email = "luke.eglington.mail@gmail.com",
            comment = c(ORCID = "0000-0002-8432-9203"))
            )
-Description: Computes Logistic Knowledge Tracing ('LKT') which is a general method for tracking human learning in an educational software system. Please see Pavlik, Eglington, and Harrel-Williams (2021) <arXiv:2005.00869>. 'LKT' is a method to compute features of student data that are used as predictors of subsequent performance. 'LKT' allows great flexibility in the choice of predictive components and features computed for these predictive components. The system is built on top of 'LiblineaR', which enables extremely fast solutions compared to base glm() in R.
+Description: Computes Logistic Knowledge Tracing ('LKT') which is a general method for tracking human learning in an educational software system. Please see Pavlik, Eglington, and Harrel-Williams (2021) <https://ieeexplore.ieee.org/document/9616435>. 'LKT' is a method to compute features of student data that are used as predictors of subsequent performance. 'LKT' allows great flexibility in the choice of predictive components and features computed for these predictive components. The system is built on top of 'LiblineaR', which enables extremely fast solutions compared to base glm() in R.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
-Depends: R (>= 3.5.0)
-Imports:
-    lme4 (>= 1.1-23),
-    pROC (>= 1.16.2),
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 3.5.0),
     SparseM (>= 1.78),
-    utils,
     Matrix,
     methods,
-    knitr,
     data.table (>= 1.13.2),
-    LiblineaR (>= 2.10-8),
+    LiblineaR (>= 2.10-8)
+Imports:
     glmnet (>= 4.0-2),
     glmnetUtils (>= 1.1.8),
-    caret
+    lme4 (>= 1.1-23)
+Suggests: 
+    rmarkdown,
+    pROC (>= 1.16.2),
+    knitr,
+    caret,
+    utils

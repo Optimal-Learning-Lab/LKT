@@ -2,6 +2,7 @@
 
 export(LKT)
 export(computeSpacingPredictors)
+export(computefeatures)
 export(countOutcome)
 export(smallSet)
 import(LiblineaR)
