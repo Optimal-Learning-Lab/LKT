@@ -42,6 +42,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
 #' @param components A vector of factors that can be used to compute each features for each subject.
 #' @param features a vector methods to use to compute a feature for the component.
+#' @param connectors a vector of the characters used for the formula connections, i.e., "+", ":", or "*", with default "+" when not provided
 #' @param fixedpars a vector of parameters for all features+components.
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
@@ -78,6 +79,16 @@ computeSpacingPredictors <- function(data, KCs) {
 #'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
 #'   features = c("logitdec", "logitdec", "lineafm"),
 #'   seedpars = c(.9, .85)
+#' )
+#' print(modelob$coefs)
+#' print(modelob$loglik)
+#'
+#' modelob <- LKT(
+#'   data = temp, interc=TRUE,
+#'   connectors = c("+","*","+"),
+#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+#'   features = c("intercept", "logitdec", "lineafm"),
+#'   fixedpars = c(.9, .85)
 #' )
 #' print(modelob$coefs)
 #' print(modelob$loglik)
@@ -123,6 +134,7 @@ computeSpacingPredictors <- function(data, KCs) {
 LKT <- function(data,
                 components,
                 features,
+                connectors= rep("+",length(components)),
                 fixedpars = NA,
                 seedpars = NA,
                 covariates = NA,
@@ -334,51 +346,44 @@ LKT <- function(data,
         ))
       }
 
+      if (exists("para")) {rm(para)}
+      if (exists("parb")) {rm(parb)}
+      if (exists("parc")) {rm(parc)}
+      if (exists("pard")) {rm(pard)}
+      if (exists("pare")) {rm(pare)      }
 
-      if (exists("para")) {
-        rm(para)
-      }
-      if (exists("parb")) {
-        rm(parb)
-      }
-      if (exists("parc")) {
-        rm(parc)
-      }
-      if (exists("pard")) {
-        rm(pard)
-      }
-      if (exists("pare")) {
-        rm(pare)
-      }
 
+      if (connectors[k]=="*"){connector<-"*"}  else if (connectors[k]==":") {connector<-":"} else {connector<-"+"}
       if (right(i, 1) == "$") {
         # add the fixed effect feature to the model with a coefficient per level
         cleanfeat <- gsub("\\$", "", i)
         if (is.na(covariates[k])) {
-          # standard way
+          # standard way with a coefficient per component
           eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],
-                                \"+\",eq,sep=\"\")")))
+                                connector,eq,sep=\"\")")))
         }
-
         else {
           eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
                                 ,\":\",covariates[k]
-                                ,\"+\",eq,sep=\"\")")))
+                                ,connector,eq,sep=\"\")")))
         }
       }
+
       else if (right(i, 1) == "@") {
         # add the random effect feature to the model with a coefficient per level
         eval(parse(text = paste("eq<-paste(\"(1|\",components[k],\")+\",eq,sep=\"\")")))
       }
+
       else {
         # add the fixed effect feature to the model with the same coefficient for all levels
-         if (is.na(covariates[k])) {
-            # standard way
-            eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\"+\",eq,sep=\"\")")))
-          }
-          else {
-            eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k],\"+\",eq,sep=\"\")")))
-          }
+        if (is.na(covariates[k])) {
+          # standard way with single coefficient
+          eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
+        }
+        else {
+          eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k]
+                                  ,connector,eq,sep=\"\")")))
+        }
       }
     }
     if (verbose) {
