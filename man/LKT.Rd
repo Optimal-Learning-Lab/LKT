@@ -8,6 +8,7 @@ LKT(
   data,
   components,
   features,
+  connectors = rep("+", length(components)),
   fixedpars = NA,
   seedpars = NA,
   covariates = NA,
@@ -29,6 +30,8 @@ LKT(
 \item{components}{A vector of factors that can be used to compute each features for each subject.}
 
 \item{features}{a vector methods to use to compute a feature for the component.}
+
+\item{connectors}{a vector of the characters used for the formula connections, i.e., "+", ":", or "*", with default "+" when not provided}
 
 \item{fixedpars}{a vector of parameters for all features+components.}
 
@@ -83,6 +86,16 @@ modelob <- LKT(
   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
   features = c("logitdec", "logitdec", "lineafm"),
   seedpars = c(.9, .85)
+)
+print(modelob$coefs)
+print(modelob$loglik)
+
+modelob <- LKT(
+  data = temp, interc=TRUE,
+  connectors = c("+","*","+"),
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("intercept", "logitdec", "lineafm"),
+  fixedpars = c(.9, .85)
 )
 print(modelob$coefs)
 print(modelob$loglik)
