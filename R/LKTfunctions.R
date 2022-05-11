@@ -38,6 +38,8 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @import SparseM
 #' @import LiblineaR
 #' @import Matrix
+#' @import rsvd
+#' @import cluster
 #' @description Compute a logistic regression model of learning for input data.
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
 #' @param components A vector of factors that can be used to compute each features for each subject.
@@ -131,13 +133,15 @@ computeSpacingPredictors <- function(data, KCs) {
 #' #)
 #' #print(modelob$cv_res)
 #'
-LKT <- function(data,
+LKT <- function(data, autoKC=rep(FALSE,length(components)),
+                autocent=NA,
                 components,
                 features,
                 connectors= rep("+",length(components)),
                 fixedpars = NA,
                 seedpars = NA,
                 covariates = NA,
+                curvefeats = NA,
                 dualfit = FALSE,
                 interc = FALSE,
                 cv=FALSE,
@@ -183,6 +187,17 @@ LKT <- function(data,
     e$counter <- e$counter + 1
     for (i in features) {
       k <- k + 1
+
+      #setup the curvilinear feature input for inverted U shaped learning features
+      if(!is.na(curvefeats)){
+         if(!is.na(curvefeats[k])){
+         e$data$curvefeat<- paste(eval(parse(text = paste("e$data$", curvefeats[k],sep = ""))), sep = "")
+         e$data$curvefeat<-as.numeric(e$data$curvefeat)
+       }}
+      else {
+         if("pred" %in% colnames(e$data)){
+           e$data$curvefeat<-e$data$pred
+         }}
 
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
@@ -263,6 +278,70 @@ LKT <- function(data,
       }
 
 
+if(autoKC[k]==T){
+        aggdata<- e$data[,mean(CF..ansbin.),
+                      by=list(eval(parse(text=components[k])),
+                              Anon.Student.Id)]
+
+        colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
+        aggdata<-aggdata[with(aggdata,order(eval(parse(text=components[k])))),]
+        mydata<-eval(parse(text=paste('dcast(aggdata,',components[k],'
+                                      ~ Anon.Student.Id, value.var=\"CF..ansbin.\")'))) #reshape to wide data format
+        rownamesmydata<-eval(parse(text=paste('mydata$',
+                                                     components[k])))
+        mydata<-mydata[,-1]
+        # determine the column names that contain NA values
+        nm <- names(mydata)[colSums(is.na(mydata)) != 0]
+        ## replace with the mean - by 'id'
+        mydata[, (nm) := lapply(nm, function(x) {
+          x <- get(x)
+          x[is.na(x)] <- mean(x, na.rm = TRUE)
+          x
+        })]
+
+        mydata<-log(mydata/(1-mydata))
+        mydata[mydata>2] <- 2
+        mydata[mydata<(-2)] <- -2
+        rownames(mydata)<-rownamesmydata
+
+        #==========================Feature matrix================================
+
+        mydata[, names(mydata) :=lapply(.SD, function(x) x - mean(x)), .SDcols = names(mydata)]
+        df <- mydata[,as.matrix(.SD) %*% t(as.matrix(.SD)),.SDcols=names(mydata)]
+        df<-df/nrow(df)
+        rownames(df)<-1:nrow(mydata)
+        colnames(df)<-rownames(mydata)
+
+        #print(str(df))
+        reducedmatrix<-rsvd(df,4)
+        #print(str(reducedmatrix$v))
+        rownames(reducedmatrix$v)<-colnames(df)
+
+        rownames(df)<-colnames(df)
+           #==========================cluster matrix==============================
+        e$df<-df
+        cm <- pam(df,autocent) #(cmeans(reducedmatrix$v,centers=posKC))
+        #names(cm$assignments)<- rownames(df)
+        KCmodel<-as.data.frame(cm$clustering)
+        colnames(KCmodel)[1] <- paste("AC",k,sep="")
+        eval(parse(text=paste(sep="",
+                              "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
+        KCmodel$rows<-rownames(KCmodel)
+        #if("AC" %in% e$data){ e$data$AC<-NULL}
+        e$data<-merge(e$data,
+                       KCmodel,
+                       by.y = 'rows',
+                       by.x = components[k],
+                       sort = FALSE)
+        components[k]<-paste("AC",k,sep="")
+        #print(colnames(e$data))
+        e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
+        #print(colnames(e$data))
+#View(e$data)
+
+
+        }
+
       if (e$flag == TRUE | e$counter < 2) {
 
         # print(components)
@@ -306,6 +385,7 @@ LKT <- function(data,
           }
         }
       }
+
 
 
       if (e$flag == TRUE | e$counter < 2) {
@@ -608,7 +688,8 @@ LKT <- function(data,
     },
     "newdata" = e$data,
     "cv_res" = e$cv_res,
-    "loglike" = e$loglike
+    "loglike" = e$loglike,
+    "automat" = e$df
   )
 results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])
   return(results)
@@ -1084,7 +1165,7 @@ countOutcomeDashPerf <- function(datav, seeking, scalev) {
 
 # count confusable outcome difficulty effect
 countOutcomeDifficulty1 <- function(data, index, r) {
-  temp <- data$pred
+  temp <- data$curvefeat
   temp <- ifelse(data$Outcome == r, temp, 0)
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp
@@ -1108,7 +1189,7 @@ countRelatedDifficulty2 <- function(data, index, r) {
 }
 
 countOutcomeDifficulty2 <- function(data, index, r) {
-  temp <- data$pred^2
+  temp <- data$curvefeat^2
   temp <- ifelse(data$Outcome == r, temp, 0)
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp
@@ -1116,7 +1197,7 @@ countOutcomeDifficulty2 <- function(data, index, r) {
 }
 
 countOutcomeDifficultyAll1 <- function(data, index) {
-  temp <- data$pred
+  temp <- data$curvefeat
 
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp
@@ -1124,7 +1205,7 @@ countOutcomeDifficultyAll1 <- function(data, index) {
 }
 
 countOutcomeDifficultyAll2 <- function(data, index) {
-  temp <- data$pred^2
+  temp <- data$curvefeat^2
 
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp

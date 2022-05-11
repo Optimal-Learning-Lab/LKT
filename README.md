@@ -4,7 +4,7 @@ LKT [![](https://cranlogs.r-pkg.org/badges/LKT)](https://cran.r-project.org/pack
 Examples below
 ==============
 
-Please see the manual and vignette for more information.
+Please see the manual and vignettes for more information.
 
 Load data
 =========
@@ -18,21 +18,28 @@ Get the data free:
 
     # data.table is the base data type
     library(data.table)
+    
+    setwd("C:/Users/ppavl/OneDrive - The University of Memphis/IES Data")
     datafile<-"ds1465_tx_All_Data_64_2016_0720_222352.txt" 
     val<-read.table(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="\"")
 
     # make it a datatable
     val= setDT(val)
 
-    #make sure it is ordered in the way the code expects
-    val<-val[order(val$Anon.Student.Id, val$Time),]
-
-    #create a binanry response column to predict and extract only data with a valid value
-    val$CF..ansbin.<-ifelse(tolower(val$Outcome)=="correct",1,ifelse(tolower(val$Outcome)=="incorrect",0,-1))
-    val<-val[val$CF..ansbin==0 | val$CF..ansbin.==1,]
+    #make unstratified folds for crossvaldiations
+    val$fold<-sample(1:5,length(val$Anon.Student.Id),replace=T)
 
     # get the times of each trial in seconds from 1970
     val$CF..Time.<-as.numeric(as.POSIXct(as.character(val$Time),format="%Y-%m-%d %H:%M:%S"))
+    
+    #make sure it is ordered in the way the code expects
+    val<-val[order(val$Anon.Student.Id, val$CF..Time.),]
+
+    #create a binary response column to predict and extract only data with a valid value
+    val$CF..ansbin.<-ifelse(tolower(val$Outcome)=="correct",1,ifelse(tolower(val$Outcome)=="incorrect",0,-1))
+    val<-val[val$CF..ansbin==0 | val$CF..ansbin.==1,]
+
+   
 
     # create durations
     val$Duration..sec.<-(val$CF..End.Latency.+val$CF..Review.Latency.+500)/1000
@@ -72,7 +79,7 @@ Performance Factors Analysis (PFA) fixed effect version
     ## LogLike logistic: -26574.08259445
 
     # have to have prior predictions in data to do the next model in and adaptive system
-    #   this needs to be added to the data as it is collected
+    #   this needs to be added to the data wth a first moodel like this
     val$pred<-modelob$prediction
 
 PFA random effect version too slow for seminar and mostly just to allow
@@ -232,7 +239,7 @@ Covariates
     ## McFadden's R2 logistic: 0.187931 
     ## LogLike logistic: -30845.19646772
 
-individualized Additive Factors Model (iAFM) fixed effect version
+Individualized Additive Factors Model (iAFM) fixed effect version
 =================================================================
 
     modelob <- LKT(
@@ -276,7 +283,7 @@ Crossvalidation
     ## [1] 0.1748
 
     #complex AFM minus student intercept
-    modelob <- LKT(
+    modelob <- LKT(autoKC=c(F,F),
       data = val, interc=TRUE,
       components = c("KC..Default.","KC..Default."),
       features = c("intercept$", "lineafm$"),
@@ -292,4 +299,35 @@ Crossvalidation
 
     ## [1] 0.1756078
 
+Connectors
+===============
+      modelob <- LKT(
+        data = temp, interc=TRUE,
+        connectors = c("+","+","*"),
+        components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+        features = c("logitdec", "logitdec$", "lineafm$"),
+        fixedpars = c(.9, .85) )
 
+    ## logitdec Anon.Student.Id 0.9     
+    ## logitdec$ KC..Default. 0.85     
+    ## lineafm$ KC..Default.      
+    ## lineafmKC..Default.:e$data$KC..Default.*logitdecKC..Default.:e$data$KC..Default.+logitdecAnon.Student.Id+1 
+    ## McFadden's R2 logistic: 0.448934 
+    ## LogLike logistic: -732.86027091 
+
+AutoKC
+===============
+
+    modelob <- LKT(autoKC=c(F,F,F,F),
+      data = val, interc=TRUE,
+      components = c("KC..Default.", "KC..Default.", "KC..Default."),
+      features = c("intercept",  "linesuc$","linefail$"),cv=TRUE)
+      mean(modelob$cv_res$mcfad)
+
+
+    modelob <- LKT(autoKC=c(F,F,F,T,T), data = val, interc=TRUE,
+      components = c("KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+      features = c("intercept",  "linesuc$", "linefail$", "linesuc$", "linefail$")
+      ,cv=TRUE)
+      mean(modelob$cv_res$mcfad)
+      

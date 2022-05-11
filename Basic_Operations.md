@@ -1,7 +1,7 @@
 ---
 title: "Basic_Operations"
 author: "Philip I. Pavlik Jr."
-date: "`r Sys.Date()`"
+date: "2022-05-03"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Basic_Operations}
@@ -9,12 +9,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
+
 
 
 # LKT (Generalized Knowledge Tracing) Framework
@@ -87,8 +82,18 @@ The LKT model relies on data being in the DataShop format, but only some columns
 
 The data set for examples is shown below:
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(LKT::samplelkt, 10))
-```
+
+|Anon.Student.Id                      | Duration..sec.|Outcome   |KC..Default. |
+|:------------------------------------|--------------:|:---------|:------------|
+|Stu_0391448da5eac00f9b6dd455081aa08e |             54|CORRECT   |1-3 A norm   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             12|INCORRECT |13-3 The u   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             23|INCORRECT |14-2 The v   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             16|CORRECT   |0-3 A dist   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             16|INCORRECT |7-3 The me   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             25|CORRECT   |1-3 A norm   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             10|INCORRECT |8-3 The no   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             24|INCORRECT |13-3 The u   |
+|Stu_0391448da5eac00f9b6dd455081aa08e |             23|CORRECT   |17-3 When    |
+|Stu_0391448da5eac00f9b6dd455081aa08e |              9|INCORRECT |4-3 Standa   |
 
 > LKT paper under review please see Pavlik, Eglington, and Harrel-Williams (2021) <arXiv:2005.00869>

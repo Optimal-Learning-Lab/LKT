@@ -6,12 +6,15 @@
 \usage{
 LKT(
   data,
+  autoKC = rep(FALSE, length(components)),
+  autocent = NA,
   components,
   features,
   connectors = rep("+", length(components)),
   fixedpars = NA,
   seedpars = NA,
   covariates = NA,
+  curvefeats = NA,
   dualfit = FALSE,
   interc = FALSE,
   cv = FALSE,
