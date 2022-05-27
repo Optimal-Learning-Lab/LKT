@@ -26,7 +26,7 @@ Get the data free:
 
 ```{r, echo=TRUE}
     library(LKT)
-
+library(ggplot2)
 
     # data.table is the base data type
     library(data.table)
@@ -34,7 +34,7 @@ Get the data free:
     setwd("C:/Users/ppavl/OneDrive - The University of Memphis/IES Data")
     datafile<-"ds1465_tx_All_Data_64_2016_0720_222352.txt" 
     val<-read.table(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="\"")
-
+    val$KC..Default.<-val$Problem.Name
     # make it a datatable
     val= setDT(val)
 
@@ -60,6 +60,135 @@ Get the data free:
     val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, forgetting features to run
 ```
 
+
+```{r,echo=TRUE}
+ library(LKT)
+library(ggplot2)
+
+    # data.table is the base data type
+    library(data.table)
+setwd("C:\\Users\\ppavl\\Dropbox\\Active Projects\\LDI-domain-modeling\\")
+
+val<-setDT(read.table("ds4845_tx_All_Data_6977_2021_0723_141809.txt",sep="\t",
+                      header=TRUE,na.strings="NA",quote="",comment.char = ""))
+val$CF..ansbin.<-ifelse((val$Outcome)=="OK",1,0)
+val$Outcome<-ifelse((val$Outcome)=="OK","CORRECT","INCORRECT")
+val$CF..ansbin.<-as.numeric(val$CF..ansbin.)
+val$KC..Default.<-val$KC..MATHia.
+val<-val[val$KC..Default.!="",]
+val<-val[val$Attempt.At.Step==1,]
+
+    #make unstratified folds for crossvaldiations
+    val$fold<-sample(1:5,length(val$Anon.Student.Id),replace=T)
+    
+    # get the times of each trial in seconds from 1970
+    val$CF..Time.<-as.numeric(as.POSIXct(as.character(val$Time),format="%Y-%m-%d %H:%M:%S"))
+    
+    #make sure it is ordered in the way the code expects
+    val<-val[order(val$Anon.Student.Id, val$CF..Time.),]
+
+mnames<-c("SimplePFA",
+          "Full PFA",
+          "Full PFA full autoKC additive",
+         # "Full PFA full autoKC interactive",
+          "Simple PFA full autoKC interactive",
+          "Full PFA simple autoKC interactive",
+          "Simple PFA simple autoKC interactive",
+         "Log SimplePFA",
+          "Log Full PFA",
+          "Log Full PFA full autoKC additive",
+         # "Log Full PFA full autoKC interactive",
+          "Log Simple PFA full autoKC interactive",
+          "Log Full PFA simple autoKC interactive",
+          "Log Simple PFA simple autoKC interactive")
+
+cvr2s<-data.frame(name=mnames,cvr2s=NA)
+  r2s<-data.frame(name=mnames,r2s=NA)
+          
+compl<-list(c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+        #    c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+        #    c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."))
+featl<-list(c("intercept","intercept",  "linefail",  "linesuc"),
+            c("intercept","intercept",  "linefail$", "linesuc$"),
+            c("intercept","intercept",  "linefail$", "linefail$", "linesuc$", "linesuc$"),
+        #    c("intercept","intercept",  "linefail$", "linefail$", "linesuc$", "linesuc$"),
+            c("intercept","intercept",  "linefail", "linefail$", "linesuc", "linesuc$"),
+            c("intercept","intercept",  "linefail$", "linefail", "linesuc$", "linesuc"),
+            c("intercept","intercept",  "linefail", "linefail", "linesuc", "linesuc"),
+        c("intercept","intercept",  "logfail",  "logsuc"),
+            c("intercept","intercept",  "logfail$", "logsuc$"),
+            c("intercept","intercept",  "logfail$", "logfail$", "logsuc$", "logsuc$"),
+        #    c("intercept","intercept",  "logfail$", "logfail$", "logsuc$", "logsuc$"),
+            c("intercept","intercept",  "logfail", "logfail$", "logsuc", "logsuc$"),
+            c("intercept","intercept",  "logfail$", "logfail", "logsuc$", "logsuc"),
+            c("intercept","intercept",  "logfail", "logfail", "logsuc", "logsuc"))
+connl<-list(c("+","+","+","+"),
+            c("+","+","+","+"),
+            c("+","+","+","+","+","+"),
+        #    c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+        c("+","+","+","+"),
+            c("+","+","+","+"),
+            c("+","+","+","+","+","+"),
+        #    c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"))
+autol <- list(c(F,F,F,F),
+              c(F,F,F,F),
+              c(F,F,F,T,F,T),
+          #    c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+          c(F,F,F,F),
+              c(F,F,F,F),
+              c(F,F,F,T,F,T),
+          #    c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T))
+
+for(i in 1:length(compl)){
+  modelob <<- LKT(data = val,components = compl[[i]],features = featl[[i]],connectors = connl[[i]],autoKC = autol[[i]],
+                 cv=TRUE,verbose = FALSE,
+                 autocent=4)
+    cat(mnames[i]," R2cv =  ",mean(modelob$cv_res$mcfad))
+    cat(" R2 =  ",modelob$r2,"\n")
+    
+    r2s$r2s[i]<-modelob$r2
+    r2s$cvr2s[i]<-mean(modelob$cv_res$mcfad)
+    }
+
+r2s$r2s<-r2s$r2s-min(r2s$r2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,r2s)) +
+geom_bar(stat = "identity") + 
+coord_flip()
+plot
+
+
+r2s$cvr2s<-r2s$cvr2s-min(r2s$cvr2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,cvr2s)) +
+geom_bar(stat = "identity") + 
+coord_flip()
+plot
+```
 
 # Additive Factors Model (AFM) fixed effect version
 
@@ -230,53 +359,122 @@ the main R code for package
 
 # AutoKC
 
-```{r, echo=TRUE}
-      modelob <- LKT(data = val, interc=TRUE,
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
-                     features = c("intercept","intercept",  "linesuc$","linefail$"),cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-    cat("\n\n")
-      
-      modelob <- LKT(autoKC=c(F,F,F,F,T,T),autocent=2, data = val, interc=TRUE,
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
-                     features = c("intercept","intercept",  "linesuc$", "linefail$", "linesuc$", "linefail$")
-                     ,cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-      val
-       cat("\n\n")
-       
-       modelob <- LKT(autoKC=c(F,F,F,T,F,T),autocent=4, data = val, interc=TRUE,connectors = c("+","+","+","*","+","*"),
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
-                     features = c("intercept","intercept",  "linesuc$", "linesuc$", "linefail$", "linefail$")
-                     ,cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-       cat("\n\n")
-       
-       
-       
-          
-       modelob <- LKT(autoKC=c(F,F,F,T,F,T),autocent=4, data = val, interc=TRUE,connectors = c("+","+","+","*","+","*"),
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
-                     features = c("intercept","intercept",  "linesuc", "linesuc$", "linefail", "linefail$")
-                     ,cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-       cat("\n\n")
-       
-          
-       modelob <- LKT(autoKC=c(F,F,F,T,F,T),autocent=4, data = val, interc=TRUE,connectors = c("+","+","+","*","+","*"),
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
-                     features = c("intercept","intercept",  "linesuc$", "linesuc", "linefail$", "linefail")
-                     ,cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-       cat("\n\n")
-       
-       
-       
-       modelob <- LKT(autoKC=c(F,F,F,F,T,T),autocent=8, data = val, interc=TRUE,
-                     components = c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
-                     features = c("intercept","intercept",  "linesuc$", "linefail$", "linesuc$", "linefail$")
-                     ,cv=TRUE)
-      mean(modelob$cv_res$mcfad)
-       cat("\n\n")
-```
+```{r, echo=TRUE, warning=TRUE, message=TRUE, include=TRUE}
 
+
+mnames<-c("IRT",
+          "Log Full autoKC",
+          "Log Simple PFA",
+          "Log Full PFA",
+          "Log Full PFA full autoKC additive",
+         # "Log Full PFA full autoKC interactive",
+          "Log Simple PFA full autoKC interactive",
+          "Log Full PFA simple autoKC interactive",
+          "Log Simple PFA simple autoKC interactive")
+
+  r2s<-data.frame(name=mnames,r2s=NA)
+          
+compl<-list(c("Anon.Student.Id","KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+        #    c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."),
+            c("Anon.Student.Id","KC..Default.", "KC..Default.", "KC..Default." ,"KC..Default." ,"KC..Default."))
+featl<-list(c("intercept","intercept"),
+            c("intercept","intercept",  "logfail$",  "logsuc$"),
+            c("intercept","intercept",  "logfail", "logsuc"),
+            c("intercept","intercept",  "logfail$", "logsuc$"),
+            c("intercept","intercept",  "logfail$", "logfail$", "logsuc$", "logsuc$"),
+        #    c("intercept","intercept",  "logfail$", "logfail$", "logsuc$", "logsuc$"),
+            c("intercept","intercept",  "logfail", "logfail$", "logsuc", "logsuc$"),
+            c("intercept","intercept",  "logfail$", "logfail", "logsuc$", "logsuc"),
+            c("intercept","intercept",  "logfail", "logfail", "logsuc", "logsuc"))
+connl<-list(c("+","+"),
+            c("+","+","+","+"),
+            c("+","+","+","+"),
+            c("+","+","+","+"),
+            c("+","+","+","+","+","+"),
+        #    c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"),
+            c("+","+","+","*","+","*"))
+autol <- list(c(F,F),
+              c(F,F,T,T),
+              c(F,F,F,F),
+              c(F,F,F,F),
+              c(F,F,F,T,F,T),
+          #    c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T),
+              c(F,F,F,T,F,T))
+
+for(i in 1:length(compl)){
+  modelob <<- LKT(data = val,components = compl[[i]],features = featl[[i]],connectors = connl[[i]],autoKC = autol[[i]],
+                 cv=TRUE,verbose = FALSE,
+                 autocent=4)
+    cat(mnames[i]," R2cv =  ",mean(modelob$cv_res$mcfad))
+    cat(" R2 =  ",modelob$r2,"\n")
+    
+    r2s$r2s[i]<-modelob$r2
+    r2s$cvr2s[i]<-mean(modelob$cv_res$mcfad)
+}
+
+r2s$r2s<-r2s$r2s-min(r2s$r2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,r2s)) +
+geom_bar(stat = "identity") + 
+coord_flip()
+plot
+
+
+r2s$cvr2s<-r2s$cvr2s-min(r2s$cvr2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,cvr2s)) +
+geom_bar(stat = "identity") + 
+coord_flip()
+plot
+
+
+
+
+       
+```
+```{r, echo=TRUE, warning=TRUE, message=TRUE, include=TRUE}
+
+mnames<-1
+  r2s<-data.frame(name=mnames,r2s=NA,cvr2s=NA)
+  
+  for(k in mnames){
+i<-2
+ modelob <- LKT(data = val,components = compl[[i]],features = featl[[i]],connectors = connl[[i]],autoKC = autol[[i]],
+                 cv=TRUE,verbose = FALSE,
+                 autocent=k)
+    cat(k," R2cv =  ",mean(modelob$cv_res$mcfad))
+    cat(" R2 =  ",modelob$r2,"\n")
+    
+    r2s$r2s[k-1]<-modelob$r2
+    r2s$cvr2s[k-1]<-mean(modelob$cv_res$mcfad)
+}
+
+r2s$r2s<-r2s$r2s-min(r2s$r2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,r2s)) +
+geom_bar(stat = "identity") 
+plot
+
+
+r2s$cvr2s<-r2s$cvr2s-min(r2s$cvr2s)
+r2s$name <- factor(r2s$name,levels = rev(mnames))
+plot<-ggplot(r2s,
+             aes(name,cvr2s)) +
+geom_bar(stat = "identity")
+plot
+
+
+```

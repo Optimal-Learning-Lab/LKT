@@ -282,8 +282,7 @@ if(autoKC[k]==T){
         aggdata<- e$data[,mean(CF..ansbin.),
                       by=list(eval(parse(text=components[k])),
                               Anon.Student.Id)]
-
-        colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
+             colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
         aggdata<-aggdata[with(aggdata,order(eval(parse(text=components[k])))),]
         mydata<-eval(parse(text=paste('dcast(aggdata,',components[k],'
                                       ~ Anon.Student.Id, value.var=\"CF..ansbin.\")'))) #reshape to wide data format
@@ -311,23 +310,19 @@ if(autoKC[k]==T){
         df<-df/nrow(df)
         rownames(df)<-1:nrow(mydata)
         colnames(df)<-rownames(mydata)
-
-        #print(str(df))
-        reducedmatrix<-rsvd(df,4)
-        #print(str(reducedmatrix$v))
-        rownames(reducedmatrix$v)<-colnames(df)
-
         rownames(df)<-colnames(df)
            #==========================cluster matrix==============================
         e$df<-df
-        cm <- pam(df,autocent) #(cmeans(reducedmatrix$v,centers=posKC))
-        #names(cm$assignments)<- rownames(df)
+        cm <- pam(df,autocent)
         KCmodel<-as.data.frame(cm$clustering)
+
+
         colnames(KCmodel)[1] <- paste("AC",k,sep="")
         eval(parse(text=paste(sep="",
                               "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
         KCmodel$rows<-rownames(KCmodel)
         #if("AC" %in% e$data){ e$data$AC<-NULL}
+        e$df<-KCmodel
         e$data<-merge(e$data,
                        KCmodel,
                        by.y = 'rows',
@@ -720,40 +715,6 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
     temp <- eval(parse(text = paste("data$", fcomp, sep = "")))
     return(temp)
   }
-  if (feat == "clineafm") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(names(data))
-      data$cor <- countOutcome(data, data$index, "CORRECT")
-      data$icor <- countOutcome(data, data$index, "INCORRECT")
-      data[, temptemp := cor + icor, by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
-  }
-  if (feat == "clogafm") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(names(data))
-      data$cor <- countOutcome(data, data$index, "CORRECT")
-      data$icor <- countOutcome(data, data$index, "INCORRECT")
-      data[, temptemp := log(1 + icor + cor), by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
-  }
   if (feat == "lineafm") {
     return((data$cor + data$icor))
   }
@@ -763,42 +724,10 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   if (feat == "powafm") {
     return((data$cor + data$icor)^par1)
   }
-  if (feat == "crecency") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "_")[[1]]) {
-      eval(parse(text = paste("data$rec <- data$", m, "spacing", sep = "")))
-
-      data$temp <-
-        data$temp + ifelse(data$rec == 0, 0, data$rec^-par1) * eval(parse(
-          text =
-            paste("data$", m, sep = "")
-        ))
-      # print(data$temp[1:100])
-      data$div <- data$div + eval(parse(text = paste("data$", m, sep = "")))
-      # print(data$div[1:100])
-    }
-    data$temp <- ifelse(data$div != 0, data$temp / data$div, 0)
-    # print(data$temp[1:100])
-    return(data$temp)
-  }
   if (feat == "recency") {
     eval(parse(text = paste("data$rec <- data$", fcomp, "spacing", sep = "")))
     return(ifelse(data$rec == 0, 0, data$rec^-par1))
   }
-  # if(feat=="recency"){
-  #   eval(parse(text=paste("data$rec <- data$",fcomp,"spacing",sep="")))
-  #   #print(paste("data$rec <- data$",fcomp,"spacing",sep=""))
-  #   #print(data$rec[1:500])
-  #   #print(data$Anon.Student.Idspacing[1:500])
-  #   #print(ifelse(data$rec==0,0,as.integer(data$rec)^-par1)[1:500])
-  #   #print(data$rec)
-  #   data$rec[is.na(data$rec)]<-0
-  #   #print(data$rec)
-  #   data[,temp:=rec^-par1]
-  #   #print(data$temp)
-  #   #print(ifelse(is.infinite(data$temp),0,data$temp))
-  #   return(ifelse(is.infinite(data$temp),0,data$temp))}
   if (feat == "expdecafm") {
     return(ave(rep(1, length(data$CF..ansbin.)), index, FUN = function(x) slideexpdec(x, par1)))
   }
@@ -918,75 +847,11 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   if (feat == "linesuc") {
     return(data$cor)
   }
-  if (feat == "clogsuc") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(data$index[1:20])
-      data$cor <- countOutcome(data, data$index, "CORRECT")
-      data[, temptemp := log(1 + cor), by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
-  }
-  if (feat == "clinesuc") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(names(data))
-      data$cor <- countOutcome(data, data$index, "CORRECT")
-      data[, temptemp := cor, by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
-  }
   if (feat == "logfail") {
     return(log(1 + data$icor))
   }
   if (feat == "linefail") {
     return(data$icor)
-  }
-  if (feat == "clogfail") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(names(data))
-      data$icor <- countOutcome(data, data$index, "INCORRECT")
-      data[, temptemp := log(1 + icor), by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
-  }
-  if (feat == "clinefail") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      # print(names(data))
-      data$icor <- countOutcome(data, data$index, "INCORRECT")
-      data[, temptemp := icor, by = index]
-      # data[is.na(temptemp),temptemp:=0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
   }
   if (feat == "recencyfail") {
     eval(parse(text = paste("data$rec <- data$", fcomp, "spacing", sep = "")))
@@ -1051,20 +916,6 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   }
   if (feat == "logitdec") {
     return(ave(data$CF..ansbin., index, FUN = function(x) slidelogitdec(x, par1)))
-  }
-  if (feat == "clogitdec") {
-    data$temp <- 0
-    data$div <- 0
-    for (m in strsplit(fcomp, "__")[[1]]) {
-      data[, mn := do.call(paste0, list(eval(parse(text = paste("data$", m, sep = "")))))]
-      data[, index := do.call(paste, list(mn, Anon.Student.Id, sep = "-"))]
-      data[mn == 1, temptemp := slidelogitdec(CF..ansbin., par1), by = index]
-      data[is.na(temptemp), temptemp := 0]
-      data[, temp := temp + temptemp * as.numeric(mn)]
-      data$div <- data$div + as.numeric(data$mn)
-    }
-    data$temp <- fifelse(data$div != 0, data$temp / data$div, 0)
-    return(data$temp)
   }
   if (feat == "prop") {
     ifelse(is.nan(data$cor / (data$cor + data$icor)), .5, data$cor / (data$cor + data$icor))
@@ -1452,4 +1303,15 @@ smallSet <- function(data, nSub) {
 
 texteval <- function(stringv) {
   eval(parse(text = stringv))
+}
+
+
+#' @title ViewExcel
+#' @export
+#' @param df Dataframe
+ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
+  df <- try(as.data.frame(df))
+  stopifnot(is.data.frame(df))
+  utils::write.csv(df, file = file)
+  base::shell.exec(file)
 }
