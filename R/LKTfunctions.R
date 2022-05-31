@@ -137,6 +137,7 @@ LKT <- function(data, autoKC=rep(FALSE,length(components)),
                 autocent=NA,
                 components,
                 features,
+                autoKCcont = "NA",
                 connectors= rep("+",length(components)),
                 fixedpars = NA,
                 seedpars = NA,
@@ -314,12 +315,22 @@ if(autoKC[k]==T){
            #==========================cluster matrix==============================
         e$df<-df
         cm <- pam(df,autocent)
+
+
         KCmodel<-as.data.frame(cm$clustering)
 
 
         colnames(KCmodel)[1] <- paste("AC",k,sep="")
         eval(parse(text=paste(sep="",
                               "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
+
+
+        if (autoKCcont=="rand"){
+          eval(parse(text=paste(sep="",
+                                "KCmodel$AC",k,"<-sample(KCmodel$AC",k,")")))
+        }
+        #KCmodel$AC<-sample(KCmodel$AC)
+
         KCmodel$rows<-rownames(KCmodel)
         #if("AC" %in% e$data){ e$data$AC<-NULL}
         e$df<-KCmodel
