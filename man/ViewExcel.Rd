@@ -8,6 +8,8 @@ ViewExcel(df = .Last.value, file = tempfile(fileext = ".csv"))
 }
 \arguments{
 \item{df}{Dataframe}
+
+\item{file}{name of the Excel file}
 }
 \description{
 ViewExcel

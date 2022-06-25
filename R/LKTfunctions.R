@@ -38,7 +38,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @import SparseM
 #' @import LiblineaR
 #' @import Matrix
-#' @import rsvd
 #' @import cluster
 #' @description Compute a logistic regression model of learning for input data.
 #' @param data A dataset with Anon.Student.Id and CF..ansbin.
@@ -48,6 +47,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param fixedpars a vector of parameters for all features+components.
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
 #' @param covariates A list of components that interacts with component by feature in the main specification.
+#' @param curvefeats vector of columns to use with "diff" functions
 #' @param dualfit TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.
 #' @param cv TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds
 #' @param interc TRUE or FALSE, include a global intercept.
@@ -55,9 +55,14 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param verbose provides more output in some cases.
 #' @param epsilon passed to LiblineaR
 #' @param cost passsed to LiblineaR
+#' @param lowb lower bound for non-linear optimizations
+#' @param highb upper bound for non-linear optimizations
 #' @param type passsed to LiblineaR
 #' @param maketimes Boolean indicating whether to create time based features (or may be precomputed)
 #' @param bias passsed to LiblineaR
+#' @param autoKC a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters
+#' @param autoKCcont a vector of text strings set to "rand" for component to make autoKC assignment to cluster is randomized (for comaprison)
+#' @param connectors a vector if linear equation R operators including +, * and :
 #' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "loglike"
 #' @export
 #' @examples
@@ -133,12 +138,9 @@ computeSpacingPredictors <- function(data, KCs) {
 #' #)
 #' #print(modelob$cv_res)
 #'
-LKT <- function(data, autoKC=rep(FALSE,length(components)),
-                autocent=NA,
+LKT <- function(data,
                 components,
                 features,
-                autoKCcont = "NA",
-                connectors= rep("+",length(components)),
                 fixedpars = NA,
                 seedpars = NA,
                 covariates = NA,
@@ -150,7 +152,15 @@ LKT <- function(data, autoKC=rep(FALSE,length(components)),
                 verbose = TRUE,
                 epsilon = 1e-4,
                 cost = 512,
-                type = 0, maketimes = FALSE, bias = 0) {
+                lowb=.00001,
+                highb=.99999,
+                type = 0,
+                maketimes = FALSE,
+                bias = 0,
+                autoKC=rep(0,length(components)),
+                autoKCcont = rep("NA",length(components)),
+                connectors= rep("+",length(components)-1)) {
+   connectors<-c("+",connectors)
   if (maketimes) {
     if (!("CF..reltime." %in% colnames(data))) {
       data$CF..reltime. <- practiceTime(data)
@@ -173,6 +183,7 @@ LKT <- function(data, autoKC=rep(FALSE,length(components)),
   e$seedpars <- seedpars
   e$counter <- 0
   e$flag <- FALSE
+  e$df<-list()
   modelfun <- function(seedparameters) {
     # intialize counts and vars
     k <- 0
@@ -279,16 +290,16 @@ LKT <- function(data, autoKC=rep(FALSE,length(components)),
       }
 
 
-if(autoKC[k]==T){
+      if(autoKC[k]>1){
         aggdata<- e$data[,mean(CF..ansbin.),
-                      by=list(eval(parse(text=components[k])),
-                              Anon.Student.Id)]
-             colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
+                         by=list(eval(parse(text=components[k])),
+                                 Anon.Student.Id)]
+        colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
         aggdata<-aggdata[with(aggdata,order(eval(parse(text=components[k])))),]
         mydata<-eval(parse(text=paste('dcast(aggdata,',components[k],'
                                       ~ Anon.Student.Id, value.var=\"CF..ansbin.\")'))) #reshape to wide data format
         rownamesmydata<-eval(parse(text=paste('mydata$',
-                                                     components[k])))
+                                              components[k])))
         mydata<-mydata[,-1]
         # determine the column names that contain NA values
         nm <- names(mydata)[colSums(is.na(mydata)) != 0]
@@ -304,49 +315,35 @@ if(autoKC[k]==T){
         mydata[mydata<(-2)] <- -2
         rownames(mydata)<-rownamesmydata
 
-        #==========================Feature matrix================================
-
+        #Feature matrix
         mydata[, names(mydata) :=lapply(.SD, function(x) x - mean(x)), .SDcols = names(mydata)]
         df <- mydata[,as.matrix(.SD) %*% t(as.matrix(.SD)),.SDcols=names(mydata)]
         df<-df/nrow(df)
         rownames(df)<-1:nrow(mydata)
         colnames(df)<-rownames(mydata)
         rownames(df)<-colnames(df)
-           #==========================cluster matrix==============================
-        e$df<-df
-        cm <- pam(df,autocent)
 
-
+        #cluster matrix
+        cm <- pam(df,autoKC[k])
         KCmodel<-as.data.frame(cm$clustering)
-
 
         colnames(KCmodel)[1] <- paste("AC",k,sep="")
         eval(parse(text=paste(sep="",
                               "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
 
-
-        if (autoKCcont=="rand"){
+        if (autoKCcont[k]=="rand"){
           eval(parse(text=paste(sep="",
-                                "KCmodel$AC",k,"<-sample(KCmodel$AC",k,")")))
-        }
-        #KCmodel$AC<-sample(KCmodel$AC)
+                                "KCmodel$AC",k,"<-sample(KCmodel$AC",k,")")))        }
 
         KCmodel$rows<-rownames(KCmodel)
-        #if("AC" %in% e$data){ e$data$AC<-NULL}
-        e$df<-KCmodel
+        e$df<-c(list(KCmodel),e$df)
         e$data<-merge(e$data,
-                       KCmodel,
-                       by.y = 'rows',
-                       by.x = components[k],
-                       sort = FALSE)
+                      KCmodel,
+                      by.y = 'rows',
+                      by.x = components[k],
+                      sort = FALSE)
         components[k]<-paste("AC",k,sep="")
-        #print(colnames(e$data))
-        e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
-        #print(colnames(e$data))
-#View(e$data)
-
-
-        }
+        e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]        }
 
       if (e$flag == TRUE | e$counter < 2) {
 
@@ -497,10 +494,6 @@ if(autoKC[k]==T){
             print(temp)
           } else {
 
-
-            # e$data<-e$data[order(-e$data$CF..ansbin.),]
-
-            # predictset<-sparse.model.matrix(e$form,e$data%>%mutate_if(is.numeric,scale))
             predictset <- sparse.model.matrix(e$form, e$data)
             predictset.csc <- new("matrix.csc",
                                   ra = predictset@x,
@@ -652,7 +645,7 @@ if(autoKC[k]==T){
 
   # optimize the model
   if (parlength > 0) {
-    optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = 0.00001, upper = .99999, control = list(maxit = 100))
+    optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb, upper = highb, control = list(maxit = 100))
   } else
     # no nolinear parameters
   {
@@ -1320,6 +1313,7 @@ texteval <- function(stringv) {
 #' @title ViewExcel
 #' @export
 #' @param df Dataframe
+#' @param file name of the Excel file
 ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
   df <- try(as.data.frame(df))
   stopifnot(is.data.frame(df))
