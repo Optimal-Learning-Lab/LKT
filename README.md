@@ -362,3 +362,4 @@ abline(v=boot_res$coef_hdi$upper[zero_idx[1]],col="darkblue",lwd=3)
 abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 #Estimate from full fit to data
 abline(v=boot_res$mod_full$coefs[which(rownames(boot_res$mod_full$coefs)==colnames(boot_res$par_reps)[zero_idx[1]])],col="firebrick3",lwd=3)
+```
