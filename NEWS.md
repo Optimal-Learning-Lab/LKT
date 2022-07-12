@@ -9,5 +9,6 @@
 * "connectors" parameter added to LKT which allows controlling component interactions
   
 # Version 1.2.0
-* Now with automatic KC generation using covariance clustering
+* Added automatic KC generation using covariance clustering
 * "curvefeats" parameter added to allow other inputs for curvilinear effects
+* Added HDIntervals (coefficient credibility intervals)

@@ -1,6 +1,7 @@
 #' @importFrom graphics boxplot
 #' @importFrom methods new
 #' @importFrom stats aggregate as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
+#' @importFrom utils packageVersion
 
 #' @title computeSpacingPredictors
 #' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
@@ -54,16 +55,17 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param elastic glmnet, cv.glmnet, cva.glmnet or FALSE.
 #' @param verbose provides more output in some cases.
 #' @param epsilon passed to LiblineaR
-#' @param cost passsed to LiblineaR
+#' @param cost passed to LiblineaR
 #' @param lowb lower bound for non-linear optimizations
 #' @param highb upper bound for non-linear optimizations
-#' @param type passsed to LiblineaR
+#' @param type passed to LiblineaR
 #' @param maketimes Boolean indicating whether to create time based features (or may be precomputed)
-#' @param bias passsed to LiblineaR
+#' @param bias passed to LiblineaR
+#' @param maxitv passed to nonlinear optimization a maxit control
 #' @param autoKC a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters
 #' @param autoKCcont a vector of text strings set to "rand" for component to make autoKC assignment to cluster is randomized (for comaprison)
 #' @param connectors a vector if linear equation R operators including +, * and :
-#' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "loglike"
+#' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 #' @export
 #' @examples
 #' temp <- samplelkt
@@ -157,6 +159,7 @@ LKT <- function(data,
                 type = 0,
                 maketimes = FALSE,
                 bias = 0,
+                maxitv=100,
                 autoKC=rep(0,length(components)),
                 autoKCcont = rep("NA",length(components)),
                 connectors= rep("+",length(components)-1)) {
@@ -175,7 +178,7 @@ LKT <- function(data,
   if (!("CF..ansbin." %in% colnames(data))) {
     data$CF..ansbin. <- ifelse(data$Outcome == "CORRECT", 1, 0)
   }
-  
+
   equation <- "CF..ansbin.~ "
   e <- new.env()
   e$data <- data
@@ -195,11 +198,11 @@ LKT <- function(data,
     } else {
       eq <- "0"
     }
-    
+
     e$counter <- e$counter + 1
     for (i in features) {
       k <- k + 1
-      
+
       #setup the curvilinear feature input for inverted U shaped learning features
       if(!is.na(curvefeats)){
         if(!is.na(curvefeats[k])){
@@ -210,7 +213,7 @@ LKT <- function(data,
         if("pred" %in% colnames(e$data)){
           e$data$curvefeat<-e$data$pred
         }}
-      
+
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
         "powafm", "recency", "recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
@@ -288,9 +291,10 @@ LKT <- function(data,
         }
         m <- m + 1
       }
-      
-      
+
+
       if(autoKC[k]>1){
+        CF..ansbin.<-NULL
         aggdata<- e$data[,mean(CF..ansbin.),
                          by=list(eval(parse(text=components[k])),
                                  Anon.Student.Id)]
@@ -309,12 +313,12 @@ LKT <- function(data,
           x[is.na(x)] <- mean(x, na.rm = TRUE)
           x
         })]
-        
+
         mydata<-log(mydata/(1-mydata))
         mydata[mydata>2] <- 2
         mydata[mydata<(-2)] <- -2
         rownames(mydata)<-rownamesmydata
-        
+
         #Feature matrix
         mydata[, names(mydata) :=lapply(.SD, function(x) x - mean(x)), .SDcols = names(mydata)]
         df <- mydata[,as.matrix(.SD) %*% t(as.matrix(.SD)),.SDcols=names(mydata)]
@@ -322,19 +326,19 @@ LKT <- function(data,
         rownames(df)<-1:nrow(mydata)
         colnames(df)<-rownames(mydata)
         rownames(df)<-colnames(df)
-        
+
         #cluster matrix
         cm <- pam(df,autoKC[k])
         KCmodel<-as.data.frame(cm$clustering)
-        
+
         colnames(KCmodel)[1] <- paste("AC",k,sep="")
         eval(parse(text=paste(sep="",
                               "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
-        
+
         if (autoKCcont[k]=="rand"){
           eval(parse(text=paste(sep="",
                                 "KCmodel$AC",k,"<-sample(KCmodel$AC",k,")")))        }
-        
+
         KCmodel$rows<-rownames(KCmodel)
         e$df<-c(list(KCmodel),e$df)
         e$data<-merge(e$data,
@@ -344,9 +348,9 @@ LKT <- function(data,
                       sort = FALSE)
         components[k]<-paste("AC",k,sep="")
         e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]        }
-      
+
       if (e$flag == TRUE | e$counter < 2) {
-        
+
         # print(components)
         # count an effect only when counted factor level is of specific type
         if (length(grep("%", components[k]))) {
@@ -388,9 +392,9 @@ LKT <- function(data,
           }
         }
       }
-      
-      
-      
+
+
+
       if (e$flag == TRUE | e$counter < 2) {
         e$flag <- FALSE
         if (right(i, 1) == "@") {
@@ -402,15 +406,15 @@ LKT <- function(data,
           )))
         } else {
           # fixed effect
-          
+
           eval(parse(text = paste("e$data$", gsub("\\$", "", i), gsub("[%]", "", components[k]),
                                   "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                               parc,pard,pare,components[k])",
                                   sep = "")))
         }
       }
-      
-      
+
+
       if (verbose) {
         cat(paste(
           i, components[k], if (exists("para")) {
@@ -428,14 +432,14 @@ LKT <- function(data,
           }, "\n"
         ))
       }
-      
+
       if (exists("para")) {rm(para)}
       if (exists("parb")) {rm(parb)}
       if (exists("parc")) {rm(parc)}
       if (exists("pard")) {rm(pard)}
       if (exists("pare")) {rm(pare)      }
-      
-      
+
+
       if (connectors[k]=="*"){connector<-"*"}  else if (connectors[k]==":") {connector<-":"} else {connector<-"+"}
       if (right(i, 1) == "$") {
         # add the fixed effect feature to the model with a coefficient per level
@@ -451,12 +455,12 @@ LKT <- function(data,
                                 ,connector,eq,sep=\"\")")))
         }
       }
-      
+
       else if (right(i, 1) == "@") {
         # add the random effect feature to the model with a coefficient per level
         eval(parse(text = paste("eq<-paste(\"(1|\",components[k],\")+\",eq,sep=\"\")")))
       }
-      
+
       else {
         # add the fixed effect feature to the model with the same coefficient for all levels
         if (is.na(covariates[k])) {
@@ -493,7 +497,7 @@ LKT <- function(data,
             plot(temp)
             print(temp)
           } else {
-            
+
             predictset <- sparse.model.matrix(e$form, e$data)
             predictset.csc <- new("matrix.csc",
                                   ra = predictset@x,
@@ -503,24 +507,24 @@ LKT <- function(data,
             )
             predictset.csr <- as.matrix.csr(predictset.csc)
             predictset2 <- predictset.csr
-            
+
             temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
                               bias = bias,
                               cost = cost, epsilon = epsilon, type = type
             )
             if(temp$ClassNames[1]==0){temp$W=temp$W*(-1)}
-            
+
             modelvs <- data.frame(temp$W)
-            
+
             colnames(modelvs) <- colnames(predictset)
-            
+
             e$modelvs <- t(modelvs)
-            
+
             colnames(e$modelvs) <- "coefficient"
-            
-            
+
+
             e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],.00001),.99999)
-            
+
             if(cv==TRUE){
               #all in one version, run through it 5 times
               cv_rmse<-rep(0,length(unique(e$data$fold)))
@@ -528,7 +532,7 @@ LKT <- function(data,
               for(i in 1:length(unique(e$data$fold))){
                 idx1 = which(e$data$fold!=i)
                 e1_tmp = e$data[idx1,]
-                
+
                 predictsetf1=slice(t(predictset),idx1)
                 predictsetf1=t(predictsetf1)
                 predictsetf1.csc <- new("matrix.csc", ra = predictsetf1@x,
@@ -549,7 +553,7 @@ LKT <- function(data,
                                   cost=512,epsilon=.0001,type=0)
                 #fit test data too to get null model for mcfad
                 if(tempTr$ClassNames[1]==0){tempTr$W=tempTr$W*(-1)}
-                
+
                 pred3<-predict(tempTr,predictsetf2.csr,proba=TRUE)$probabilities[,1]
                 e1_ansbin <-e1_tmp$CF..ansbin.
                 e2_ansbin <-e2_tmp$CF..ansbin.
@@ -560,16 +564,16 @@ LKT <- function(data,
                 cv_mcfad[i]= round(1-cv_fitstat/cv_nullfit,6)
                 cv_rmse[i] = sqrt(mean((e2_tmp$CF..ansbin.-pred3)^2))
               }
-              
+
               e$cv_res = data.frame("rmse" = cv_rmse,"mcfad" = cv_mcfad)
             }else{e$cv_res = data.frame("rmse" = rep(NA,5),"mcfad" = rep(NA,5))}
-            
+
             fitstat <- sum(log(ifelse(e$data$CF..ansbin. == 1, e$data$pred, 1 - e$data$pred)))
-            
+
             # e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
           }
     }
-    
+
     if (dualfit == TRUE && elastic == FALSE) { # fix for Liblin
       rt.pred <- exp(-qlogis(e$data$pred[which(e$data$CF..ansbin. == 1)]))
       outVals <- boxplot(e$data$Duration..sec., plot = FALSE)$out
@@ -607,7 +611,7 @@ LKT <- function(data,
       NULL
     }
   }
-  
+
   # count # of parameters
   parlength <-
     sum("powafm" == gsub("[$]", "", features)) +
@@ -638,20 +642,20 @@ LKT <- function(data,
     sum("base5suc" == gsub("[$]", "", features)) * 5 +
     sum("base5fail" == gsub("[$]", "", features)) * 5 -
     sum(!is.na(e$fixedpars))
-  
+
   # number of seeds is just those pars specified and not fixed
   seeds <- e$seedpars[is.na(e$fixedpars)]
   seeds[is.na(seeds)] <- .5 # if not set seeds set to .5
-  
+
   # optimize the model
   if (parlength > 0) {
-    optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb, upper = highb, control = list(maxit = 100))
+    optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb, upper = highb, control = list(maxit = maxitv))
   } else
     # no nolinear parameters
   {
     modelfun(numeric(0))
   }
-  
+
   # report
   if (dualfit == TRUE && elastic == FALSE) {
     failureLatency <- mean(e$data$Duration..sec.[which(e$data$CF..ansbin. == 0)])
@@ -665,7 +669,7 @@ LKT <- function(data,
       ))
     }
   }
-  
+
   results <- list(
     "model" = e$temp,
     "coefs" = e$modelvs,
@@ -801,7 +805,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
                   data$meanspace2^par3 * (log((par5 * 10) + data$icor)) * ave(data$CF..age., index, FUN = function(x) baselevel(x, par1))
     ))
   }
-  
+
   if (feat == "dashafm") {
     data$x <- ave(data$CF..Time., index, FUN = function(x) countOutcomeDash(x, par1))
     return(log(1 + data$x))
@@ -901,7 +905,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
     # print(c(par1,par2))
     return(log(1 + data$cor) * ave(data$CF..age., index, FUN = function(x) baselevel(x, par1)))
   }
-  
+
   # double factor dynamic features
   if (feat == "linecomp") {
     return((data$cor - data$icor))
@@ -928,20 +932,21 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
 
 #boot function for LKT_HDI
 boot_fn <- function(dat,n_students,components,features,covariates,fixedpars){
-  
-  
+
+
   dat_ss = smallSet(dat,n_students)
-  
-  mod = LKT(setDT(dat_ss),inter=TRUE,
+
+  mod = LKT(setDT(dat_ss),interc=TRUE,
             components,
             features,
             fixedpars = fixedpars,
             seedpars = c(NA),verbose=FALSE, cv = FALSE)
   return((mod$coefs))
 }
+
 #Given a par_reps matrix, computes HDI intervals for each column
 get_hdi <- function(par_reps,cred_mass=.95){
-  
+
   coef_hdi <- data.frame(
     "coef_name" = colnames(par_reps),
     "lower" = rep(NA,dim(par_reps)[2]),
@@ -953,7 +958,7 @@ get_hdi <- function(par_reps,cred_mass=.95){
   coef_hdi$lower = intervals[1,]
   coef_hdi$upper = intervals[2,]
   coef_hdi$includes_zero = rep(0,length(intervals[1,])) %between% list(intervals[1,],intervals[2,])
-  
+
   return(coef_hdi)
 }
 # custom duration function, experimental
@@ -1020,14 +1025,14 @@ countOutcomeDash <- function(times, scalev) {
 
 countOutcomeDashPerf <- function(datav, seeking, scalev) {
   temp <- rep(0, length(datav[, 1]))
-  
+
   for (s in unique(datav[, 3])) {
     # print(s)
     l <- length(datav[, 1][datav[, 3] == s])
     v1 <- c(rep(0, l))
     v2 <- c(rep(0, l))
     r <- as.character(datav[, 2][datav[, 3] == s]) == seeking
-    
+
     # print(r)
     v1[1] <- 0
     v2[1] <- v1[1] + r[1]
@@ -1081,7 +1086,7 @@ countOutcomeDifficulty2 <- function(data, index, r) {
 
 countOutcomeDifficultyAll1 <- function(data, index) {
   temp <- data$curvefeat
-  
+
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp
   data$temp
@@ -1089,7 +1094,7 @@ countOutcomeDifficultyAll1 <- function(data, index) {
 
 countOutcomeDifficultyAll2 <- function(data, index) {
   temp <- data$curvefeat^2
-  
+
   data$temp <- ave(temp, index, FUN = function(x) as.numeric(cumsum(x)))
   data$temp <- data$temp - temp
   data$temp
@@ -1325,7 +1330,7 @@ smallSet <- function(data, nSub) {
   totsub <- length(unique(data$Anon.Student.Id))
   datasub <- unique(data$Anon.Student.Id)
   smallSub <- datasub[sample(1:totsub)[1:nSub]]
-  
+
   smallIdx <- which(data$Anon.Student.Id %in% smallSub)
   smalldata <- data[smallIdx, ]
   smalldata <- droplevels(smalldata)
@@ -1364,24 +1369,53 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @export
 #' @return list of values "par_reps", "mod_full", "coef_hdi"
 LKT_HDI <- function(dat,n_boot,n_students,components,features,covariates,fixedpars, get_hdi = TRUE, cred_mass = .95){
-  
+
   #first fit full to get all features to get all predictor names
-  mod_full = LKT(setDT(dat),inter=TRUE,
+  mod_full = LKT(setDT(dat),interc=TRUE,
                  components,
                  features,
                  fixedpars = fixedpars,
                  seedpars = c(NA),verbose=FALSE, cv = FALSE)
-  
+
   par_reps = matrix(nrow=n_boot,ncol=length(mod_full$coefs))
   colnames(par_reps) <- rownames(mod_full$coefs)
-  
+
   for(i in 1:n_boot){
     #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components,features,covarariates,fixedpars)
+    temp=boot_fn(dat,n_students,components,features,covariates,fixedpars)
     idx = match(rownames(temp),colnames(par_reps))
     par_reps[i,idx] = as.numeric(temp)
     if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
     if(i==n_boot){cat("\n")}
   }
   return(list("par_reps" = par_reps,"mod_full" = mod_full, coef_hdi = get_hdi(par_reps, cred_mass = .95)))
+}
+
+
+LKTStartupMessage <- function()
+{
+  # > figlet -f doom LKT
+  msg <- c(paste0(
+    "LL      KK  KK TTTTTTT
+LL      KK KK    TTT
+LL      KKKK     TTT
+LL      KK KK    TTT
+LLLLLLL KK  KK   TTT
+  Join the mailing list: imrryr@gmail.com
+  Version ",
+    packageVersion("LKT")),
+    "\nType 'citation(\"LKT\")' for citing this R package in publications.")
+  return(msg)
+}
+
+.onAttach <- function(lib, pkg)
+{
+  # unlock .LKT variable allowing its modification
+  #unlockBinding(".LKT", asNamespace("LKT"))
+  # startup message
+  msg <- LKTStartupMessage()
+  if(!interactive())
+    msg[1] <- paste("Package 'LKT' version", packageVersion("LKT"))
+  packageStartupMessage(msg)
+  invisible()
 }

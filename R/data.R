@@ -14,3 +14,13 @@
 #' @source <https://datashop.memphis.edu/index.jsp>
 "samplelkt"
 
+#' Trial sequences for practice participants.
+#'
+#' A dataset containing a raw sample from the Memphis Datashop.
+#'
+#' @format A data frame please see the DataShop for more info.
+#' \describe{
+#' It has many columns.
+#' }
+#' @source <https://datashop.memphis.edu/Export?datasetId=1465>
+"largerawsample"

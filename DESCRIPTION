@@ -23,10 +23,11 @@ RoxygenNote: 7.2.0
 Depends: 
     R (>= 3.5.0),
     SparseM (>= 1.78),
-    Matrix,
     methods,
+    Matrix,
     data.table (>= 1.13.2),
-    LiblineaR (>= 2.10-8)
+    LiblineaR (>= 2.10-8),
+    HDInterval (>= 0.2.2)
 Imports:
     glmnet (>= 4.0-2),
     glmnetUtils (>= 1.1.8),
@@ -36,5 +37,6 @@ Suggests:
     rmarkdown,
     pROC (>= 1.16.2),
     knitr,
+    utils,
     caret,
-    utils
+    ggplot2

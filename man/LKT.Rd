@@ -24,6 +24,7 @@ LKT(
   type = 0,
   maketimes = FALSE,
   bias = 0,
+  maxitv = 100,
   autoKC = rep(0, length(components)),
   autoKCcont = rep("NA", length(components)),
   connectors = rep("+", length(components) - 1)
@@ -56,17 +57,19 @@ LKT(
 
 \item{epsilon}{passed to LiblineaR}
 
-\item{cost}{passsed to LiblineaR}
+\item{cost}{passed to LiblineaR}
 
 \item{lowb}{lower bound for non-linear optimizations}
 
 \item{highb}{upper bound for non-linear optimizations}
 
-\item{type}{passsed to LiblineaR}
+\item{type}{passed to LiblineaR}
 
 \item{maketimes}{Boolean indicating whether to create time based features (or may be precomputed)}
 
-\item{bias}{passsed to LiblineaR}
+\item{bias}{passed to LiblineaR}
+
+\item{maxitv}{passed to nonlinear optimization a maxit control}
 
 \item{autoKC}{a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters}
 
@@ -75,7 +78,7 @@ LKT(
 \item{connectors}{a vector if linear equation R operators including +, * and :}
 }
 \value{
-list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "loglike"
+list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 }
 \description{
 Compute a logistic regression model of learning for input data.
