@@ -12,7 +12,7 @@
 
 <meta name="author" content="Philip I. Pavlik Jr." />
 
-<meta name="date" content="2022-07-10" />
+<meta name="date" content="2022-07-13" />
 
 <title>Basic_Operations</title>
 
@@ -47,7 +47,7 @@
 
 <h1 class="title toc-ignore">Basic_Operations</h1>
 <h4 class="author">Philip I. Pavlik Jr.</h4>
-<h4 class="date">2022-07-10</h4>
+<h4 class="date">2022-07-13</h4>
 
 
 
@@ -82,7 +82,7 @@
 <li><p>Exponential decay (expdecsuc and expdecfail) - This expression uses the decayed count of right or wrong. This method appears to have been first tested by Gong, Beck, and Heffernan. This method is also part of R-PFA, where it is used for tracking failures only, whereas R-PFA uses propdec to track correctness. The function is generally the same as for expdecafm. However, when used with a performance factor, the exponential decay weights on the events seen recently, so a history of recent successes or failures might quickly change predictions since only the recent events count for much, especially if the decay rate is relatively fast.</p></li>
 <li><p>Linear sum performance (linecomp) - This term uses the success minus failures to provide a simple summary of overall performance. The advantage of this model is that it is parsimonious and therefore is less likely to lead to overfitting or multicollinearity in the model. This feature was created for this paper and has not been presented previously.</p></li>
 <li><p>Proportion (prop) - This expression uses the prior probability correct. It is seeded at .5 for the first attempt. This feature was created for this paper and has not been presented previously.</p></li>
-<li><p>Exponential decay of proportion (propdec and propdec2) - This expression uses the prior probability correct and was introduced as part of the R-PFA model. This function requires an additional nonlinear parameter to characterize the exponential rate of decay. For propdec, we set the number of ghost successes at 1 and ghost failures at 1 as a modification of Galyardt and Goldin. This modification produces an initial value that can either decrease or increase, unlike the Galyardt and Goldin version (propdec2), which can only increase due to the use of 3 ghost failures and no ghost successes. Our initial comparisons below show that the modified version works as well for tracking subject level variance during learning. Galyardt and Goldin illustrate an extensive number of examples of propdec2’s behavior across patterns of successful and unsuccessful trials at various parameter values. The new propdec behaves analogously, except it starts at a value of .5 to represent the different ratio of ghost success to failure at the beginning of practice. As a point of fact, the number of ghost attempts of each type are additional parameters, and we have implemented two settings: 1 ghost success and 1 ghost failure (propdec), or 3 ghost failures (prodec2).</p></li>
+<li><p>Exponential decay of proportion (propdec and propdec2) - This expression uses the prior probability correct and was introduced as part of the R-PFA model. This function requires an additional nonlinear parameter to characterize the exponential rate of decay. For propdec, we set the number of ghost successes at 1 and ghost failures at 1 as a modification of Galyardt and Goldin. This modification produces an initial value that can either decrease or increase, unlike the Galyardt and Goldin version (propdec2), which can only increase due to the use of 3 ghost failures and no ghost successes. Our initial comparisons below show that the modified version works as well for tracking subject level variance during learning. Galyardt and Goldin illustrate an extensive number of examples of propdec2s behavior across patterns of successful and unsuccessful trials at various parameter values. The new propdec behaves analogously, except it starts at a value of .5 to represent the different ratio of ghost success to failure at the beginning of practice. As a point of fact, the number of ghost attempts of each type are additional parameters, and we have implemented two settings: 1 ghost success and 1 ghost failure (propdec), or 3 ghost failures (prodec2).</p></li>
 <li><p>Logit (logit) - This expression uses the logit (natural log of the success divided by failures). This function requires an additional nonlinear parameter to characterize the initial amount of successes or failures. This feature was created for this paper and has not been presented previously.</p></li>
 <li><p>Exponential decay of logit (logitdec) - This expression uses the logit (natural log of the success divided by failures). Instead of using the simple counts, it uses the decayed counts like R-PFA, with the assumption of exponential decay and 1 ghost success and 1 ghost failure. This feature was created for this paper and has not been presented previously.</p></li>
 </ul>
