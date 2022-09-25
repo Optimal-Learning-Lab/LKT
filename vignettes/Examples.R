@@ -39,9 +39,9 @@ knitr::opts_chunk$set(
 
 ## ---- echo=TRUE---------------------------------------------------------------
     modelob <- LKT(
-      data = val, interc=TRUE,
+      data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("intercept", "intercept", "lineafm$"))
+      features = c("intercept", "intercept", "lineafm"))
 
 ## ---- echo=TRUE---------------------------------------------------------------
     modelob <- LKT(
@@ -332,4 +332,118 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
       features = c("intercept", "intercept", "propdec2","recency"),
       fixedpars=c(NA,NA),maxitv=5)
+
+## ---- echo=TRUE---------------------------------------------------------------
+ modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
+      features = c("intercept","intercept", "linesuc", "linefail","recency"),fixedpars =c(0.2843158))
+print(modelob$coefs)
+cat("\n")
+
+    modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+      features = c("logitdec", "linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.2843158))
+print(modelob$coefs)
+cat("\n")
+
+modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
+      features = c("logitdec","intercept","linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.44))
+print(modelob$coefs)
+cat("\n")
+
+
+    modelob <- LKT(
+      data = val, interc=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("logitdec","linesuc","recency"),fixedpars =c(0.9673974,0.47))
+print(modelob$coefs)
+val$pred<-modelob$prediction
+cat("\n")
+
+    modelob <- LKT(
+      data = val, interc=TRUE,dualfit=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("logitdec","diffcorComp","recency"),fixedpars =c(0.9642107,0.4797579))
+print(modelob$coefs)
+cat("\n")
+
+    modelob <- LKT(
+      data = val, interc=TRUE, dualfit=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+      features = c("logitdec","diffcorComp","recencysuc","recencyfail"),fixedpars =c(0.9682298,0.1870481,0.5788126))
+print(modelob$coefs)
+cat("\n")
+
+    modelob <- LKT(
+      data = val, interc=TRUE, dualfit=TRUE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
+      features = c("logitdec","diffcor1","diffcor2","recencysuc","recencyfail"),fixedpars =c(0.967,0.184,0.579))
+print(modelob$coefs)
+cat("\n")
+
+val$pred2<-modelob$prediction
+
+tdata<-val[Level..Unitname.=="Posttest",]
+tdata$index<-paste(tdata$Anon.Student.Id,tdata$KC..Default.)
+tdata$tot<-countOutcome(tdata,tdata$index,"CORRECT")
+tdata$tot<-tdata$tot+countOutcome(tdata,tdata$index,"INCORRECT")
+plot(aggregate(CF..ansbin. ~tot , tdata , FUN= "mean" ),ylim=c(0,1))
+points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
+
+
+tdata<-val[Level..Unitname.!="Posttest",]
+tdata$index<-paste(tdata$Anon.Student.Id,tdata$KC..Default.)
+tdata$tot<-countOutcome(tdata,tdata$index,"CORRECT")
+tdata$tot<-tdata$tot+countOutcome(tdata,tdata$index,"INCORRECT")
+plot(aggregate(CF..ansbin. ~tot , tdata , FUN= "mean" ),ylim=c(0,1))
+points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
+
+
+
+
+pv <- 1:100 / 100
+fixedcost <- 26.5
+scal <- .792
+const <- 6.4
+
+F6 <- -1.44
+F5 <- 1.48
+gains = pv * (F5 * pv + F6 * pv ^ 2) + (1 - pv) * 0
+
+
+plot(
+  pv,
+  gains ,
+  type = "n",
+  xlab = "Difficulty of practice trial",
+  ylab = "Logit gain from trial",
+  main = "Cloze Difficulty Effect"
+)
+lines(pv, gains, lwd = 3, col = "red")
+
+plot(
+  pv,
+  gains / (pv * (const + scal * exp(-qlogis(
+    pv
+  ))) + (1 - pv) * (fixedcost)),
+  type = "n",  xlab = "Difficulty of practice trial (probabilty of success)",
+  ylab = "Logit gain per second of practice"
+)#     main="Cloze Efficiency")
+lines(pv, gains / (pv * (const + scal * exp(-qlogis(pv))) + 
+                     (1 - pv) * (fixedcost)), lwd = 3, col = "red")
+
+
+
+pv[which((gains / (
+  pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
+)) ==
+  max((gains / (
+    pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
+  ))))]
+
+
 

@@ -512,6 +512,7 @@ LKT <- function(data,
                               bias = bias,
                               cost = cost, epsilon = epsilon, type = type
             )
+
             if(temp$ClassNames[1]==0){temp$W=temp$W*(-1)}
 
             modelvs <- data.frame(temp$W)
@@ -522,8 +523,16 @@ LKT <- function(data,
 
             colnames(e$modelvs) <- "coefficient"
 
+              success <- FALSE
+              while (!success) {
+                # do something
+                e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
+                                         .00001),.99999)
 
-            e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],.00001),.99999)
+                # check for success
+                success <- sum(is.nan(e$data$pred)) == 0}
+
+         #   e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],.001),.999)
 
             if(cv==TRUE){
               #all in one version, run through it 5 times
@@ -555,6 +564,7 @@ LKT <- function(data,
                 if(tempTr$ClassNames[1]==0){tempTr$W=tempTr$W*(-1)}
 
                 pred3<-predict(tempTr,predictsetf2.csr,proba=TRUE)$probabilities[,1]
+
                 e1_ansbin <-e1_tmp$CF..ansbin.
                 e2_ansbin <-e2_tmp$CF..ansbin.
                 #mcfad time
