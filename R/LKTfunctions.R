@@ -1406,12 +1406,13 @@ LKTStartupMessage <- function()
 {
   # > figlet -f doom LKT
   msg <- c(paste0(
-    "LL      KK  KK TTTTTTT
-LL      KK KK    TTT
-LL      KKKK     TTT
-LL      KK KK    TTT
-LLLLLLL KK  KK   TTT
-  Join the mailing list: imrryr@gmail.com
+    "  LL      KK  KK TTTTTTT
+  LL      KK KK    TTT
+  LL      KKKK     TTT
+  LL      KK KK    TTT
+  LLLLLLL KK  KK   TTT
+
+  Join the mailing list: lkt@freelists.org
   Version ",
     packageVersion("LKT")),
     "\nType 'citation(\"LKT\")' for citing this R package in publications.")
