@@ -15,5 +15,5 @@
 
 # Version 1.3.0
 * Updated examples
-* large test sample
+* Large test sample added
 * Bugfix for bug in predict function causing random catastrophic failure
