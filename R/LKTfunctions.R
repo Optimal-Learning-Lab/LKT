@@ -162,7 +162,7 @@ LKT <- function(data,
                 maxitv=100,
                 autoKC=rep(0,length(components)),
                 autoKCcont = rep("NA",length(components)),
-                connectors= rep("+",length(components)-1)) {
+                connectors= rep("+",max(1,length(components)-1))) {
   connectors<-c("+",connectors)
   if (maketimes) {
     if (!("CF..reltime." %in% colnames(data))) {
@@ -693,7 +693,7 @@ LKT <- function(data,
     },
     "optimizedpars" = if (exists("optimizedpars")) {
       optimizedpars
-    },
+    } else NA,
     "studentRMSE" = if ("pred" %in% colnames(e$data)) {
       aggregate((e$data$pred - e$data$CF..ansbin.)^2,
                 by = list(e$data$Anon.Student.Id), FUN = mean
@@ -1430,3 +1430,158 @@ LKTStartupMessage <- function()
   packageStartupMessage(msg)
   invisible()
 }
+
+
+
+stepLKT <- function(data,
+                    allcomponents,currentcomponents=c(),allfeatures,its,forv,bacv,
+                    currentfeatures=c(),verbose,traceCV=TRUE,
+                    featpars, currentfixedpars =c(),maxitv,interc = FALSE,
+                    forward= TRUE, backward=TRUE){
+  currentfit<-list()
+  startfitscor <- Inf
+  currentfitscore<- Inf
+  k<-0
+
+  paramvec<-c()
+
+  tracetable<- as.data.frame(matrix(data=NA,nrow=0,ncol=6))
+  x<-c("comp","feat","score","ind","params","BIC")
+  colnames(tracetable)<-x
+
+  while (is.infinite(startfitscor) | currentfitscore<startfitscor){
+    startfitscor<-currentfitscore
+
+    k<-k+1
+    cat("\nStep ",k,"start\n")
+    bestmod<-NULL
+    if(forward){
+      testtable<- as.data.frame(matrix(data=NA,nrow=0,ncol=6))
+      x<-c("comp","feat","score","ind","params","BIC")
+      colnames(testtable)<-x
+      ij<-0
+      for(i in allcomponents){
+        for(j in allfeatures){
+          if(sum(paste(i,j) == data.frame(paste(currentcomponents,currentfeatures)))==1) next
+          ij<-ij+1
+          testfeatures <- c(currentfeatures,j)
+          testcomponents <- c(currentcomponents,i)
+          fixedparct<-0
+          for(ct in testfeatures){
+            if(match(ct,allfeatures)>0){fixedparct<-fixedparct+featpars[match(ct,allfeatures)]}
+          }
+
+          #print(c(unlist(paramlist),rep(NA,featpars[match(j,allfeatures)])))
+          fittest<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+                       components = testcomponents,
+                       features = testfeatures,fixedpars = c(paramvec,rep(NA,featpars[match(j,allfeatures)])))
+
+          BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
+          cat(paste(testfeatures,testcomponents,sep="-"),length(fittest$coefs)+fixedparct,BICis,fittest$loglik,"\n")
+          testtable[nrow(testtable) + 1,] =
+            list(comp=i,feat=j,score=fittest$r2,ind=ij,params=length(fittest$coefs)+fixedparct,BIC=BICis)
+          if(min(testtable$BIC)==BICis)(bestmod<-fittest)
+        }
+      }
+
+      compstat<- testtable$BIC
+      if(min(compstat)+forv<currentfitscore){cat("added","\n")
+        tracetable<-rbind(tracetable,testtable[which.min(compstat),])
+        currentfitscore<-min(compstat)
+        currentfeatures<-c(currentfeatures,testtable[which.min(compstat),]$feat)
+        currentcomponents<-c(currentcomponents,testtable[which.min(compstat),]$comp)
+        cat(testtable[which.min(compstat),]$feat,testtable[which.min(compstat),]$comp,"\n")
+
+      }}
+
+    if(!is.atomic(bestmod$optimizedpars)){
+      paramvec<-c(paramvec ,bestmod$optimizedpars$par)}
+    print(paramvec)
+    # retain the best model from forward
+    # then assume that model was selected and use its parameters as a basis
+    # backward step will not resolve nonlinear at all
+    if(length(currentfeatures)>1 & backward)
+    {
+      testtable<- as.data.frame(matrix(data=NA,nrow=0,ncol=6))
+      x<-c("comp","feat","score","ind","params","BIC")
+      colnames(testtable)<-x
+
+      for(i in 1:length(currentcomponents)){
+        testfeatures <- currentfeatures[-i]
+        testcomponents <- currentcomponents[-i]
+        testpars<-c()
+
+
+        fixedparct<-0
+        pc<-1
+        featct<-1
+        for(ct in currentfeatures){
+          if(ct!=currentfeatures[i] & currentcomponents[featct]!=currentcomponents[i]){
+          #print(paste("i",i))
+          #print('skip forward')
+          if(featpars[match(ct,allfeatures)]>0 ){
+            fixedparct<-fixedparct+featpars[match(ct,allfeatures)]
+            testpars<-c(testpars,paramvec[pc:pc+(featpars[match(ct,allfeatures)]-1)])
+            #print(paramvec)
+          }}
+          #print("inc")
+          pc<-pc+featpars[match(ct,allfeatures)]
+          # print(paste("pc",pc))
+          featct<-featct+1
+
+        }
+        print(testpars)
+
+
+        fittest<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+                     components = testcomponents,
+                     features = testfeatures,fixedpars = testpars)
+
+        BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
+        cat(paste(testfeatures,testcomponents,sep="-"),length(fittest$coefs)+fixedparct,BICis,fittest$loglik,"\n")
+
+        testtable[nrow(testtable) + 1,] =
+          list(comp=i,feat=i,score=fittest$r2,ind=i,params=length(fittest$coefs)+fixedparct,BIC=BICis)
+      }
+
+      compstat<- testtable$BIC
+      #cat(min(compstat)+.01,currentfitscore)
+      if(max(compstat)-bacv<currentfitscore){cat("removed","\n")
+        tracetable<-rbind(tracetable,testtable[which.max(compstat),])
+        currentfeatures<-currentfeatures[-testtable[which.max(compstat),]$feat]
+        currentcomponents<-currentcomponents[-testtable[which.max(compstat),]$comp]
+        cat(testtable[which.max(compstat),]$feat,testtable[which.max(compstat),]$comp,"\n")
+
+      }}
+
+    if(length(currentcomponents)>0){
+      fixedparct<-0
+      for(ct in currentfeatures){
+        if(match(ct,allfeatures)>0){fixedparct<-fixedparct+featpars[match(ct,allfeatures)]}
+      }
+      currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+                      components = currentcomponents,
+                      features = currentfeatures,fixedpars = rep(NA,fixedparct),cv=traceCV)
+      currentfitscore<- ((length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik)
+      if(traceCV){cat("\nStep",k,"results - current BIC",currentfitscore," CV McFadden's R2",mean(currentfit$cv_res$mcfad),"\n")} else
+      {cat("\nStep",k,"results - current BIC",currentfitscore,"\n")}
+      cat(currentfeatures,"\n",currentcomponents,"\n")
+      if(!is.atomic(currentfit$optimizedpars)){
+        cat("pars",currentfit$optimizedpars$par,"\n")
+        paramvec<-currentfit$optimizedpars$par}
+
+    }
+
+
+  }
+  #repeat until no more above threshold
+
+  # report final
+  return(list(tracetable,currentfit))
+}
+
+
+
+# terminate based on CV
+# terminate based on no chage
+# save table of fit change with model
