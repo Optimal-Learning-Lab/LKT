@@ -1453,17 +1453,20 @@ LKTStartupMessage <- function()
 #'
 library(crayon)
 library(pROC)
-stepLKT <- function(data,
+buildLKTModel <- function(data,specialcomponents=c(),specialfeatures=c(),
                     allcomponents,currentcomponents=c(),allfeatures,its,forv,bacv,
-                    currentfeatures=c(),verbose,traceCV=TRUE,
-                    featpars, currentfixedpars =c(),maxitv,interc = FALSE,
+                    currentfeatures=c(),verbose=FALSE,traceCV=TRUE,
+                    currentfixedpars =c(),maxitv=10,interc = FALSE,
                     forward= TRUE, backward=TRUE, metric="BIC"){
 
+  allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
+                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe")
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4)
   currentfit<-list()
   startfitscor <- Inf
   currentfitscore<- Inf
   k<-0
-  paramvec<-c()
+  paramvec<-currentfixedpars
   compstat<- c()
 
   tracetable<- as.data.frame(matrix(data=NA,nrow=0,ncol=10))
@@ -1474,11 +1477,12 @@ stepLKT <- function(data,
     fixedparct<-0
     for(ct in currentfeatures){
 
-      if(match(gsub("[$]","",ct),gsub("[$]","",allfeatures))>0){
-        fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]}}
+      if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){
+        fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
     currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
                     components = currentcomponents,
-                    features = currentfeatures,fixedpars = rep(NA,fixedparct),cv=traceCV)
+                    features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
+                    ,cv=traceCV)
 
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
@@ -1493,9 +1497,20 @@ stepLKT <- function(data,
       cat("pars",currentfit$optimizedpars$par,"\n")
       paramvec<-currentfit$optimizedpars$par}
     tracetable[nrow(tracetable) + 1,] =
-      list(comp=paste(currentcomponents),feat=paste(currentfeatures),r2=currentfit$r2,ind=0,params=length(currentfit$coefs)+fixedparct,
+      list(comp=paste(currentcomponents,collapse=" "),feat=paste(currentfeatures,collapse=" "),r2=currentfit$r2,ind=0,params=length(currentfit$coefs)+fixedparct,
            BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("starting model"))
 
+    switch(metric,
+           "AUC" = {
+             currentfitscore<- -AUCis},
+           "AIC" = {
+             currentfitscore<-AICis},
+           "BIC" = {
+             currentfitscore<-BICis},
+           "RMSE" = {
+             currentfitscore<-RMSEis},
+           "R2" = {
+             currentfitscore<- -currentfit$r2})
   } else {
     meancor<-mean(data$CF..ansbin.)
     ll<- sum(log(ifelse(data$CF..ansbin.==1,meancor,1-meancor)))
@@ -1507,7 +1522,19 @@ stepLKT <- function(data,
       list(comp="none",feat="none",r2=0,ind=0,params=1,
            BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("null model"))
 
+    switch(metric,
+           "AUC" = {
+             currentfitscore<- -AUCis},
+           "AIC" = {
+             currentfitscore<-AICis},
+           "BIC" = {
+             currentfitscore<-BICis},
+           "RMSE" = {
+             currentfitscore<-RMSEis},
+           "R2" = {
+             currentfitscore<- 0})
   }
+
   # create null model also and put that on graph
 
   while (is.infinite(startfitscor) | currentfitscore!=startfitscor){
@@ -1522,19 +1549,34 @@ stepLKT <- function(data,
       x<-c("comp","feat","r2","ind","params","BIC","AUC","AIC","RMSE","action")
       colnames(testtable)<-x
       ij<-0
+      complist<-c()
+      featlist<-c()
       for(i in allcomponents){
         for(j in allfeatures){
+          complist<-c(complist,i)
+          featlist<-c(featlist,j)
+        }}
+
+      complist<-c(specialcomponents, complist)
+      featlist<-c(specialfeatures, featlist)
+          for(w in 1:length(complist)){
+            i<-complist[w]
+            j<-featlist[w]
+
+
           if(sum(paste(i,j) == data.frame(paste(currentcomponents,currentfeatures)))==1) next
           ij<-ij+1
           testfeatures <- c(currentfeatures,j)
           testcomponents <- c(currentcomponents,i)
           fixedparct<-0
           for(ct in testfeatures){
-            if(match(gsub("[$]","",ct),gsub("[$]","",allfeatures))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]}}
-
+            if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
+#print(c(paramvec,rep(NA,sum(featpars[match(gsub("[$]","",j),gsub("[$]","",allfeatlist))]))))
+#print(sum(featpars[match(gsub("[$]","",j),gsub("[$]","",allfeatlist))]))
+#print(j)
           fittest<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
                        components = testcomponents,
-                       features = testfeatures,fixedpars = c(paramvec,rep(NA,featpars[match(j,allfeatures)])))
+                       features = testfeatures,fixedpars = c(paramvec,rep(NA,featpars[match(gsub("[$]","",j),gsub("[$]","",allfeatlist))])))
 
           BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
           AUCis<- suppressMessages(auc(data$CF..ansbin.,fittest$prediction)[1])
@@ -1545,6 +1587,8 @@ stepLKT <- function(data,
                  BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("add\n" ,paste(j,i,sep="-")))
 
           switch(metric,
+                 "AUC" = {compstat<- -testtable$AUC
+                 currentcompstat<- -AUCis},
                  "AIC" = {compstat<- testtable$AIC
                  currentcompstat<-AICis},
                  "BIC" = {compstat<- testtable$BIC
@@ -1557,7 +1601,7 @@ stepLKT <- function(data,
 
           if(min(compstat)==currentcompstat)(bestmod<-fittest)
         }
-      }
+
 
 
       if(min(compstat)+forv<currentfitscore){cat("added","\n")
@@ -1597,13 +1641,13 @@ stepLKT <- function(data,
           #print(paste("i",i))
         #print('skip forward')
             }else{
-          if(featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]>0 ){
-            fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]
-            testpars<-c(testpars,paramvec[pc:pc+(featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]-1)])
+          if(featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]>0 ){
+            fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]
+            testpars<-c(testpars,paramvec[pc:pc+(featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]-1)])
             #print(paramvec)
           }}
         #print("inc")
-          pc<-pc+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]
+          pc<-pc+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]
            #print(paste("pc",pc))
           featct<-featct+1
 
@@ -1624,6 +1668,8 @@ stepLKT <- function(data,
                BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("drop\n" ,paste(currentfeatures[i],currentcomponents[i],sep="-")))
 
         switch(metric,
+               "AUC" = {compstat<- -testtable$AUC
+               currentcompstat<- -AUCis},
                "AIC" = {compstat<- testtable$AIC
                currentcompstat<-AICis},
                "BIC" = {compstat<- testtable$BIC
@@ -1648,7 +1694,7 @@ stepLKT <- function(data,
     if(length(currentcomponents)>0){
       fixedparct<-0
       for(ct in currentfeatures){
-        if(match(gsub("[$]","",ct),gsub("[$]","",allfeatures))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatures))]}}
+        if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
       currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
                       components = currentcomponents,
                       features = currentfeatures,fixedpars = rep(NA,fixedparct),cv=traceCV)
