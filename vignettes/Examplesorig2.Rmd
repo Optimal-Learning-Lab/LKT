@@ -19,6 +19,8 @@ knitr::opts_chunk$set(
     library(LKT)
     library(data.table)
     library(ggplot2)
+library(crayon)
+library(pROC)
 # precomptued as per https://ropensci.org/blog/2019/12/08/precompute-vignettes/
 ```
 
@@ -576,8 +578,6 @@ q<-  stepLKT(data = val, interc=TRUE,
 
 #Load MATHia
 ```{r, echo=TRUE}
-library(crayon)
-library(pROC)
 
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
