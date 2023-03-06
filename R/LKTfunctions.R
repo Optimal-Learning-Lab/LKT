@@ -160,6 +160,7 @@ LKT <- function(data,
                 maketimes = FALSE,
                 bias = 0,
                 maxitv=100,
+                nosolve=FALSE,
                 autoKC=rep(0,length(components)),
                 autoKCcont = rep("NA",length(components)),
                 connectors= rep("+",max(1,length(components)-1))) {
@@ -178,7 +179,6 @@ LKT <- function(data,
   if (!("CF..ansbin." %in% colnames(data))) {
     data$CF..ansbin. <- ifelse(data$Outcome == "CORRECT", 1, 0)
   }
-
   equation <- "CF..ansbin.~ "
   e <- new.env()
   e$data <- data
@@ -406,11 +406,18 @@ LKT <- function(data,
           )))
         } else {
           # fixed effect
-
+if(nosolve==FALSE){
           eval(parse(text = paste("e$data$", gsub("\\$", "", i), gsub("[%]", "", components[k]),
                                   "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                               parc,pard,pare,components[k])",
-                                  sep = "")))
+                                  sep = "")))} else
+          {
+            eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para")){para}else{""}, gsub("[%]", "", components[k]),
+                                    "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
+                              parc,pard,pare,components[k])",
+                                    sep = "")))
+
+          }
         }
       }
 
@@ -433,12 +440,6 @@ LKT <- function(data,
         ))
       }
 
-      if (exists("para")) {rm(para)}
-      if (exists("parb")) {rm(parb)}
-      if (exists("parc")) {rm(parc)}
-      if (exists("pard")) {rm(pard)}
-      if (exists("pare")) {rm(pare)      }
-
 
       if (connectors[k]=="*"){connector<-"*"}  else if (connectors[k]==":") {connector<-":"} else {connector<-"+"}
       if (right(i, 1) == "$") {
@@ -446,13 +447,20 @@ LKT <- function(data,
         cleanfeat <- gsub("\\$", "", i)
         if (is.na(covariates[k])) {
           # standard way with a coefficient per component
-          eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],
+          if(nosolve==FALSE){eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],
+                                connector,eq,sep=\"\")")))}else{
+                                  eval(parse(text = paste("eq<-paste(cleanfeat,if(exists(\"para\")){para}else{\"\"},components[k],\":e$data$\",components[k],
                                 connector,eq,sep=\"\")")))
+                                }
         }
         else {
-          eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
+          if(nosolve==FALSE){eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
+                                ,\":\",covariates[k]
+                                ,connector,eq,sep=\"\")")))}else{
+                                  eval(parse(text = paste("eq<-paste(cleanfeat,if(exists(\"para\")){para}else{\"\"},components[k],\":e$data$\",components[k]
                                 ,\":\",covariates[k]
                                 ,connector,eq,sep=\"\")")))
+                                }
         }
       }
 
@@ -465,13 +473,35 @@ LKT <- function(data,
         # add the fixed effect feature to the model with the same coefficient for all levels
         if (is.na(covariates[k])) {
           # standard way with single coefficient
-          eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
+          if(nosolve==FALSE){
+            eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
+            }
+          else
+            {
+       #    print(parse(text=paste("paste(i,if(exists(\"para\")){para}else{\"\"},
+         #                             gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
+              eval(parse(text = paste("eq<-paste(i,if(exists(\"para\")){para}else{\"\"},
+                                      gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
+            }
+
+
         }
         else {
+          if(nosolve==FALSE){
           eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k]
+                                  ,connector,eq,sep=\"\")")))}else
+                                  {
+                                    eval(parse(text = paste("eq<-paste(i,if(exists(\"para\")){para}else{\"\"},gsub('[%]','',components[k]),\":\",covariates[k]
                                   ,connector,eq,sep=\"\")")))
         }
-      }
+      }}
+
+      if (exists("para")) {rm(para)}
+      if (exists("parb")) {rm(parb)}
+      if (exists("parc")) {rm(parc)}
+      if (exists("pard")) {rm(pard)}
+      if (exists("pare")) {rm(pare)      }
+
     }
     if (verbose) {
       cat(paste(eq, "\n"))
@@ -508,6 +538,7 @@ LKT <- function(data,
             predictset.csr <- as.matrix.csr(predictset.csc)
             predictset2 <- predictset.csr
 
+if(nosolve==FALSE){
             temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
                               bias = bias,
                               cost = cost, epsilon = epsilon, type = type
@@ -579,7 +610,7 @@ LKT <- function(data,
             }else{e$cv_res = data.frame("rmse" = rep(NA,5),"mcfad" = rep(NA,5))}
 
             fitstat <- sum(log(ifelse(e$data$CF..ansbin. == 1, e$data$pred, 1 - e$data$pred)))
-
+}
             # e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]
           }
     }
@@ -600,6 +631,7 @@ LKT <- function(data,
         cat(paste("R2 (cor squared) latency: ", fitstat2, "\n", sep = ""))
       }
     }
+    if(nosolve==FALSE){
     e$temp <- temp
     if (elastic == FALSE) {
       e$nullmodel <- glm(as.formula(paste("CF..ansbin.~ 1", sep = "")), data = e$data, family = binomial(logit))
@@ -619,9 +651,10 @@ LKT <- function(data,
     }
     else {
       NULL
-    }
+    }} else {list(
+      colnames(predictset),predictset2)}
   }
-
+  if(nosolve==FALSE){
   # count # of parameters
   parlength <-
     sum("powafm" == gsub("[$]", "", features)) +
@@ -704,7 +737,11 @@ LKT <- function(data,
     "loglike" = e$loglike,
     "automat" = e$df
   )
-  results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])
+  results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])}else{
+
+    results <- list(
+      "lassodata"=modelfun(numeric(0)))}
+
   return(results)
 }
 
@@ -1151,60 +1188,45 @@ practiceTime <- function(data) {
 
 # computes spacing from prior repetition for index (in seconds)
 componentspacing <- function(data, index, times) {
-  temp <- rep(0, length(data$CF..ansbin.))
-  for (i in unique(index)) {
-    lv <- length(data$CF..ansbin.[index == i])
-    if (lv > 1) {
-      temp[index == i] <- c(0, times[index == i][2:(lv)] - times[index == i][1:(lv - 1)])
-    }
-  }
+
+  temp <- numeric(nrow(data)) # initialize temp as a numeric vector
+
+  # calculate the differences within each group and assign to temp
+  temp <- ave(times, index, FUN=function(x) c(0, diff(x)))
+
   return(temp)
 }
 
 componentprev <- function(data, index, answers) {
-  temp <- rep(0, length(data$CF..ansbin.))
-  for (i in unique(index)) {
-    lv <- length(data$CF..ansbin.[index == i])
-    if (lv > 1) {
-      temp[index == i] <- c(0, answers[index == i][1:(lv - 1)])
-    }
-  }
-  return(temp)
+  prev_answers <- ave(answers, index, FUN = function(x) c(0, head(x, -1)))
+  return(prev_answers)
 }
 
 # computes mean spacing
 meanspacingf <- function(data, index, spacings) {
-  temp <- rep(0, length(data$CF..ansbin.)) # computes mean spacing
-  for (i in unique(index)) {
-    j <- length(temp[index == i])
+  temp <- ave(spacings, index, FUN = function(x) {
+    j <- length(x)
+    tempx <- rep(0,j)
     if (j > 1) {
-      temp[index == i][2] <- -1
+      tempx[2] <- -1
     }
     if (j == 3) {
-      temp[index == i][3] <- spacings[index == i][2]
+      tempx[3] <- x[2]
     }
     if (j > 3) {
-      temp[index == i][3:j] <- cumsum(spacings[index == i][2:(j - 1)]) / (1:(j - 2))
+      tempx[3:j] <- cumsum(x[2:(j - 1)]) / (1:(j - 2))
     }
-  }
-  # runmean(spacings[index==i][2:(j-1)],k=25,alg=c("exact"),align=c("right"))}}
+    tempx
+  })
+
   return(temp)
 }
 
 laggedspacingf <- function(data, index, spacings) {
-  temp <- rep(0, length(data$CF..ansbin.))
-  for (i in unique(index)) {
-    j <- length(temp[index == i])
-    if (j > 1) {
-      temp[index == i][2] <- 0
-    }
-    if (j >= 3) {
-      temp[index == i][3:j] <- spacings[index == i][2:(j - 1)]
-    }
-  }
+
+  temp <- ave(spacings, index, FUN=function(x) c(0, head(x, -1)))
   return(temp)
 }
-
 
 errordec <- function(v, d) {
   w <- length(v)
@@ -1432,29 +1454,37 @@ LKTStartupMessage <- function()
 }
 
 
-#' @title stepLKT
+
+
+
+#' @title buildLKTModel
 #' @description Forward and backwards stepwise search for a set of features and components
 #' @description with tracking of nonlinear parameters.
 #' @param data is a dataset with Anon.Student.Id and CF..ansbin.
-#' @param allcomponents is ....
-#' @param allfeatures is
-#' @param
-#' @param
-#' @param
-#' @param
-#' @param
-#' @param
-#' @param
-#' @param
-#'
-#'
+#' @param allcomponents is search space for LKT components
+#' @param allfeatures is search space for LKT features
+#' @param currentcomponents components to start search from
+#' @param specialcomponents add special components (not crossed with features, only paired with special features 1 for 1)
+#' @param specialfeatures features for each special component (not crossed during search)
+#' @param forv the minimuum amount of improvement needed for the addition of a new term
+#' @param bacv the maximuum amount of loss for a term to be removed
+#' @param currentfeatures features to start search from
+#' @param verbose passed to LKT
+#' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
+#' @param currentfixedpars used for current features as an option to start
+#' @param maxitv passed to LKT
+#' @param itnerc passed to LKT
+#' @param forward TRUE or FALSE
+#' @param backward TRUE or FALSE
+#' @param metric One of "BIC","AUC","AIC", and "RMSE"
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @export
+#' @return list of values "tracetable" and "currentfit"
 #'
-library(crayon)
-library(pROC)
-buildLKTModel <- function(data,specialcomponents=c(),specialfeatures=c(),
-                    allcomponents,currentcomponents=c(),allfeatures,its,forv,bacv,
+buildLKTModel <- function(data,
+                    allcomponents,allfeatures,
+                    currentcomponents=c(),specialcomponents=c(),specialfeatures=c()
+                    ,forv,bacv,
                     currentfeatures=c(),verbose=FALSE,traceCV=TRUE,
                     currentfixedpars =c(),maxitv=10,interc = FALSE,
                     forward= TRUE, backward=TRUE, metric="BIC"){
@@ -1479,10 +1509,11 @@ buildLKTModel <- function(data,specialcomponents=c(),specialfeatures=c(),
 
       if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){
         fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
-    currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+    currentfit<<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
                     components = currentcomponents,
                     features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
                     ,cv=traceCV)
+    stop()
 
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
@@ -1613,7 +1644,7 @@ buildLKTModel <- function(data,specialcomponents=c(),specialfeatures=c(),
       }}
 
     if(!is.atomic(bestmod$optimizedpars)){
-      paramvec<-c(paramvec ,bestmod$optimizedpars$par)}
+      paramvec<-c(paramvec ,NA)}
 
     # retain the best model from forward
     # then assume that model was selected and use its parameters as a basis
@@ -1731,4 +1762,77 @@ buildLKTModel <- function(data,specialcomponents=c(),specialfeatures=c(),
 
 # bin groups of features
 # cat for whether add or removal happens
+
+
+#' @title buildLKTModel
+#' @description Forward and backwards stepwise search for a set of features and components
+#' @description with tracking of nonlinear parameters.
+#' @param data is a dataset with Anon.Student.Id and CF..ansbin.
+#' @param allcomponents is search space for LKT components
+#' @param allfeatures is search space for LKT features
+#' @param currentcomponents components to start search from
+#' @param specialcomponents add special components (not crossed with features, only paired with special features 1 for 1)
+#' @param specialfeatures features for each special component (not crossed during search)
+#' @param forv the minimuum amount of improvement needed for the addition of a new term
+#' @param bacv the maximuum amount of loss for a term to be removed
+#' @param currentfeatures features to start search from
+#' @param verbose passed to LKT
+#' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
+#' @param currentfixedpars used for current features as an option to start
+#' @param maxitv passed to LKT
+#' @param itnerc passed to LKT
+#' @param forward TRUE or FALSE
+#' @param backward TRUE or FALSE
+#' @param metric One of "BIC","AUC","AIC", and "RMSE"
+#' @return data which is the same frame with the added spacing relevant columns.
+#' @export
+#' @return list of values "tracetable" and "currentfit"
+#'
+LASSOLKTModel <- function(data,gridpars,
+                          allcomponents,allfeatures,
+                          specialcomponents=c(),specialfeatures=c(),specialpars=c()){
+
+  allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
+                 "recency","expdecafm","recencysuc","recencyfail","logitdec")
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1)
+
+    cat(white$bgBlack$bold("\nStart making data\n"))
+
+      complist<-c()
+      featlist<-c()
+      allpars<-c()
+      for(i in allcomponents){
+        for(j in allfeatures){
+          if(featpars[match(gsub("[$]","",j),gsub("[$]","",allfeatlist))]==0){
+          complist<-c(complist,i)
+          featlist<-c(featlist,j)} else {
+          #if it has parameters, add for each value in grid
+          complist<-c(complist,rep(i,length(gridpars)))
+          featlist<-c(featlist,rep(j,length(gridpars)))
+          allpars<-c(allpars,gridpars)}
+        }}
+
+      complist<-c(specialcomponents, complist)
+      featlist<-c(specialfeatures, featlist)
+      allpars<-c(specialpars, allpars)
+
+
+
+
+    # retain the best model data
+
+
+  return(
+
+
+
+    LKT(data = data,   components = complist,
+        features = featlist,fixedpars = allpars, nosolve=TRUE)
+  )
+}
+
+
+# bin groups of features
+# cat for whether add or removal happens
+
 

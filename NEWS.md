@@ -17,3 +17,9 @@
 * Updated examples
 * Large test sample added
 * Bugfix for bug in predict function causing random catastrophic failure
+
+# Version 1.5.0
+* computeSpacingPredictors speed upgrade using better functions
+* buildLKT
+* LASSOLKT
+* New examples
