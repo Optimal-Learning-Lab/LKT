@@ -215,7 +215,7 @@ LKT <- function(data,
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
         "powafm", "recency", "recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
-        "logitdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
+        "logitdec","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
         "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe",
         "base5suc", "base5fail", "clogitdec", "crecency"
       )) {
@@ -402,10 +402,10 @@ LKT <- function(data,
                               parc,pard,pare,components[k])",
                                     sep = "")))} else
                                     {
-                                      eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para")){para}else{""}, gsub("[%]", "", components[k]),
-                                                              "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
-                              parc,pard,pare,components[k])",
-                                                              sep = "")))
+                                      eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para"))
+                                        {para}else{""}, gsub("[%]", "", components[k]),
+                                        "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
+                                        parc,pard,pare,components[k])",sep = "")))
                                     }
         }
       }
@@ -496,7 +496,7 @@ LKT <- function(data,
       fitstat <- logLik(temp)
     } else  {
 
-      predictset <- sparse.model.matrix(e$form, e$data)
+      predictset <<- sparse.model.matrix(e$form, e$data)
       predictset.csc <- new("matrix.csc",
                             ra = predictset@x,
                             ja = predictset@i + 1L,
@@ -504,7 +504,7 @@ LKT <- function(data,
                             dimension = predictset@Dim
       )
       predictset.csr <- as.matrix.csr(predictset.csc)
-      predictset2 <- predictset.csr
+      predictset2 <<- predictset.csr
       if(nosolve==FALSE){
         temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
                           bias = bias,
@@ -619,6 +619,7 @@ LKT <- function(data,
       sum("propdec" == gsub("[$]", "", features)) +
       sum("propdec2" == gsub("[$]", "", features)) +
       sum("logitdec" == gsub("[$]", "", features)) +
+      sum("baseratepropdec" == gsub("[$]", "", features)) +
       sum("clogitdec" == gsub("[$]", "", features)) +
       sum("base" == gsub("[$]", "", features)) +
       sum("expdecafm" == gsub("[$]", "", features)) +
@@ -923,6 +924,9 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   if (feat == "logitdec") {
     return(ave(data$CF..ansbin., index, FUN = function(x) slidelogitdec(x, par1)))
   }
+  if (feat == "baseratepropdec") {
+    return(as.numeric(ave(index2, data$Anon.Student.Id, FUN = function(x) baserateslidedec(x, par1))))
+  }
   if (feat == "prop") {
     ifelse(is.nan(data$cor / (data$cor + data$icor)), .5, data$cor / (data$cor + data$icor))
   }
@@ -1211,6 +1215,45 @@ logitdec <- function(v, d) {
   log(corv / incorv)
 }
 
+slidelogitdec <- function(x, d) {
+  v <- c(rep(0, length(x)))
+  for (i in 1:length(x)) {
+    v[i] <- logitdec(x[1:i], d)
+  }
+  return(c(0, v[1:length(x) - 1]))
+}
+
+baseratepropdec <- function(v, d) {
+  w <- length(v)
+  targetvalue <- v[w]
+  print(v)
+  v <- v==targetvalue
+  print(v)
+  corv <- sum(c(1, v[1:w]) * d^(w:0))
+  incorv <- sum(c(1, abs(v[1:w] - 1)) * d^(w:0))
+  log(corv / incorv)
+}
+
+baseratepropdec <- function(v, d) {
+  w <- length(v)
+  targetvalue <- v[w]
+  #print(v)
+  v <- v==targetvalue
+ #print(v)
+  corv <- sum((v[1:w-1]) * d^((w-1):1))
+  incorv <- sum(d^((w + 2):1))
+#  print(corv/incorv)
+  (corv / incorv)
+}
+
+baserateslidedec <- function(x, d) {
+  v <- c(rep(0, length(x)))
+  for (i in 1:length(x)) {
+    v[i] <- baseratepropdec(x[1:i], d)
+  }
+  return(v[1:length(x) ])
+}
+
 # exponential decay for sequence
 slideexpdec <- function(x, d) {
   v <- c(rep(0, length(x)))
@@ -1237,13 +1280,7 @@ slidepropdec2 <- function(x, d) {
   return(c(0, v[1:length(x) - 1]))
 }
 
-slidelogitdec <- function(x, d) {
-  v <- c(rep(0, length(x)))
-  for (i in 1:length(x)) {
-    v[i] <- logitdec(x[1:i], d)
-  }
-  return(c(0, v[1:length(x) - 1]))
-}
+
 
 slidelogitdec <- function(x, d) {
   v <- c(rep(0, length(x)))

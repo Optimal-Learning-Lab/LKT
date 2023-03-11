@@ -84,7 +84,7 @@ Get the data free:
 
 str(modelob)
 ```
-# Additive Factors Model (AFM) fixed effect version
+# example for the nosolve parameter to make it return the model matrix
 
 ```{r, echo=TRUE}
     modelob <- LKT(
@@ -430,65 +430,33 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-      features = c("intercept", "intercept", "propdec2","recency"),
+      features = c("intercept","intercept",  "intercept", "propdec2","recency"),
       fixedpars=c(NA,NA),maxitv=5)
 ```
 
+#brpropdec
+```{r, echo=TRUE}
+    modelob <- LKT(
+      data = val, interc=TRUE,dualfit = TRUE,
+      components = c("KC..Default.","Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("baseratepropdec", "logitdec", "logitdec","recency"),fixedpars =c(0.988209,0.9690458,0.9004974,0.2603806))
+print(modelob$coefs)
+cat("\n")
+```
 
 
-# Adaptive Knowledge Tracing
+# Simple Optimization
 
 ```{r, echo=TRUE}
- modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("intercept","intercept", "linesuc", "linefail","recency"),fixedpars =c(0.2843158))
-print(modelob$coefs)
-cat("\n")
-
-    modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec", "linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.2843158))
-print(modelob$coefs)
-cat("\n")
-
-modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","intercept","linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.44))
-print(modelob$coefs)
-cat("\n")
 
 
     modelob <- LKT(
-      data = val, interc=TRUE,
+      data = val, interc=TRUE,dualfit = TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("logitdec","linesuc","recency"),fixedpars =c(0.9673974,0.47))
-print(modelob$coefs)
-val$pred<-modelob$prediction
-cat("\n")
-
-    modelob <- LKT(
-      data = val, interc=TRUE,dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcorComp","recency"),fixedpars =c(0.9642107,0.4797579))
+      features = c("logitdec", "logitdec","recency"),seedpars =c(0.9673974,0.7943158,.27))
 print(modelob$coefs)
 cat("\n")
 
-    modelob <- LKT(
-      data = val, interc=TRUE, dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcorComp","recencysuc","recencyfail"),fixedpars =c(0.9682298,0.1870481,0.5788126))
-print(modelob$coefs)
-cat("\n")
-
-    modelob <- LKT(
-      data = val, interc=TRUE, dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcor1","diffcor2","recencysuc","recencyfail"),fixedpars =c(0.967,0.184,0.579))
-print(modelob$coefs)
-cat("\n")
 
 val$pred2<-modelob$prediction
 
@@ -507,48 +475,6 @@ tdata$tot<-tdata$tot+countOutcome(tdata,tdata$index,"INCORRECT")
 plot(aggregate(CF..ansbin. ~tot , tdata , FUN= "mean" ),ylim=c(0,1))
 points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
 
-
-
-
-pv <- 1:100 / 100
-fixedcost <- 26.5
-scal <- .792
-const <- 6.4
-
-F6 <- -1.44
-F5 <- 1.48
-gains = pv * (F5 * pv + F6 * pv ^ 2) + (1 - pv) * 0
-
-
-plot(
-  pv,
-  gains ,
-  type = "n",
-  xlab = "Difficulty of practice trial",
-  ylab = "Logit gain from trial",
-  main = "Cloze Difficulty Effect"
-)
-lines(pv, gains, lwd = 3, col = "red")
-
-plot(
-  pv,
-  gains / (pv * (const + scal * exp(-qlogis(
-    pv
-  ))) + (1 - pv) * (fixedcost)),
-  type = "n",  xlab = "Difficulty of practice trial (probabilty of success)",
-  ylab = "Logit gain per second of practice"
-)#     main="Cloze Efficiency")
-lines(pv, gains / (pv * (const + scal * exp(-qlogis(pv))) +
-                     (1 - pv) * (fixedcost)), lwd = 3, col = "red")
-
-
-
-pv[which((gains / (
-  pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
-)) ==
-  max((gains / (
-    pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
-  ))))]
 
 
 ```
@@ -879,141 +805,6 @@ par(mar=c(16, 5, 1, 1))
 
 
 
-
-#Carvalho Data
-```{r, echo=TRUE}
-library(plyr)
-#This function is for the model prediction
-
-
-# so there is 500ms, RT, then 2000ms if wrong then 
-mdatax<-function(data,pred){
-  data$pred<-modelob$prediction
-  mdat <- ddply(data, c("itemtype", "similarity","practice","Anon.Student.Id","studied"), summarise,
-                mean = mean(pred))
-  names(mdat)[names(mdat)=="mean"]<-"pred"
-  mdata<-ddply(mdat, c("itemtype", "similarity","practice","studied"), summarise,
-               N    = length(pred),
-               mean = mean(pred),
-               sd   = sd(pred),
-               se   = sd / sqrt(N)
-  )
-  mdata$type<-"model"
-  mdata<-mdata
-}
-
-emplot <- function(empiricaldata, modeldata,modelname){
-  print(cor(modeldata$mean,empiricaldata$mean))
-  plot <- ggplot(empiricaldata, aes(x=similarity, y=mean,fill = practice)) +
-    geom_bar(position="dodge",stat="identity",color="black",alpha=0.4) +
-    coord_cartesian(ylim = c(0,1), expand = TRUE) +
-    geom_errorbar(data = empiricaldata,aes(ymax = mean + se, ymin= mean - se, width=0.2),position=position_dodge(width = 0.90)) +
-    geom_point(data = modeldata, aes(x=similarity, y=mean,group = practice,colour=practice),position=position_dodge(width = 0.90),size=4) +
-    geom_errorbar(data = modeldata, aes(ymax = mean + se, ymin= mean - se, width=0.2,colour=practice),position=position_dodge(width = 0.90)) +
-    scale_colour_manual(values=c("#e66101","#b2abd2")) +
-    labs(title=modelname,x="Category Structure",y="Probability of Correct Classification") + theme_bw() +  
-    theme(legend.position="right",legend.title = element_blank(),panel.grid.major = element_blank(),panel.grid.minor=element_blank(),panel.background=element_blank()) +
-    scale_fill_manual(values=c("#e66101","#b2abd2")) +
-    theme(legend.position = c(0.1,0.9))
-  plot + facet_grid(. ~ itemtype,as.table = T)
-}
-#
-dat<-Paulodata
-
-dat$Duration..sec.<-(dat$RT+1500+ifelse(dat$CF..ansbin.==0,2000,0))/1000
-#This function is for the plot
-
-cat2<-dat$Category
-dat<-computeSpacingPredictors(dat,"Category")
-
-dat<-computeSpacingPredictors(dat,"cat2")
-dat<-computeSpacingPredictors(dat,"Anon.Student.Id")
-dat<-computeSpacingPredictors(dat,"Problem.Name")
-dat<-computeSpacingPredictors(dat,"similarity")
-
-dat$spac<-ifelse(dat$Categorymeanspacing<1,0,log(dat$Categorymeanspacing+1))
-dat$spaclin<-ifelse(dat$Categorymeanspacing<1,0,dat$Categorymeanspacing+1)
-
-#This is for the real data
-emdat <- ddply(dat, c("itemtype", "similarity","practice","Anon.Student.Id","studied"), summarise,
-               mean = mean(CF..ansbin.)
-)
-names(emdat)[names(emdat)=="mean"]<-"empred"
-
-emdata<-ddply(emdat, c("itemtype", "similarity","practice","studied"), summarise,
-              N    = length(empred),
-              mean = mean(empred),
-              sd   = sd(empred),
-              se   = sd / sqrt(N)
-)
-emdata$type<-"emmodel"
-emdata1<-emdata[17:24,]
-
-dat$dum<-ifelse(dat$spac==0,1,0)
-
-
-
-
-modelob <- LKT(#connectors = c("+","*","+","+","+","+","+"),
-  data = dat, interc=TRUE,verbose=T,
-  components = c("Category","Category","Problem.Name","Problem.Name","Anon.Student.Id"),
-  #covariates=c("similarity",NA,"similarity",NA,NA,NA),
-  features = c("recency","logitdec","recency","logitdec","logitdec"),fixedpars=c(0.5833941,0.9152019,0.3662952,0.7435518,0.9456435)
-)
-
-dat$pred1<-modelob$prediction
-mdata1<-mdatax(dat,pred1)
-mdata11<-mdata1[17:24,]
-cor(mdata1$mean,emdata$mean)
-emplot(emdata1,mdata11,"PFA-Categorization")  #the plot of posttest
-emplot(emdata,mdata1,"PFA-Categorization")      #the plot of all the sessions
-
-
-
-modelob <- LKT(#connectors = c("+","*","+","+","+","+","+"),
-  data = dat, interc=TRUE,verbose=T,
-  components = c("Category","Category","Problem.Name","Problem.Name","Anon.Student.Id","similarity"),
-  covariates=c("similarity",NA,"similarity",NA,NA,NA),
-  features = c("recency","logitdec","recency","logitdec","logitdec","intercept"),fixedpars=c(0.5833941,0.9152019,0.3662952,0.7435518,0.9456435)
-)
-
-dat$pred1<-modelob$prediction
-mdata1<-mdatax(dat,pred1)
-mdata11<-mdata1[17:24,]
-cor(mdata1$mean,emdata$mean)
-emplot(emdata1,mdata11,"PFA-Categorization")  #the plot of posttest
-emplot(emdata,mdata1,"PFA-Categorization")      #the plot of all the sessions
-
-modelob <- LKT(#connectors = c("+","*","+","+","+","+","+"),
-  data = dat, interc=TRUE,verbose=T,
-  components = c("Category","Category","Problem.Name","Problem.Name","Anon.Student.Id","similarity"),
-  covariates=c("similarity*practice",NA,"similarity*practice",NA,NA,NA),
-  features = c("recency","logitdec","recency","logitdec","logitdec","intercept"),fixedpars=c(0.5833941,0.9152019,0.3662952,0.7435518,0.9456435)
-)
-
-dat$pred1<-modelob$prediction
-mdata1<-mdatax(dat,pred1)
-mdata11<-mdata1[17:24,]
-cor(mdata1$mean,emdata$mean)
-emplot(emdata1,mdata11,"PFA-Categorization")  #the plot of posttest
-emplot(emdata,mdata1,"PFA-Categorization")      #the plot of all the sessions
-
-
-modelob <- LKT(#connectors = c("+","*","+","+","+","+","+"),
-  data = dat, interc=TRUE,verbose=T,
-  components = c("Category","Category","Problem.Name","Problem.Name","Anon.Student.Id","similarity","dum"),
-  covariates=c("similarity*spac",NA,"similarity*spac",NA,NA,NA,NA),
-  features = c("recency","logitdec","recency","logitdec","logitdec","intercept","intercept"),fixedpars=c(0.5833941,0.9152019,0.3662952,0.7435518,0.9456435)
-)
-
-dat$pred1<-modelob$prediction
-mdata1<-mdatax(dat,pred1)
-mdata11<-mdata1[17:24,]
-cor(mdata1$mean,emdata$mean)
-emplot(emdata1,mdata11,"PFA-Categorization")  #the plot of posttest
-emplot(emdata,mdata1,"PFA-Categorization")      #the plot of all the sessions
-
-```
 
 
 
