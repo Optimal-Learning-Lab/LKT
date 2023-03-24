@@ -2,6 +2,7 @@
 #' @importFrom methods new
 #' @importFrom stats aggregate as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
 #' @importFrom utils packageVersion
+#' @importFrom graphics axis legend matplot mtext par
 
 #' @title computeSpacingPredictors
 #' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
@@ -64,6 +65,8 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param autoKC a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters
 #' @param autoKCcont a vector of text strings set to "rand" for component to make autoKC assignment to cluster is randomized (for comaprison)
 #' @param connectors a vector if linear equation R operators including +, * and :
+#' @param nosolve causes the function to return a sparse data matrix of the features, rather than a solution
+#' @param factrv controls the optim() function
 #' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 #' @export
 #' @examples
@@ -158,6 +161,7 @@ LKT <- function(data,
                 maketimes = FALSE,
                 bias = 0,
                 maxitv=100,
+                factrv=1e12,
                 nosolve=FALSE,
                 autoKC=rep(0,length(components)),
                 autoKCcont = rep("NA",length(components)),
@@ -496,7 +500,7 @@ LKT <- function(data,
       fitstat <- logLik(temp)
     } else  {
 
-      predictset <<- sparse.model.matrix(e$form, e$data)
+      predictset <- sparse.model.matrix(e$form, e$data)
       predictset.csc <- new("matrix.csc",
                             ra = predictset@x,
                             ja = predictset@i + 1L,
@@ -504,7 +508,7 @@ LKT <- function(data,
                             dimension = predictset@Dim
       )
       predictset.csr <- as.matrix.csr(predictset.csc)
-      predictset2 <<- predictset.csr
+      predictset2 <- predictset.csr
       if(nosolve==FALSE){
         temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
                           bias = bias,
@@ -607,47 +611,17 @@ LKT <- function(data,
       colnames(predictset),predictset2)}
   }
   if(nosolve==FALSE){
-    # count # of parameters
-    parlength <-
-      sum("powafm" == gsub("[$]", "", features)) +
-      sum("recency" == gsub("[$]", "", features)) +
-      sum("crecency" == gsub("[$]", "", features)) +
-      sum("recencysuc" == gsub("[$]", "", features)) +
-      sum("recencyfail" == gsub("[$]", "", features)) +
-      sum("logit" == gsub("[$]", "", features)) +
-      sum("errordec" == gsub("[$]", "", features)) +
-      sum("propdec" == gsub("[$]", "", features)) +
-      sum("propdec2" == gsub("[$]", "", features)) +
-      sum("logitdec" == gsub("[$]", "", features)) +
-      sum("baseratepropdec" == gsub("[$]", "", features)) +
-      sum("clogitdec" == gsub("[$]", "", features)) +
-      sum("base" == gsub("[$]", "", features)) +
-      sum("expdecafm" == gsub("[$]", "", features)) +
-      sum("expdecsuc" == gsub("[$]", "", features)) +
-      sum("expdecfail" == gsub("[$]", "", features)) +
-      sum("base2" == gsub("[$]", "", features)) * 2 +
-      sum("base4" == gsub("[$]", "", features)) * 4 +
-      sum("ppe" == gsub("[$]", "", features)) * 4 +
-      sum("basefail" == gsub("[$]", "", features)) +
-      sum("basesuc" == gsub("[$]", "", features)) +
-      sum("base2suc" == gsub("[$]", "", features)) * 2 +
-      sum("base2fail" == gsub("[$]", "", features)) * 2 +
-      sum("dashafm" == gsub("[$]", "", features)) +
-      sum("dashsuc" == gsub("[$]", "", features)) +
-      sum("dashfail" == gsub("[$]", "", features)) +
-      sum("base5suc" == gsub("[$]", "", features)) * 5 +
-      sum("base5fail" == gsub("[$]", "", features)) * 5 -
-      sum(!is.na(e$fixedpars))
 
-    # number of seeds is just those pars specified and not fixed
+    # number of seeds is those pars specified and not fixed
     seeds <- e$seedpars[is.na(e$fixedpars)]
     seeds[is.na(seeds)] <- .5 # if not set seeds set to .5
 
     # optimize the model
-    if (parlength > 0) {
-      optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb, upper = highb, control = list(maxit = maxitv))
+    if (sum(!is.na(seeds)) > 0) {
+      optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb,
+                             upper = highb, control = list(maxit = maxitv,factr = factrv))
     } else
-      # no nolinear parameters
+      # no nolinear parameters fit
     {
       modelfun(numeric(0))
     }
@@ -661,8 +635,7 @@ LKT <- function(data,
         cat(paste("Failure latency: ", failureLatency, "\n"))
         cat(paste("Latency Scalar: ", Scalar, "\n",
                   "Latency Intercept: ", Intercept, "\n",
-                  sep = ""
-        ))
+                  sep = ""))
       }
     }
 
@@ -682,22 +655,19 @@ LKT <- function(data,
       } else NA,
       "studentRMSE" = if ("pred" %in% colnames(e$data)) {
         aggregate((e$data$pred - e$data$CF..ansbin.)^2,
-                  by = list(e$data$Anon.Student.Id), FUN = mean
-        )
-      },
+                  by = list(e$data$Anon.Student.Id), FUN = mean)
+        },
       "newdata" = e$data,
       "cv_res" = e$cv_res,
       "loglike" = e$loglike,
       "automat" = e$df
     )
-    results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])}else{
-
+    results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])}
+  else{
       results <- list(
         "lassodata"=modelfun(numeric(0)))}
-
   return(results)
 }
-
 
 #' @title computefeatures
 #' @description Compute feature describing prior practice effect.
@@ -999,13 +969,19 @@ slice <- function(tSparse, index) {
 #' @param response the actually response value being counted
 #' @return the vector of the lagged cumulative sum.
 #' @export
-countOutcome <- function(data, index, response) {
+countOutcomeold <- function(data, index, response) {
   temp <- Outcome <- NULL
   data[, temp := cumsum(Outcome == response), by = index]
   data[Outcome == response, temp := temp - 1, by = index]
   data$temp
 }
 
+countOutcome <- function(data, index, response) {
+  temp <- Outcome <- NULL
+  data[, temp := cumsum(Outcome == response), by = index]
+  data[Outcome == response, temp := temp - 1]
+  return(data$temp)
+}
 
 
 countOutcomeDash <- function(times, scalev) {
@@ -1180,6 +1156,7 @@ errordec <- function(v, d) {
   w <- length(v)
   sum((c(0, v[1:w]) * d^((w):0)) / sum(d^((w + 1):0)))
 }
+
 slideerrordec <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x)) {
@@ -1215,10 +1192,20 @@ logitdec <- function(v, d) {
   log(corv / incorv)
 }
 
-slidelogitdec <- function(x, d) {
+
+
+slidelogitdecfree <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x)) {
     v[i] <- logitdec(x[1:i], d)
+  }
+  return(c(0, v[1:length(x) - 1]))
+}
+
+slidelogitdec <- function(x, d) {
+  v <- c(rep(0, length(x)))
+  for (i in 1:length(x)) {
+    v[i] <- logitdec(x[max(1, i - 60):i], d)
   }
   return(c(0, v[1:length(x) - 1]))
 }
@@ -1282,15 +1269,6 @@ slidepropdec2 <- function(x, d) {
 
 
 
-slidelogitdec <- function(x, d) {
-  v <- c(rep(0, length(x)))
-  for (i in 1:length(x)) {
-    v[i] <- logitdec(x[max(1, i - 60):i], d)
-  }
-  return(c(0, v[1:length(x) - 1]))
-}
-
-
 # PPE weights
 ppew <- function(times, wpar) {
   times^-wpar *
@@ -1322,8 +1300,6 @@ slideppetw <- function(x, d) {
   return(c(v[1:length(x)]))
 }
 
-
-
 # tkt main function
 baselevel <- function(x, d) {
   l <- length(x)
@@ -1350,11 +1326,9 @@ smallSet <- function(data, nSub) {
   return(smalldata)
 }
 
-
 texteval <- function(stringv) {
   eval(parse(text = stringv))
 }
-
 
 #' @title ViewExcel
 #' @export
@@ -1404,7 +1378,6 @@ LKT_HDI <- function(dat,n_boot,n_students,components,features,covariates,fixedpa
   return(list("par_reps" = par_reps,"mod_full" = mod_full, coef_hdi = get_hdi(par_reps, cred_mass = .95)))
 }
 
-
 LKTStartupMessage <- function()
 {
   # > figlet -f doom LKT
@@ -1434,11 +1407,9 @@ LKTStartupMessage <- function()
   invisible()
 }
 
-
-
-
-
 #' @title buildLKTModel
+#' @import pROC
+#' @import crayon
 #' @description Forward and backwards stepwise search for a set of features and components
 #' @description with tracking of nonlinear parameters.
 #' @param data is a dataset with Anon.Student.Id and CF..ansbin.
@@ -1454,14 +1425,12 @@ LKTStartupMessage <- function()
 #' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
 #' @param currentfixedpars used for current features as an option to start
 #' @param maxitv passed to LKT
-#' @param itnerc passed to LKT
+#' @param interc passed to LKT
 #' @param forward TRUE or FALSE
 #' @param backward TRUE or FALSE
 #' @param metric One of "BIC","AUC","AIC", and "RMSE"
-#' @return data which is the same frame with the added spacing relevant columns.
-#' @export
 #' @return list of values "tracetable" and "currentfit"
-#'
+#' @export
 buildLKTModel <- function(data,
                           allcomponents,allfeatures,
                           currentcomponents=c(),specialcomponents=c(),specialfeatures=c()
@@ -1490,11 +1459,10 @@ buildLKTModel <- function(data,
 
       if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){
         fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
-    currentfit<<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+    currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
                      components = currentcomponents,
                      features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
                      ,cv=traceCV)
-    stop()
 
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
@@ -1730,11 +1698,9 @@ buildLKTModel <- function(data,
 }
 
 
-# bin groups of features
-# cat for whether add or removal happens
 
-
-#' @title buildLKTModel
+#' @title LASSOLKTModel
+#' @import crayon
 #' @description Forward and backwards stepwise search for a set of features and components
 #' @description with tracking of nonlinear parameters.
 #' @param data is a dataset with Anon.Student.Id and CF..ansbin.
@@ -1755,9 +1721,8 @@ buildLKTModel <- function(data,
 #' @param backward TRUE or FALSE
 #' @param metric One of "BIC","AUC","AIC", and "RMSE"
 #' @return data which is the same frame with the added spacing relevant columns.
-#' @export
 #' @return list of values "tracetable" and "currentfit"
-#'
+#' @export
 LASSOLKTModel <- function(data,gridpars,
                           allcomponents,allfeatures,
                           specialcomponents=c(),specialfeatures=c(),specialpars=c()){
@@ -1785,17 +1750,8 @@ LASSOLKTModel <- function(data,gridpars,
   complist<-c(specialcomponents, complist)
   featlist<-c(specialfeatures, featlist)
   allpars<-c(specialpars, allpars)
-
-
-
-
   # retain the best model data
-
-
   return(
-
-
-
     LKT(data = data,   components = complist,
         features = featlist,fixedpars = allpars, nosolve=TRUE)
   )

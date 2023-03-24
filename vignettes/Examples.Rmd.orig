@@ -17,8 +17,7 @@ knitr::opts_chunk$set(
   fig.path = "vigfig-"
 )
     library(LKT)
-    library(data.table)
-    library(ggplot2)
+# precomptued as per https://ropensci.org/blog/2019/12/08/precompute-vignettes/
 ```
 
 
@@ -56,6 +55,10 @@ Get the data free:
 
     # this function needs times and durations but you don't need it if you don't want to model time effects
     val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, forgetting features to run
+    val <- computeSpacingPredictors(val, "KC..Cluster.") #allows recency, spacing, forgetting features to run
+    val <- computeSpacingPredictors(val, "Anon.Student.Id") #allows recency, spacing, forgetting features to run
+
+    val <- computeSpacingPredictors(val, "CF..Correct.Answer.") #allows recency, spacing, forgetting features to run
 ```
 
 # Additive Factors Model (AFM) fixed effect version
@@ -66,14 +69,33 @@ Get the data free:
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
       features = c("intercept", "intercept", "lineafm"))
 ```
+# example of LASSOLKT
+
+```{r, echo=TRUE}
+    modelob <- LASSOLKTModel(
+      data = val, gridpars=(1:9)/10,
+      allcomponents = c("Anon.Student.Id","KC..Default."),
+      allfeatures = c("intercept", "lineafm$","linefail","recency"))
+
+
+str(modelob)
+```
+# example for the nosolve parameter to make it return the model matrix
+
+```{r, echo=TRUE}
+    modelob <- LKT(
+      data = val, interc=FALSE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
+```
 
 # Performance Factors Analysis (PFA) fixed effect version
 
 ```{r, echo=TRUE}
-    modelob <- LKT(
+   system.time( modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-      features = c("intercept", "intercept", "linesuc$","linefail$"))
+      features = c("intercept", "intercept", "linesuc$","linefail$")))
     # have to have prior predictions in data to do the next model in and adaptive system
     #   this needs to be added to the data with a first model like this
     val$pred<-modelob$prediction
@@ -120,11 +142,11 @@ Get the data free:
 
 ```{r, echo=TRUE}
 
-modelob <- LKT(
+system.time( modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.","KC..Cluster."),
       features = c("intercept", "intercept", "logitdec","recency","logitdec"),
-      fixedpars=c(.9,.5,.5))
+      seedpars=c(.9,.5,.5)))
 ```
 
 # Performance Prediction Equation (PPE)
@@ -134,7 +156,7 @@ modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
       features = c("intercept", "intercept", "ppe","logitdec"),
-      fixedpars=c(0.3491901,0.2045801,1e-05,0.9734477,0.4443027))
+      seedpars=c(0.3491901,0.2045801,1e-05,0.9734477,0.4443027))
 ```
 
 # base4
@@ -404,65 +426,31 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-      features = c("intercept", "intercept", "propdec2","recency"),
+      features = c("intercept","intercept",  "intercept", "propdec2","recency"),
       fixedpars=c(NA,NA),maxitv=5)
 ```
 
+#brpropdec
+```{r, echo=TRUE}
+    modelob <- LKT(
+      data = val, interc=TRUE,dualfit = TRUE,
+      components = c("KC..Default.","Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("baseratepropdec", "logitdec", "logitdec","recency"),fixedpars =c(0.988209,0.9690458,0.9004974,0.2603806))
+print(modelob$coefs)
+cat("\n")
+```
 
 
-# Adaptive Knowledge Tracing
+# Simple adaptive model for practice optimization
 
 ```{r, echo=TRUE}
- modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("intercept","intercept", "linesuc", "linefail","recency"),fixedpars =c(0.2843158))
-print(modelob$coefs)
-cat("\n")
-
     modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec", "linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.2843158))
-print(modelob$coefs)
-cat("\n")
-
-modelob <- LKT(
-      data = val, interc=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","intercept","linesuc", "linefail","recency"),fixedpars =c(0.9673974,0.44))
-print(modelob$coefs)
-cat("\n")
-
-
-    modelob <- LKT(
-      data = val, interc=TRUE,
+      data = val, interc=TRUE,dualfit = TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("logitdec","linesuc","recency"),fixedpars =c(0.9673974,0.47))
-print(modelob$coefs)
-val$pred<-modelob$prediction
-cat("\n")
-
-    modelob <- LKT(
-      data = val, interc=TRUE,dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcorComp","recency"),fixedpars =c(0.9642107,0.4797579))
+      features = c("logitdec", "logitdec","recency"),fixed =c(0.9677064,0.7955477,0.276081))
 print(modelob$coefs)
 cat("\n")
 
-    modelob <- LKT(
-      data = val, interc=TRUE, dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcorComp","recencysuc","recencyfail"),fixedpars =c(0.9682298,0.1870481,0.5788126))
-print(modelob$coefs)
-cat("\n")
-
-    modelob <- LKT(
-      data = val, interc=TRUE, dualfit=TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
-      features = c("logitdec","diffcor1","diffcor2","recencysuc","recencyfail"),fixedpars =c(0.967,0.184,0.579))
-print(modelob$coefs)
-cat("\n")
 
 val$pred2<-modelob$prediction
 
@@ -483,46 +471,117 @@ points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
 
 
 
-
-pv <- 1:100 / 100
-fixedcost <- 26.5
-scal <- .792
-const <- 6.4
-
-F6 <- -1.44
-F5 <- 1.48
-gains = pv * (F5 * pv + F6 * pv ^ 2) + (1 - pv) * 0
+```
 
 
-plot(
-  pv,
-  gains ,
-  type = "n",
-  xlab = "Difficulty of practice trial",
-  ylab = "Logit gain from trial",
-  main = "Cloze Difficulty Effect"
-)
-lines(pv, gains, lwd = 3, col = "red")
+#Build LKT with special feature
+```{r, echo=TRUE}
 
-plot(
-  pv,
-  gains / (pv * (const + scal * exp(-qlogis(
-    pv
-  ))) + (1 - pv) * (fixedcost)),
-  type = "n",  xlab = "Difficulty of practice trial (probabilty of success)",
-  ylab = "Logit gain per second of practice"
-)#     main="Cloze Efficiency")
-lines(pv, gains / (pv * (const + scal * exp(-qlogis(pv))) +
-                     (1 - pv) * (fixedcost)), lwd = 3, col = "red")
+q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency.",specialfeatures = "numer",
+      allcomponents = c("Anon.Student.Id", "KC..Default."),traceCV=TRUE,
+      currentcomponents = c(),forv=100,bacv=80,
+      allfeatures = c("lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec","recencysuc","recencyfail"),
+      currentfeatures = c( ),currentfixedpars = c(),forward=TRUE,backward=TRUE,
+      maxitv=1,verbose=FALSE)
+```
 
 
+#Load MATHia
+```{r, echo=TRUE}
 
-pv[which((gains / (
-  pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
-)) ==
-  max((gains / (
-    pv * (const + scal * exp(-qlogis(pv))) + (1 - pv) * (fixedcost)
-  ))))]
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
+val2=as.data.table(val2)
+val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$Time),format="%Y-%m-%d %H:%M:%S"))
 
+    #make sure it is ordered in the way the code expects
+    val2<-val2[order(val2$Anon.Student.Id, val2$CF..Time.),]
 
+    #create a binary response column to predict and extract only data with a valid value
+
+    val2$Outcome<-ifelse(tolower(val2$Outcome)=="ok","CORRECT","INCORRECT")
+    val2$CF..ansbin.<-ifelse(tolower(val2$Outcome)=="correct",1,0)
+    val2<-val2[val2$CF..ansbin==0 | val2$CF..ansbin.==1,]
+
+#subtot<-  aggregate(val2$CF..ansbin.,by=list(val2$Anon.Student.Id),FUN=length)
+ # subtot<- subtot[subtot$x<20,]
+   # val2<-val2[!(val2$Anon.Student.Id %in% subtot$Group.1),]
+    val2<-val2[val2$Attempt.At.Step==1,]
+        val2<-val2[val2$KC..MATHia.!="",]
+     val2 <- suppressWarnings(computeSpacingPredictors(val2, "KC..MATHia.")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Problem.Name")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Anon.Student.Id")) #allows recency, spacing, forgetting features to run
+```
+
+#AFMstartMATHia
+```{r, echo=TRUE}
+AFMstartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..MATHia.","Problem.Name"),
+      currentcomponents = c("Anon.Student.Id","KC..MATHia.","KC..MATHia."),
+      forv=5000,bacv=5000,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+      traceCV=FALSE,maxitv=8,
+      currentfeatures = c("intercept", "intercept", "lineafm$"))
+```
+
+#BestLRstartMATHia
+```{r, echo=TRUE}
+BestLRstartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..MATHia.","Problem.Name"),
+      currentcomponents = c("Anon.Student.Id","Problem.Name","Anon.Student.Id","Anon.Student.Id","KC..MATHia.","KC..MATHia.","KC..MATHia."),
+      forv=5000,bacv=5000,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+      traceCV=FALSE,maxitv=8,
+      currentfeatures = c("intercept", "intercept", "logsuc", "logfail","intercept",
+                          "logsuc$", "logfail$"))
+
+```
+
+#EmptystartMATHia
+```{r, echo=TRUE}
+EmptystartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..MATHia.","Problem.Name"),
+      forv=5000,bacv=5000,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+      traceCV=FALSE,maxitv=8)
+```
+
+#AFMstartCloze
+```{r, echo=TRUE}
+
+AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
+      currentcomponents = c("Anon.Student.Id","KC..Cluster.","KC..Cluster.","CF..Correct.Answer.","CF..Correct.Answer."),forv=5000,bacv=5000,
+
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),traceCV=TRUE,maxitv=8,
+      currentfeatures = c("intercept", "intercept",         "lineafm$", "intercept",         "lineafm$"),metric="BIC")
+
+```
+
+#BestLRstartCloze
+```{r, echo=TRUE}
+BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
+      currentcomponents = c("Anon.Student.Id","KC..Default.","Anon.Student.Id","Anon.Student.Id","KC..Cluster.","KC..Cluster.",
+                            "KC..Cluster.","CF..Correct.Answer.","CF..Correct.Answer.","CF..Correct.Answer."),
+      forv=5000,bacv=5000,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+      traceCV=TRUE,maxitv=8,
+     currentfeatures = c("intercept", "intercept", "logsuc", "logfail","intercept", "logsuc$",
+                          "logfail$","intercept", "logsuc$", "logfail$"))
+```
+
+#EmptystartCloze
+```{r, echo=TRUE}
+EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
+      forv=5000,bacv=5000,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+      traceCV=TRUE,maxitv=8)
 ```

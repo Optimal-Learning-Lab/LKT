@@ -1,6 +1,6 @@
 Package: LKT
 Title: Logistic Knowledge Tracing
-Version: 1.3.0
+Version: 1.5.0
 Authors@R: 
     c(person(given = "Philip I.",
            family = "Pavlik Jr.",
@@ -26,16 +26,17 @@ Depends:
     methods,
     Matrix,
     data.table (>= 1.13.2),
-    LiblineaR (>= 2.10-8),
-    HDInterval (>= 0.2.2)
+    LiblineaR (>= 2.10-8)
 Imports:
     glmnet (>= 4.0-2),
     glmnetUtils (>= 1.1.8),
     lme4 (>= 1.1-23),
-    cluster (>= 2.1.3)
+    cluster (>= 2.1.3),
+    pROC (>= 1.16.2),
+    crayon,
+    HDInterval (>= 0.2.2)
 Suggests: 
     rmarkdown,
-    pROC (>= 1.16.2),
     knitr,
     utils,
     caret,

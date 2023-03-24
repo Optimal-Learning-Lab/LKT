@@ -15,7 +15,6 @@ LKT(
   dualfit = FALSE,
   interc = FALSE,
   cv = FALSE,
-  elastic = FALSE,
   verbose = TRUE,
   epsilon = 1e-04,
   cost = 512,
@@ -25,9 +24,11 @@ LKT(
   maketimes = FALSE,
   bias = 0,
   maxitv = 100,
+  factrv = 1e+12,
+  nosolve = FALSE,
   autoKC = rep(0, length(components)),
   autoKCcont = rep("NA", length(components)),
-  connectors = rep("+", length(components) - 1)
+  connectors = rep("+", max(1, length(components) - 1))
 )
 }
 \arguments{
@@ -51,8 +52,6 @@ LKT(
 
 \item{cv}{TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds}
 
-\item{elastic}{glmnet, cv.glmnet, cva.glmnet or FALSE.}
-
 \item{verbose}{provides more output in some cases.}
 
 \item{epsilon}{passed to LiblineaR}
@@ -70,6 +69,10 @@ LKT(
 \item{bias}{passed to LiblineaR}
 
 \item{maxitv}{passed to nonlinear optimization a maxit control}
+
+\item{factrv}{controls the optim() function}
+
+\item{nosolve}{causes the function to return a sparse data matrix of the features, rather than a solution}
 
 \item{autoKC}{a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters}
 
