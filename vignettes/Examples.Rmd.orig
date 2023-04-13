@@ -75,7 +75,7 @@ Get the data free:
     modelob <- LASSOLKTModel(
       data = val, gridpars=(1:9)/10,
       allcomponents = c("Anon.Student.Id","KC..Default."),
-      allfeatures = c("intercept", "lineafm$","linefail","recency"))
+      allfeatures = c( "lineafm","linesuc","linefail","recency"),target_n = 5)
 
 
 str(modelob)

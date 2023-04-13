@@ -69,79 +69,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param factrv controls the optim() function
 #' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 #' @export
-#' @examples
-#' temp <- samplelkt
-#' temp$CF..ansbin.<-ifelse(temp$Outcome=="CORRECT",1,ifelse(temp$Outcome=="INCORRECT",0,-1))
-#' temp <- data.table::setDT(temp)
-#' temp <- computeSpacingPredictors(temp, "KC..Default.")
-#' temp <- temp[temp$CF..ansbin==0 | temp$CF..ansbin.==1,]
-#' temp$KC..Default.<-substr(temp$KC..Default.,1,10)
-#' modelob <- LKT(
-#'   data = temp, interc=TRUE,
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("logitdec", "logitdec", "lineafm"),
-#'   fixedpars = c(.9, .85)
-#' )
-#' print(modelob$coefs)
-#' print(modelob$loglik)
-#'
-#' modelob <- LKT(
-#'   data = temp, interc=TRUE,
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("logitdec", "logitdec", "lineafm"),
-#'   seedpars = c(.9, .85)
-#' )
-#' print(modelob$coefs)
-#' print(modelob$loglik)
-#'
-#' modelob <- LKT(
-#'   data = temp, interc=TRUE,
-#'   connectors = c("+","*","+"),
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("intercept", "logitdec", "lineafm"),
-#'   fixedpars = c(.9, .85)
-#' )
-#' print(modelob$coefs)
-#' print(modelob$loglik)
-#'
-#' modelob <- LKT(
-#'   data = temp, interc=TRUE,
-#'   components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'   features = c("logitdec", "logitdec$", "lineafm$"),
-#'   fixedpars = c(.9, .85)
-#' )
-#' print(modelob$coefs)
-#' print(modelob$loglik)
-#'
-#' # this example illustrates how mean fit is worse for CV
-#' # compared to the first example above. In this case,
-#' # this is mainly do to the small dataset allowing overgeneralization
-#' # despite the model only having 4 coefficients
-#' temp <- samplelkt
-#' unq <- sample(unique(temp$Anon.Student.Id))
-#' sfold <- rep(1:5,length.out=length(unq))
-#' temp$fold <- rep(0,length(temp[,1]))
-#' for(i in 1:5){temp$fold[which(temp$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
-#' modelob <- LKT(
-#'      data = temp, interc=TRUE,
-#'       components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#'       features = c("logitdec", "logitdec", "lineafm"),
-#'       fixedpars = c(.9, .85),cv=TRUE
-#'   )
-#' print(modelob$cv_res)
-#' print(mean(modelob$cv_res$rmse))
-#' print(mean(modelob$cv_res$mcfad))
-#'
-#' # this example illustrates the limitation of CV when data does not contain
-#' # sufficient examples of each predictor
-#' #modelob <- LKT(
-#' #  data = temp, interc=TRUE,
-#' #  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
-#' #  features = c("logitdec", "logitdec$", "lineafm$"),
-#' #  fixedpars = c(.9, .85),cv=TRUE
-#' #)
-#' #print(modelob$cv_res)
-#'
 LKT <- function(data,
                 components,
                 features,
@@ -206,15 +133,13 @@ LKT <- function(data,
       k <- k + 1
 
       #setup the curvilinear feature input for inverted U shaped learning features
-      if(!is.na(curvefeats)){
-        if(!is.na(curvefeats[k])){
+     if(!is.na(curvefeats[k])){
           e$data$curvefeat<- paste(eval(parse(text = paste("e$data$", curvefeats[k],sep = ""))), sep = "")
           e$data$curvefeat<-as.numeric(e$data$curvefeat)
-        }}
-      else {
-        if("pred" %in% colnames(e$data)){
+        }
+      else if ("pred" %in% colnames(e$data)){
           e$data$curvefeat<-e$data$pred
-        }}
+        }
 
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
@@ -1699,31 +1624,21 @@ buildLKTModel <- function(data,
 
 
 
-#' @title LASSOLKTModel
+#' @title LASSOLKTData
 #' @import crayon
 #' @description Forward and backwards stepwise search for a set of features and components
 #' @description with tracking of nonlinear parameters.
 #' @param data is a dataset with Anon.Student.Id and CF..ansbin.
 #' @param allcomponents is search space for LKT components
 #' @param allfeatures is search space for LKT features
-#' @param currentcomponents components to start search from
 #' @param specialcomponents add special components (not crossed with features, only paired with special features 1 for 1)
 #' @param specialfeatures features for each special component (not crossed during search)
-#' @param forv the minimuum amount of improvement needed for the addition of a new term
-#' @param bacv the maximuum amount of loss for a term to be removed
-#' @param currentfeatures features to start search from
-#' @param verbose passed to LKT
-#' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
-#' @param currentfixedpars used for current features as an option to start
-#' @param maxitv passed to LKT
-#' @param itnerc passed to LKT
-#' @param forward TRUE or FALSE
-#' @param backward TRUE or FALSE
-#' @param metric One of "BIC","AUC","AIC", and "RMSE"
+#' @param specialpars parameters for the special features (if needed)
+#' @param gridpars a vector of parameters to create each feature at
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
-LASSOLKTModel <- function(data,gridpars,
+LASSOLKTData <- function(data,gridpars,
                           allcomponents,allfeatures,
                           specialcomponents=c(),specialfeatures=c(),specialpars=c()){
 
@@ -1755,4 +1670,64 @@ LASSOLKTModel <- function(data,gridpars,
     LKT(data = data,   components = complist,
         features = featlist,fixedpars = allpars, nosolve=TRUE)
   )
+}
+
+
+#' @title LASSOLKTModel
+#' @import crayon
+#' @description runs LASSO search on the data
+#' @param data is a dataset with Anon.Student.Id and CF..ansbin.
+#' @param allcomponents is search space for LKT components
+#' @param allfeatures is search space for LKT features
+#' @param specialcomponents add special components (not crossed with features, only paired with special features 1 for 1)
+#' @param specialfeatures features for each special component (not crossed during search)
+#' @param specialpars parameters for the special features (if needed)
+#' @param gridpars a vector of parameters to create each feature at
+#' @param target_n yada yada yada
+#' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target deviance ratio", and "best deviance ratio"
+#' @export
+LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcomponents=c(),
+                      specialfeatures=c(),specialpars=c(), target_n){
+
+  datmat = LASSOLKTData(setDT(data),gridpars,
+                         allcomponents,allfeatures,
+                         specialcomponents=c(),specialfeatures=c(),specialpars=c())
+
+  m1 = as.matrix(datmat$lassodata[[2]])
+  colnames(m1) = datmat$lassodata[[1]]
+
+  train_x <- m1
+  train_y <- data$CF..ansbin.
+
+  #23 seconds on largerawsample
+  start=Sys.time()
+  fit  = glmnet(train_x,train_y,family="binomial",intercept = FALSE)
+  end=Sys.time()
+  dur1 = end-start
+  print(dur1)
+
+  #4 minutes in largerawsample
+  start=Sys.time()
+  cvfit = cv.glmnet(train_x, train_y,family="binomial",intercept=FALSE)
+  end=Sys.time()
+  dur2 = end-start
+  print(dur2)
+
+  coef_1se = coef(cvfit, s = "lambda.1se")
+  nonzero_1se = rownames(coef_1se)[which(coef_1se!=0)]
+  zero_1se = rownames(coef_1se)[which(coef_1se==0)]
+  #Larger lambda (to the right) results in fewer features
+
+  target_lambda = cvfit$glmnet.fit$lambda[which.min(abs(cvfit$glmnet.fit$df - target_n))]
+  #Get new lasso
+  target_fit = coef(cvfit, s = target_lambda)
+  target_features = rownames(target_fit)[which(target_fit!=0)]
+  target_dropped = rownames(target_fit)[which(target_fit==0)]
+
+  target_dev_ratio = cvfit$glmnet.fit$dev.ratio[which.min(abs(cvfit$glmnet.fit$df - target_n))]
+  best_dev_ratio = max(cvfit$glmnet.fit$dev.ratio)
+  return_list=list(zero_1se,nonzero_1se,target_features,target_dropped,target_dev_ratio,best_dev_ratio)
+  names(return_list) = c("dropped 1se", "retained 1se","target features","target dropped","target deviance ratio","best deviance ratio")
+
+  return(return_list)
 }
