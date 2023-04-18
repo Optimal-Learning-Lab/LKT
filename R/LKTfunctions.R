@@ -536,13 +536,43 @@ LKT <- function(data,
       colnames(predictset),predictset2)}
   }
   if(nosolve==FALSE){
+    parlength <-
+      sum("powafm" == gsub("[$]", "", features)) +
+      sum("recency" == gsub("[$]", "", features)) +
+      sum("crecency" == gsub("[$]", "", features)) +
+      sum("recencysuc" == gsub("[$]", "", features)) +
+      sum("recencyfail" == gsub("[$]", "", features)) +
+      sum("logit" == gsub("[$]", "", features)) +
+      sum("errordec" == gsub("[$]", "", features)) +
+      sum("propdec" == gsub("[$]", "", features)) +
+      sum("propdec2" == gsub("[$]", "", features)) +
+      sum("logitdec" == gsub("[$]", "", features)) +
+      sum("baseratepropdec" == gsub("[$]", "", features)) +
+      sum("clogitdec" == gsub("[$]", "", features)) +
+      sum("base" == gsub("[$]", "", features)) +
+      sum("expdecafm" == gsub("[$]", "", features)) +
+      sum("expdecsuc" == gsub("[$]", "", features)) +
+      sum("expdecfail" == gsub("[$]", "", features)) +
+      sum("base2" == gsub("[$]", "", features)) * 2 +
+      sum("base4" == gsub("[$]", "", features)) * 4 +
+      sum("ppe" == gsub("[$]", "", features)) * 4 +
+      sum("basefail" == gsub("[$]", "", features)) +
+      sum("basesuc" == gsub("[$]", "", features)) +
+      sum("base2suc" == gsub("[$]", "", features)) * 2 +
+      sum("base2fail" == gsub("[$]", "", features)) * 2 +
+      sum("dashafm" == gsub("[$]", "", features)) +
+      sum("dashsuc" == gsub("[$]", "", features)) +
+      sum("dashfail" == gsub("[$]", "", features)) +
+      sum("base5suc" == gsub("[$]", "", features)) * 5 +
+      sum("base5fail" == gsub("[$]", "", features)) * 5 -
+      sum(!is.na(e$fixedpars))
 
-    # number of seeds is those pars specified and not fixed
+    # number of seeds is just those pars specified and not fixed
     seeds <- e$seedpars[is.na(e$fixedpars)]
     seeds[is.na(seeds)] <- .5 # if not set seeds set to .5
 
     # optimize the model
-    if (sum(!is.na(seeds)) > 0) {
+    if (parlength > 0) {
       optimizedpars <- optim(seeds, modelfun, method = c("L-BFGS-B"), lower = lowb,
                              upper = highb, control = list(maxit = maxitv,factr = factrv))
     } else
