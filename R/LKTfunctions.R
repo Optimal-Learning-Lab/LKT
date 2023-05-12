@@ -1756,8 +1756,20 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcompone
 
   target_dev_ratio = cvfit$glmnet.fit$dev.ratio[which.min(abs(cvfit$glmnet.fit$df - target_n))]
   best_dev_ratio = max(cvfit$glmnet.fit$dev.ratio)
-  return_list=list(zero_1se,nonzero_1se,target_features,target_dropped,target_dev_ratio,best_dev_ratio)
-  names(return_list) = c("dropped 1se", "retained 1se","target features","target dropped","target deviance ratio","best deviance ratio")
+  
+  preds=predict(cvfit,train_x,s=target_lambda,type="response")
+  target_mod_rmse = mean(tapply(preds-train_y,val$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
+  target_mod_auc = auc(train_y,preds)
+
+  fit=glmnet(x = train_x, y = train_y, family = "binomial",lambda=target_lambda)
+  tLL <- fit$nulldev - deviance(fit)
+  k <- fit$df
+  n <- fit$nobs
+  target_mod_bic=log(n)*k - tLL
+
+  return_list=list(zero_1se,nonzero_1se,target_features,target_dropped,target_dev_ratio,best_dev_ratio,target_mod_rmse,target_mod_auc,target_mod_bic)
+  names(return_list) = c("dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc","target_mod_bic")
+
 
   return(return_list)
 }
