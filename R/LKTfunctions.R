@@ -1782,7 +1782,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcompone
   best_dev_ratio = max(cvfit$glmnet.fit$dev.ratio)
 
   preds=predict(cvfit,train_x,s=target_lambda,type="response")
-  target_mod_rmse = mean(tapply(preds-train_y,val$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
+  target_mod_rmse = mean(tapply(preds-train_y,data$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
   target_mod_auc = auc(train_y,preds)
 
   fit=glmnet(x = train_x, y = train_y, family = "binomial",lambda=target_lambda)
