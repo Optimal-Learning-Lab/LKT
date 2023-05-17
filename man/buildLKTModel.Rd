@@ -13,6 +13,8 @@ buildLKTModel(
   specialfeatures = c(),
   forv,
   bacv,
+  preset = NA,
+  presetint = T,
   currentfeatures = c(),
   verbose = FALSE,
   traceCV = TRUE,
@@ -40,6 +42,10 @@ buildLKTModel(
 \item{forv}{the minimuum amount of improvement needed for the addition of a new term}
 
 \item{bacv}{the maximuum amount of loss for a term to be removed}
+
+\item{preset}{One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"}
+
+\item{presetint}{should the intercepts be included for preset components}
 
 \item{currentfeatures}{features to start search from}
 

@@ -1,7 +1,7 @@
 ---
 title: "Examples"
 author: "Philip I. Pavlik Jr."
-date: "2023-04-29"
+date: "2023-05-03"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Examples}
@@ -128,14 +128,14 @@ Get the data free:
 #> recency KC..Default. 0.8     
 #> recency KC..Default. 0.9     
 #> recency0.9KC..Default.+recency0.8KC..Default.+recency0.7KC..Default.+recency0.6KC..Default.+recency0.5KC..Default.+recency0.4KC..Default.+recency0.3KC..Default.+recency0.2KC..Default.+recency0.1KC..Default.+linefailKC..Default.+linesucKC..Default.+lineafmKC..Default.+recency0.9Anon.Student.Id+recency0.8Anon.Student.Id+recency0.7Anon.Student.Id+recency0.6Anon.Student.Id+recency0.5Anon.Student.Id+recency0.4Anon.Student.Id+recency0.3Anon.Student.Id+recency0.2Anon.Student.Id+recency0.1Anon.Student.Id+linefailAnon.Student.Id+linesucAnon.Student.Id+lineafmAnon.Student.Id+0 
-#> Time difference of 2.720144 secs
-#> Time difference of 31.90166 secs
+#> Time difference of 2.83403 secs
+#> Time difference of 32.84306 secs
 
 
 str(modelob)
 #> List of 6
-#>  $ dropped 1se          : chr [1:15] "(Intercept)" "recency0.9KC..Default." "recency0.8KC..Default." "recency0.7KC..Default." ...
-#>  $ retained 1se         : chr [1:10] "recency0.4KC..Default." "recency0.3KC..Default." "recency0.1KC..Default." "linefailKC..Default." ...
+#>  $ dropped 1se          : chr [1:13] "(Intercept)" "recency0.9KC..Default." "recency0.8KC..Default." "recency0.7KC..Default." ...
+#>  $ retained 1se         : chr [1:12] "recency0.4KC..Default." "recency0.3KC..Default." "recency0.2KC..Default." "recency0.1KC..Default." ...
 #>  $ target features      : chr [1:5] "recency0.3KC..Default." "linesucKC..Default." "recency0.1Anon.Student.Id" "linefailAnon.Student.Id" ...
 #>  $ target dropped       : chr [1:20] "(Intercept)" "recency0.9KC..Default." "recency0.8KC..Default." "recency0.7KC..Default." ...
 #>  $ target deviance ratio: num 0.154
@@ -190,7 +190,7 @@ str(modelob)
 #> LogLike logistic: -26769.69416527 
 #> step par values =0.499
 #>    user  system elapsed 
-#>    1.88    0.19    2.07
+#>    2.56    0.43    2.87
     # have to have prior predictions in data to do the next model in and adaptive system
     #   this needs to be added to the data with a first model like this
     val$pred<-modelob$prediction
@@ -662,7 +662,7 @@ system.time( modelob <- LKT(
 #> LogLike logistic: -24883.5736715 
 #> step par values =0.4095353,0.2174653,0.2247826
 #>    user  system elapsed 
-#>   74.48    2.73   76.91
+#>   89.57    1.82   90.77
 ```
 
 # Performance Prediction Equation (PPE)
@@ -1086,7 +1086,7 @@ the main R code for package
 #> LogLike logistic: -31115.68435931 
 #> step par values =0.499
     mean(modelob$cv_res$mcfad)
-#> [1] 0.1788286
+#> [1] 0.1786234
 
     #complex AFM minus student intercept
     modelob <- LKT(
@@ -1115,7 +1115,7 @@ the main R code for package
 #> LogLike logistic: -30793.28958174 
 #> step par values =0.499
     mean(modelob$cv_res$mcfad)
-#> [1] 0.1845796
+#> [1] 0.183782
 ```
 
 # Connectors
@@ -1205,8 +1205,8 @@ for(i in 1:length(compl)){
   r2s$r2s[i]<-modelob$r2
   r2s$cvr2s[i]<-mean(modelob$cv_res$mcfad)
 }
-#> IRT  R2cv =   0.159412 R2 =   0.17526 
-#> Faculty  R2cv =   0.1772982 R2 =   0.193067
+#> IRT  R2cv =   0.1587116 R2 =   0.17526 
+#> Faculty  R2cv =   0.1764946 R2 =   0.193067
 #> Error in model.frame.default(object, data, xlev = xlev): invalid type (NULL) for variable 'e$data$AC4'
 
 r2s$cvr2s<-r2s$cvr2s-min(r2s$cvr2s)
@@ -1335,7 +1335,7 @@ system.time({
 })
 #> 0%...2%...3%...4%...5%...6%...7%...8%...9%...10%...11%...12%...13%...14%...15%...16%...17%...18%...19%...20%...21%...22%...23%...24%...25%...26%...27%...28%...29%...30%...31%...32%...33%...34%...35%...36%...37%...38%...39%...40%...41%...42%...43%...44%...45%...46%...47%...48%...49%...50%...51%...52%...53%...54%...55%...56%...57%...58%...59%...60%...61%...62%...63%...64%...65%...66%...67%...68%...69%...70%...71%...72%...73%...74%...75%...76%...77%...78%...79%...80%...81%...82%...83%...84%...85%...86%...87%...88%...89%...90%...91%...92%...93%...94%...95%...96%...97%...98%...99%...100%
 #>    user  system elapsed 
-#>   81.50    3.57   84.25
+#>   98.68    4.32  102.12
 
 
 #Names of coefficients that are non-significant (interval includes zero)
@@ -1352,11 +1352,11 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 #Estimate from full fit to data
   abline(v=boot_res$mod_full$coefs[which(rownames(boot_res$mod_full$coefs)==colnames(boot_res$par_reps)[zero_idx[1]])],col="firebrick3",lwd=3)} else {print(boot_res$coef_hdi)}
 #>              coef_name      lower      upper includes_zero credMass
-#> 1          (Intercept) -0.2719469 -0.2408559         FALSE     0.95
-#> 2 linefailKC..Default.  0.1691824  0.2580667         FALSE     0.95
-#> 3  linesucKC..Default.  0.5413421  0.6424459         FALSE     0.95
-#> 4    logitKC..Default.  0.3357042  0.5114883         FALSE     0.95
-#> 5 logitAnon.Student.Id  0.6211200  0.6500147         FALSE     0.95
+#> 1          (Intercept) -0.2704267 -0.2462938         FALSE     0.95
+#> 2 linefailKC..Default.  0.1809538  0.2669696         FALSE     0.95
+#> 3  linesucKC..Default.  0.5360065  0.6432640         FALSE     0.95
+#> 4    logitKC..Default.  0.3486447  0.5321098         FALSE     0.95
+#> 5 logitAnon.Student.Id  0.6090107  0.6502104         FALSE     0.95
 ```
 
 # Recency tracing with RPFA propdec2 feature
@@ -1494,7 +1494,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> added 
 #> recencysuc KC..Default. 
 #> 
-#> Step 1 results - pars  3  current BIC 62964.75 current AIC 62938 current AUC 0.7227457 current RMSE 0.4426974  CV McFadden's R2 0.171464 
+#> Step 1 results - pars  3  current BIC 62964.75 current AIC 62938 current AUC 0.7227457 current RMSE 0.4426974  CV McFadden's R2 0.1713472 
 #> recencysuc 
 #>  KC..Default. 
 #> pars 0.1515394 
@@ -1527,7 +1527,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> recencysuc-KC..Default. 2 63997.94 
 #> numer-CF..End.Latency. 3 62965.38 
 #> 
-#> Step 2 results - pars  4  current BIC 56803.36 current AIC 56767.69 current AUC 0.8218488 current RMSE 0.4138223  CV McFadden's R2 0.252055 
+#> Step 2 results - pars  4  current BIC 56803.36 current AIC 56767.69 current AUC 0.8218488 current RMSE 0.4138223  CV McFadden's R2 0.2510842 
 #> recencysuc numer 
 #>  KC..Default. CF..End.Latency. 
 #> pars 0.0782031 
@@ -1560,7 +1560,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> numer-CF..End.Latency. 5 61156.15 
 #> recencyfail-KC..Default. 4 56832.63 
 #> 
-#> Step 3 results - pars  6  current BIC 56429.86 current AIC 56376.36 current AUC 0.8276726 current RMSE 0.4107229  CV McFadden's R2 0.2545584 
+#> Step 3 results - pars  6  current BIC 56429.86 current AIC 56376.36 current AUC 0.8276726 current RMSE 0.4107229  CV McFadden's R2 0.2552464 
 #> recencysuc numer recencyfail 
 #>  KC..Default. CF..End.Latency. KC..Default. 
 #> pars 1e-05 0.2434768 
@@ -1593,7 +1593,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> recencyfail-KC..Default. 6 55981.21 
 #> propdec-Anon.Student.Id 6 56432.09 
 #> 
-#> Step 4 results - pars  8  current BIC 54549.18 current AIC 54477.84 current AUC 0.8392508 current RMSE 0.4032447  CV McFadden's R2 0.2831544 
+#> Step 4 results - pars  8  current BIC 54549.18 current AIC 54477.84 current AUC 0.8392508 current RMSE 0.4032447  CV McFadden's R2 0.2819346 
 #> recencysuc numer recencyfail propdec 
 #>  KC..Default. CF..End.Latency. KC..Default. Anon.Student.Id 
 #> pars 0.02230836 0.190302 0.9776916 
@@ -1626,7 +1626,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> propdec-Anon.Student.Id 7 56078.19 
 #> lineafm-Anon.Student.Id 8 54553.36 
 #> 
-#> Step 5 results - pars  9  current BIC 54447.46 current AIC 54367.21 current AUC 0.8396868 current RMSE 0.4027136  CV McFadden's R2 0.2825356 
+#> Step 5 results - pars  9  current BIC 54447.46 current AIC 54367.21 current AUC 0.8396868 current RMSE 0.4027136  CV McFadden's R2 0.282327 
 #> recencysuc numer recencyfail propdec lineafm 
 #>  KC..Default. CF..End.Latency. KC..Default. Anon.Student.Id Anon.Student.Id 
 #> pars 1e-05 0.331292 0.99999 
@@ -1656,13 +1656,13 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> propdec-Anon.Student.Id 7 56471.43 
 #> lineafm-Anon.Student.Id 8 55021.06 
 #> 
-#> Step 6 results - pars  9  current BIC 54447.46 current AIC 54367.21 current AUC 0.8396868 current RMSE 0.4027136  CV McFadden's R2 0.2825356 
+#> Step 6 results - pars  9  current BIC 54447.46 current AIC 54367.21 current AUC 0.8396868 current RMSE 0.4027136  CV McFadden's R2 0.282327 
 #> recencysuc numer recencyfail propdec lineafm 
 #>  KC..Default. CF..End.Latency. KC..Default. Anon.Student.Id Anon.Student.Id 
 #> pars 1e-05 0.331292 0.99999
 ```
 
-![plot of chunk unnamed-chunk-24](vigfig-unnamed-chunk-24-1.png)
+![plot of chunk unnamed-chunk-22](vigfig-unnamed-chunk-22-1.png)
 
 
 #Load MATHia
@@ -1905,7 +1905,7 @@ AFMstartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
 #> pars 0.9576757
 ```
 
-![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-1.png)
+![plot of chunk unnamed-chunk-24](vigfig-unnamed-chunk-24-1.png)
 
 #BestLRstartMATHia
 
@@ -2310,7 +2310,7 @@ BestLRstartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
 #> pars 0.9576757
 ```
 
-![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-1.png)
+![plot of chunk unnamed-chunk-25](vigfig-unnamed-chunk-25-1.png)
 
 #EmptystartMATHia
 
@@ -2414,7 +2414,7 @@ EmptystartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
 #> pars 0.9151705
 ```
 
-![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-1.png)
+![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-1.png)
 
 #AFMstartCloze
 
@@ -2428,7 +2428,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
                       "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),traceCV=TRUE,maxitv=8,
       currentfeatures = c("intercept", "intercept",         "lineafm$", "intercept",         "lineafm$"),metric="BIC")
 #> 
-#> Step 0 results - pars  676  current BIC 61563.15 current AIC 55535.05 current AUC 0.8420717 current RMSE 0.4013434  CV McFadden's R2 0.265528 
+#> Step 0 results - pars  676  current BIC 61563.15 current AIC 55535.05 current AUC 0.8420717 current RMSE 0.4013434  CV McFadden's R2 0.2653924 
 #> intercept intercept lineafm$ intercept lineafm$ 
 #>  Anon.Student.Id KC..Cluster. KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -2493,7 +2493,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> intercept KC..Cluster. 
 #> 
-#> Step 1 results - pars  643  current BIC 56251.39 current AIC 50517.57 current AUC 0.8713136 current RMSE 0.3807316  CV McFadden's R2 0.3321972 
+#> Step 1 results - pars  643  current BIC 56251.39 current AIC 50517.57 current AUC 0.8713136 current RMSE 0.3807316  CV McFadden's R2 0.331966 
 #> intercept lineafm$ intercept lineafm$ recency 
 #>  Anon.Student.Id KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. KC..Default. 
 #> pars 0.3872019 
@@ -2556,7 +2556,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> lineafm$ KC..Cluster. 
 #> 
-#> Step 2 results - pars  607  current BIC 56275.02 current AIC 50862.22 current AUC 0.8687089 current RMSE 0.3827887  CV McFadden's R2 0.3277918 
+#> Step 2 results - pars  607  current BIC 56275.02 current AIC 50862.22 current AUC 0.8687089 current RMSE 0.3827887  CV McFadden's R2 0.3278954 
 #> intercept intercept lineafm$ recency 
 #>  Anon.Student.Id CF..Correct.Answer. CF..Correct.Answer. KC..Default. 
 #> pars 0.359206 
@@ -2618,7 +2618,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> lineafm$ CF..Correct.Answer. 
 #> 
-#> Step 3 results - pars  543  current BIC 57389.82 current AIC 52547.72 current AUC 0.8573369 current RMSE 0.3910469  CV McFadden's R2 0.306431 
+#> Step 3 results - pars  543  current BIC 57389.82 current AIC 52547.72 current AUC 0.8573369 current RMSE 0.3910469  CV McFadden's R2 0.3059252 
 #> intercept intercept recency 
 #>  Anon.Student.Id CF..Correct.Answer. KC..Default. 
 #> pars 0.2185459 
@@ -2679,7 +2679,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> intercept Anon.Student.Id 
 #> 
-#> Step 4 results - pars  66  current BIC 59248.68 current AIC 58660.14 current AUC 0.8090632 current RMSE 0.4210114  CV McFadden's R2 0.2276412 
+#> Step 4 results - pars  66  current BIC 59248.68 current AIC 58660.14 current AUC 0.8090632 current RMSE 0.4210114  CV McFadden's R2 0.2274378 
 #> intercept recency 
 #>  CF..Correct.Answer. KC..Default. 
 #> pars 0.3158826 
@@ -2741,7 +2741,7 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> recency-KC..Default. 66 64114.86 
 #> propdec-Anon.Student.Id 66 59248.61 
 #> 
-#> Step 5 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.2966144 
+#> Step 5 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.296615 
 #> intercept recency propdec 
 #>  CF..Correct.Answer. KC..Default. Anon.Student.Id 
 #> pars 0.3221993 0.9793741 
@@ -2800,13 +2800,13 @@ AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> recency-KC..Default. 66 64390.76 
 #> propdec-Anon.Student.Id 66 59248.57 
 #> 
-#> Step 6 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.2966144 
+#> Step 6 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.296615 
 #> intercept recency propdec 
 #>  CF..Correct.Answer. KC..Default. Anon.Student.Id 
 #> pars 0.3221993 0.9793741
 ```
 
-![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-1.png)
+![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-1.png)
 
 #BestLRstartCloze
 
@@ -2822,7 +2822,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
      currentfeatures = c("intercept", "intercept", "logsuc", "logfail","intercept", "logsuc$",
                           "logfail$","intercept", "logsuc$", "logfail$"))
 #> 
-#> Step 0 results - pars  849  current BIC 61001.05 current AIC 53430.26 current AUC 0.8564099 current RMSE 0.3915139  CV McFadden's R2 0.2948886 
+#> Step 0 results - pars  849  current BIC 61001.05 current AIC 53430.26 current AUC 0.8564099 current RMSE 0.3915139  CV McFadden's R2 0.2955796 
 #> intercept intercept logsuc logfail intercept logsuc$ logfail$ intercept logsuc$ logfail$ 
 #>  Anon.Student.Id KC..Default. Anon.Student.Id Anon.Student.Id KC..Cluster. KC..Cluster. KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -2882,7 +2882,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> intercept Anon.Student.Id 
 #> 
-#> Step 1 results - pars  372  current BIC 58531.57 current AIC 55214.33 current AUC 0.8387081 current RMSE 0.4035952  CV McFadden's R2 0.2736784 
+#> Step 1 results - pars  372  current BIC 58531.57 current AIC 55214.33 current AUC 0.8387081 current RMSE 0.4035952  CV McFadden's R2 0.2738422 
 #> intercept logsuc logfail intercept logsuc$ logfail$ intercept logsuc$ logfail$ 
 #>  KC..Default. Anon.Student.Id Anon.Student.Id KC..Cluster. KC..Cluster. KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -2942,7 +2942,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> intercept KC..Default. 
 #> 
-#> Step 2 results - pars  301  current BIC 57762.29 current AIC 55078.18 current AUC 0.8386732 current RMSE 0.4036166  CV McFadden's R2 0.273889 
+#> Step 2 results - pars  301  current BIC 57762.29 current AIC 55078.18 current AUC 0.8386732 current RMSE 0.4036166  CV McFadden's R2 0.2739422 
 #> logsuc logfail intercept logsuc$ logfail$ intercept logsuc$ logfail$ 
 #>  Anon.Student.Id Anon.Student.Id KC..Cluster. KC..Cluster. KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -3002,7 +3002,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logfail$ KC..Cluster. 
 #> 
-#> Step 3 results - pars  265  current BIC 57496.97 current AIC 55133.88 current AUC 0.8377984 current RMSE 0.4041899  CV McFadden's R2 0.2731946 
+#> Step 3 results - pars  265  current BIC 57496.97 current AIC 55133.88 current AUC 0.8377984 current RMSE 0.4041899  CV McFadden's R2 0.2732692 
 #> logsuc logfail intercept logsuc$ intercept logsuc$ logfail$ 
 #>  Anon.Student.Id Anon.Student.Id KC..Cluster. KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -3062,7 +3062,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> intercept KC..Cluster. 
 #> 
-#> Step 4 results - pars  230  current BIC 57266.58 current AIC 55215.6 current AUC 0.8367237 current RMSE 0.4049037  CV McFadden's R2 0.2719628 
+#> Step 4 results - pars  230  current BIC 57266.58 current AIC 55215.6 current AUC 0.8367237 current RMSE 0.4049037  CV McFadden's R2 0.272104 
 #> logsuc logfail logsuc$ intercept logsuc$ logfail$ 
 #>  Anon.Student.Id Anon.Student.Id KC..Cluster. CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -3122,7 +3122,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logsuc$ KC..Cluster. 
 #> 
-#> Step 5 results - pars  194  current BIC 57235.32 current AIC 55505.36 current AUC 0.8344048 current RMSE 0.4064067  CV McFadden's R2 0.2682482 
+#> Step 5 results - pars  194  current BIC 57235.32 current AIC 55505.36 current AUC 0.8344048 current RMSE 0.4064067  CV McFadden's R2 0.2684482 
 #> logsuc logfail intercept logsuc$ logfail$ 
 #>  Anon.Student.Id Anon.Student.Id CF..Correct.Answer. CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -3182,7 +3182,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logfail$ CF..Correct.Answer. 
 #> 
-#> Step 6 results - pars  130  current BIC 58281.94 current AIC 57122.69 current AUC 0.8211743 current RMSE 0.4142556  CV McFadden's R2 0.2472414 
+#> Step 6 results - pars  130  current BIC 58281.94 current AIC 57122.69 current AUC 0.8211743 current RMSE 0.4142556  CV McFadden's R2 0.2474526 
 #> logsuc logfail intercept logsuc$ 
 #>  Anon.Student.Id Anon.Student.Id CF..Correct.Answer. CF..Correct.Answer. 
 #> 
@@ -3245,7 +3245,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logsuc$ CF..Correct.Answer. 
 #> 
-#> Step 7 results - pars  68  current BIC 54184.08 current AIC 53577.7 current AUC 0.8451487 current RMSE 0.3994975  CV McFadden's R2 0.294385 
+#> Step 7 results - pars  68  current BIC 54184.08 current AIC 53577.7 current AUC 0.8451487 current RMSE 0.3994975  CV McFadden's R2 0.2944584 
 #> logsuc logfail intercept recency 
 #>  Anon.Student.Id Anon.Student.Id CF..Correct.Answer. KC..Default. 
 #> pars 0.3192321 
@@ -3306,7 +3306,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logfail Anon.Student.Id 
 #> 
-#> Step 8 results - pars  67  current BIC 56996.33 current AIC 56398.87 current AUC 0.8259058 current RMSE 0.4114482  CV McFadden's R2 0.2573526 
+#> Step 8 results - pars  67  current BIC 56996.33 current AIC 56398.87 current AUC 0.8259058 current RMSE 0.4114482  CV McFadden's R2 0.2572696 
 #> logsuc intercept recency 
 #>  Anon.Student.Id CF..Correct.Answer. KC..Default. 
 #> pars 0.4418862 
@@ -3367,7 +3367,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> removed 
 #> logsuc Anon.Student.Id 
 #> 
-#> Step 9 results - pars  66  current BIC 59248.68 current AIC 58660.14 current AUC 0.8090632 current RMSE 0.4210114  CV McFadden's R2 0.2276412 
+#> Step 9 results - pars  66  current BIC 59248.68 current AIC 58660.14 current AUC 0.8090632 current RMSE 0.4210114  CV McFadden's R2 0.2274378 
 #> intercept recency 
 #>  CF..Correct.Answer. KC..Default. 
 #> pars 0.3158826 
@@ -3429,7 +3429,7 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> recency-KC..Default. 66 64114.86 
 #> propdec-Anon.Student.Id 66 59248.61 
 #> 
-#> Step 10 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.2966144 
+#> Step 10 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.296615 
 #> intercept recency propdec 
 #>  CF..Correct.Answer. KC..Default. Anon.Student.Id 
 #> pars 0.3221993 0.9793741 
@@ -3488,13 +3488,13 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> recency-KC..Default. 66 64390.76 
 #> propdec-Anon.Student.Id 66 59248.57 
 #> 
-#> Step 11 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.2966144 
+#> Step 11 results - pars  68  current BIC 54020.86 current AIC 53414.49 current AUC 0.8461549 current RMSE 0.3988299  CV McFadden's R2 0.296615 
 #> intercept recency propdec 
 #>  CF..Correct.Answer. KC..Default. Anon.Student.Id 
 #> pars 0.3221993 0.9793741
 ```
 
-![plot of chunk unnamed-chunk-30](vigfig-unnamed-chunk-30-1.png)
+![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-1.png)
 
 #EmptystartCloze
 
@@ -3560,7 +3560,7 @@ EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> added 
 #> logsuc$ CF..Correct.Answer. 
 #> 
-#> Step 1 results - pars  65  current BIC 63428.69 current AIC 62849.07 current AUC 0.7463069 current RMSE 0.439556  CV McFadden's R2 0.1722426 
+#> Step 1 results - pars  65  current BIC 63428.69 current AIC 62849.07 current AUC 0.7463069 current RMSE 0.439556  CV McFadden's R2 0.1722676 
 #> logsuc$ 
 #>  CF..Correct.Answer. 
 #> 
@@ -3615,9 +3615,9 @@ EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
 #> recency-CF..Correct.Answer. 67 61007.09 
 #> logfail$-CF..Correct.Answer. 129 62988.46 
 #> 
-#> Step 2 results - pars  65  current BIC 63428.69 current AIC 62849.07 current AUC 0.7463069 current RMSE 0.439556  CV McFadden's R2 0.1722426 
+#> Step 2 results - pars  65  current BIC 63428.69 current AIC 62849.07 current AUC 0.7463069 current RMSE 0.439556  CV McFadden's R2 0.1722676 
 #> logsuc$ 
 #>  CF..Correct.Answer.
 ```
 
-![plot of chunk unnamed-chunk-31](vigfig-unnamed-chunk-31-1.png)
+![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-1.png)

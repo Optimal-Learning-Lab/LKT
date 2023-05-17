@@ -1,6 +1,6 @@
 #' @importFrom graphics boxplot
 #' @importFrom methods new
-#' @importFrom stats aggregate as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
+#' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
 #' @importFrom utils packageVersion
 #' @importFrom graphics axis legend matplot mtext par
 
@@ -1375,6 +1375,8 @@ LKTStartupMessage <- function()
 #' @param specialfeatures features for each special component (not crossed during search)
 #' @param forv the minimuum amount of improvement needed for the addition of a new term
 #' @param bacv the maximuum amount of loss for a term to be removed
+#' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
+#' @param presetint should the intercepts be included for preset components
 #' @param currentfeatures features to start search from
 #' @param verbose passed to LKT
 #' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
@@ -1389,14 +1391,36 @@ LKTStartupMessage <- function()
 buildLKTModel <- function(data,
                           allcomponents,allfeatures,
                           currentcomponents=c(),specialcomponents=c(),specialfeatures=c()
-                          ,forv,bacv,
+                          ,forv,bacv,preset=NA,presetint=T,
                           currentfeatures=c(),verbose=FALSE,traceCV=TRUE,
                           currentfixedpars =c(),maxitv=10,interc = FALSE,
                           forward= TRUE, backward=TRUE, metric="BIC"){
 
+  #allowable features in search space
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
-                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe")
-  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4)
+                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe","base")
+
+  if(!is.na(preset)){if(preset=="static"){allfeatures<-c("intercept")}
+
+
+    if(preset=="AFM"){allfeatures<-c("intercept","lineafm","logafm","lineafm")}
+
+    if(preset=="AFMLLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm","lineafm$","logafm$","lineafm$")}
+
+    if(preset=="PFA"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",  "linesuc","linefail")}
+
+    if(preset=="PFALLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",  "linesuc","linefail"
+                                         ,"lineafm$","logafm$","lineafm$", "logsuc$","logfail$",  "linesuc$","linefail$")}
+
+    if(preset=="advanced"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",
+                                          "linesuc","linefail", "logitdec","propdec","recency","base")}
+
+    if(preset=="advancedLLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",
+                                              "linesuc","linefail", "logitdec","propdec","recency","base","lineafm$","logafm$","lineafm$", "logsuc$","logfail$",
+                                              "linesuc$","linefail$")}
+    if(presetint==F){allfeatures<-allfeatures[allfeatures!="intercept"]}
+  }
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1)
   currentfit<-list()
   startfitscor <- Inf
   currentfitscore<- Inf
@@ -1415,9 +1439,9 @@ buildLKTModel <- function(data,
       if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){
         fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
     currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
-                     components = currentcomponents,
-                     features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
-                     ,cv=traceCV)
+                    components = currentcomponents,
+                    features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
+                    ,cv=traceCV)
 
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
@@ -1756,7 +1780,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcompone
 
   target_dev_ratio = cvfit$glmnet.fit$dev.ratio[which.min(abs(cvfit$glmnet.fit$df - target_n))]
   best_dev_ratio = max(cvfit$glmnet.fit$dev.ratio)
-  
+
   preds=predict(cvfit,train_x,s=target_lambda,type="response")
   target_mod_rmse = mean(tapply(preds-train_y,val$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
   target_mod_auc = auc(train_y,preds)
