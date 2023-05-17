@@ -1737,8 +1737,8 @@ LASSOLKTData <- function(data,gridpars,
 #' @param specialfeatures features for each special component (not crossed during search)
 #' @param specialpars parameters for the special features (if needed)
 #' @param gridpars a vector of parameters to create each feature at
-#' @param target_n yada yada yada
-#' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target deviance ratio", and "best deviance ratio"
+#' @param target_n chosen number of features in model
+#' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcomponents=c(),
                       specialfeatures=c(),specialpars=c(), target_n){
@@ -1783,10 +1783,10 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcompone
 
   preds=predict(cvfit,train_x,s=target_lambda,type="response")
   target_mod_rmse = mean(tapply(preds-train_y,data$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
-  target_mod_auc = auc(train_y,preds)
+  target_mod_auc = auc(as.numeric(train_y),as.numeric(preds))
 
   fit=glmnet(x = train_x, y = train_y, family = "binomial",lambda=target_lambda)
-  tLL <- fit$nulldev - deviance(fit)
+  tLL <-  -deviance(fit)
   k <- fit$df
   n <- fit$nobs
   target_mod_bic=log(n)*k - tLL
