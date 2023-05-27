@@ -17,15 +17,15 @@ knitr::opts_chunk$set(
   fig.path = "vigfig-"
 )
     library(LKT)
-# precomptued as per https://ropensci.org/blog/2019/12/08/precompute-vignettes/
+    library(ggplot2)
+# precomputed as per https://ropensci.org/blog/2019/12/08/precompute-vignettes/
 ```
 
 
 # Load data
+Get the full data if needed:
 
-Get the data free:
-
-<a href="https://datashop.memphis.edu/DatasetInfo?datasetId=1465" class="uri">https://datashop.memphis.edu/DatasetInfo?datasetId=1465</a>
+<a href="https://pslcdatashop.web.cmu.edu/DatasetInfo?datasetId=5513" class="uri">https://pslcdatashop.web.cmu.edu/DatasetInfo?datasetId=5513</a>
 
 ```{r, echo=TRUE}
     val<-largerawsample
@@ -36,7 +36,7 @@ Get the data free:
     val= setDT(val)
 
     #make unstratified folds for crossvaldiations
-    val$fold<-sample(1:5,length(val$Anon.Student.Id),replace=T)
+    val$fold<-sample(1:4,length(val$Anon.Student.Id),replace=T)
 
     # get the times of each trial in seconds from 1970
     val$CF..Time.<-as.numeric(as.POSIXct(as.character(val$Time),format="%Y-%m-%d %H:%M:%S"))
@@ -62,47 +62,23 @@ Get the data free:
 ```
 
 # Additive Factors Model (AFM) fixed effect version
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
       features = c("intercept", "intercept", "lineafm"))
 ```
-# example of LASSOLKT
 
-```{r, echo=TRUE}
-    modelob <- LASSOLKTModel(
-      data = val, gridpars=(1:9)/10,
-      allcomponents = c("Anon.Student.Id","KC..Default."),
-      allfeatures = c( "lineafm","linesuc","linefail","recency"),target_n = 5)
-
-
-str(modelob)
-```
-# example for the nosolve parameter to make it return the model matrix
-
-```{r, echo=TRUE}
-    modelob <- LKT(
-      data = val, interc=FALSE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
-```
 
 # Performance Factors Analysis (PFA) fixed effect version
-
 ```{r, echo=TRUE}
    system.time( modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
       features = c("intercept", "intercept", "linesuc$","linefail$")))
-    # have to have prior predictions in data to do the next model in and adaptive system
-    #   this needs to be added to the data with a first model like this
-    val$pred<-modelob$prediction
 ```
 
 # PFA using difficulty sensitive predictors (composite model requiring pred from prior model)
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -119,7 +95,6 @@ str(modelob)
 ```
 
 # Recent Performance Factors Analysis (RPFA)
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -129,7 +104,6 @@ str(modelob)
 ```
 
 # Recency tracing with logitdec
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -139,7 +113,6 @@ str(modelob)
 ```
 
 # Recency tracing with logitdec and transfer from cluster
-
 ```{r, echo=TRUE}
 
 system.time( modelob <- LKT(
@@ -150,7 +123,6 @@ system.time( modelob <- LKT(
 ```
 
 # Performance Prediction Equation (PPE)
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -160,7 +132,6 @@ system.time( modelob <- LKT(
 ```
 
 # base4
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -174,28 +145,25 @@ the main R code for package
 <a href="https://github.com/Optimal-Learning-Lab/LKT/blob/master/R/LKTfunctions.R" class="uri">https://github.com/Optimal-Learning-Lab/LKT/blob/master/R/LKTfunctions.R</a>
 
 
-# Covariates
-
+# Simple interactions
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
       features = c("logitdec", "logitdec", "lineafm"),fixedpars=c(.9,.8),
-      covariates = c(NA,NA,"Level..Unitname."))
+      interacts = c(NA,NA,"Level..Unitname."))
 ```
 
 # Individualized Additive Factors Model (iAFM) fixed effect version
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
       features = c("intercept", "intercept", "lineafm$","lineafm"),
-      covariates = c(NA,NA,NA,"Anon.Student.Id"))
+      interacts = c(NA,NA,NA,"Anon.Student.Id"))
 ```
 
 # Crossvalidation
-
 ```{r, echo=TRUE}
 # make student stratified folds (for crossvalidation for unseen population)
     # unq = sample(unique(val$Anon.Student.Id))
@@ -220,8 +188,7 @@ the main R code for package
     mean(modelob$cv_res$mcfad)
 ```
 
-# Connectors
-
+# Connectors (another way to do interactions)
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
@@ -232,7 +199,6 @@ the main R code for package
 ```
 
 # AutoKC
-
 ```{r}
 
 mnames<-c("IRT",
@@ -345,7 +311,6 @@ for (i in c(3,6)){
 ```
 
 # Synthetic discrimination parameter testing
-
 ```{r}
 
 mnames<-c("IRT",
@@ -381,7 +346,6 @@ for(i in 1:5){
 
 
 #Credibility intervals
-
 ```{r}
 
 components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
@@ -420,17 +384,16 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
   abline(v=boot_res$mod_full$coefs[which(rownames(boot_res$mod_full$coefs)==colnames(boot_res$par_reps)[zero_idx[1]])],col="firebrick3",lwd=3)} else {print(boot_res$coef_hdi)}
 ```
 
-# Recency tracing with RPFA propdec2 feature
-
+# Recency tracing with RPFA propdec2 feature (the one in the original Galyardt and Goldin paper)
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
-      components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
+      components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default."),
       features = c("intercept","intercept",  "intercept", "propdec2","recency"),
-      fixedpars=c(NA,NA),maxitv=5)
+      fixedpars=c(NA,NA))
 ```
 
-#brpropdec
+#brpropdec experimental feature
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
@@ -440,9 +403,7 @@ print(modelob$coefs)
 cat("\n")
 ```
 
-
 # Simple adaptive model for practice optimization
-
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
@@ -452,27 +413,7 @@ print(modelob$coefs)
 cat("\n")
 
 
-val$pred2<-modelob$prediction
-
-tdata<-val[Level..Unitname.=="Posttest",]
-tdata$index<-paste(tdata$Anon.Student.Id,tdata$KC..Default.)
-tdata$tot<-countOutcome(tdata,tdata$index,"CORRECT")
-tdata$tot<-tdata$tot+countOutcome(tdata,tdata$index,"INCORRECT")
-plot(aggregate(CF..ansbin. ~tot , tdata , FUN= "mean" ),ylim=c(0,1))
-points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
-
-
-tdata<-val[Level..Unitname.!="Posttest",]
-tdata$index<-paste(tdata$Anon.Student.Id,tdata$KC..Default.)
-tdata$tot<-countOutcome(tdata,tdata$index,"CORRECT")
-tdata$tot<-tdata$tot+countOutcome(tdata,tdata$index,"INCORRECT")
-plot(aggregate(CF..ansbin. ~tot , tdata , FUN= "mean" ),ylim=c(0,1))
-points(aggregate(pred2 ~tot, tdata , FUN= "mean" ),ylim=c(0,1),col="red")
-
-
-
 ```
-
 
 #Build LKT with special feature
 ```{r, echo=TRUE}
@@ -485,8 +426,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
       maxitv=1,verbose=FALSE)
 ```
 
-
-#Load MATHia
+#Load MATHia (example how to load a remote dataset)
 ```{r, echo=TRUE}
 
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
@@ -584,4 +524,34 @@ EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
       allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
                       "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
       traceCV=TRUE,maxitv=8)
+```
+
+# example of LASSOLKT
+```{r, echo=TRUE}
+    modelob <- LASSOLKTModel(
+      data = val, gridpars=(1:9)/10,
+      allcomponents = c("Anon.Student.Id","KC..Default."),
+      allfeatures = c( "lineafm","linesuc","linefail","recency"),target_n = 5)
+
+
+str(modelob)
+```
+
+# example of LASSOLKT with preset
+```{r, echo=TRUE}
+    modelob <- LASSOLKTModel(
+      data = val, gridpars=(1:9)/10,
+      allcomponents = c("Anon.Student.Id","KC..Default."),
+      preset = "PFA",target_n = 5)
+
+
+str(modelob)
+```
+
+# example for the nosolve parameter to make it return the model matrix
+```{r, echo=TRUE}
+    modelob <- LKT(
+      data = val, interc=FALSE,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
 ```

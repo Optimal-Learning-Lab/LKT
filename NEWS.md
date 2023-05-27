@@ -20,6 +20,6 @@
 
 # Version 1.5.0
 * computeSpacingPredictors speed upgrade using better functions
-* buildLKT
-* LASSOLKT
+* buildLKTModel
+* LASSOLKTModel
 * New examples

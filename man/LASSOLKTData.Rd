@@ -9,6 +9,8 @@ LASSOLKTData(
   gridpars,
   allcomponents,
   allfeatures,
+  preset = NA,
+  presetint = T,
   specialcomponents = c(),
   specialfeatures = c(),
   specialpars = c()
@@ -22,6 +24,10 @@ LASSOLKTData(
 \item{allcomponents}{is search space for LKT components}
 
 \item{allfeatures}{is search space for LKT features}
+
+\item{preset}{One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"}
+
+\item{presetint}{should the intercepts be included for preset components}
 
 \item{specialcomponents}{add special components (not crossed with features, only paired with special features 1 for 1)}
 

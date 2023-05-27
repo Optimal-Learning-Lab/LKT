@@ -11,7 +11,7 @@
 #'   \item{Outcome}{unique identifier for each student}
 #'   ...
 #' }
-#' @source <https://datashop.memphis.edu/index.jsp>
+#' @source <https://pslcdatashop.web.cmu.edu/DatasetInfo?datasetId=5508>
 "samplelkt"
 
 #' Trial sequences for practice participants.
@@ -22,6 +22,6 @@
 #' \describe{
 #' It has many columns.
 #' }
-#' @source <https://datashop.memphis.edu/Export?datasetId=1465>
+#' @source <https://pslcdatashop.web.cmu.edu/Export?datasetId=5513>
 "largerawsample"
 

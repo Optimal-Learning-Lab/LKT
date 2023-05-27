@@ -48,7 +48,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param connectors a vector of the characters used for the formula connections, i.e., "+", ":", or "*", with default "+" when not provided
 #' @param fixedpars a vector of parameters for all features+components.
 #' @param seedpars a vector of parameters for all features+components to seed non-linear parameter search.
-#' @param covariates A list of components that interacts with component by feature in the main specification.
+#' @param interacts A list of components that interacts with component by feature in the main specification.
 #' @param curvefeats vector of columns to use with "diff" functions
 #' @param dualfit TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.
 #' @param cv TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds
@@ -74,7 +74,7 @@ LKT <- function(data,
                 features,
                 fixedpars = NA,
                 seedpars = NA,
-                covariates = NA,
+                interacts = NA,
                 curvefeats = NA,
                 dualfit = FALSE,
                 interc = FALSE,
@@ -362,7 +362,7 @@ LKT <- function(data,
       if (right(i, 1) == "$") {
         # add the fixed effect feature to the model with a coefficient per level
         cleanfeat <- gsub("\\$", "", i)
-        if (is.na(covariates[k])) {
+        if (is.na(interacts[k])) {
           # standard way with a coefficient per component
           if(nosolve==FALSE){eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k],
                                 connector,eq,sep=\"\")")))}else{
@@ -372,10 +372,10 @@ LKT <- function(data,
         }
         else {
           if(nosolve==FALSE){eval(parse(text = paste("eq<-paste(cleanfeat,components[k],\":e$data$\",components[k]
-                                ,\":\",covariates[k]
+                                ,\":\",interacts[k]
                                 ,connector,eq,sep=\"\")")))}else{
                                   eval(parse(text = paste("eq<-paste(cleanfeat,if(exists(\"para\")){para}else{\"\"},components[k],\":e$data$\",components[k]
-                                ,\":\",covariates[k]
+                                ,\":\",interacts[k]
                                 ,connector,eq,sep=\"\")")))
                                 }
         }
@@ -388,7 +388,7 @@ LKT <- function(data,
 
       else {
         # add the fixed effect feature to the model with the same coefficient for all levels
-        if (is.na(covariates[k])) {
+        if (is.na(interacts[k])) {
           # standard way with single coefficient
           if(nosolve==FALSE){
             eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),connector,eq,sep=\"\")")))
@@ -401,10 +401,10 @@ LKT <- function(data,
         }
         else {
           if(nosolve==FALSE){
-            eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",covariates[k]
+            eval(parse(text = paste("eq<-paste(i,gsub('[%]','',components[k]),\":\",interacts[k]
                                   ,connector,eq,sep=\"\")")))}else
                                   {
-                                    eval(parse(text = paste("eq<-paste(i,if(exists(\"para\")){para}else{\"\"},gsub('[%]','',components[k]),\":\",covariates[k]
+                                    eval(parse(text = paste("eq<-paste(i,if(exists(\"para\")){para}else{\"\"},gsub('[%]','',components[k]),\":\",interacts[k]
                                   ,connector,eq,sep=\"\")")))
                                   }}}
       if (exists("para")) {rm(para)}
@@ -858,7 +858,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
 }
 
 #boot function for LKT_HDI
-boot_fn <- function(dat,n_students,components,features,covariates,fixedpars){
+boot_fn <- function(dat,n_students,components,features,interacts,fixedpars){
 
 
   dat_ss = smallSet(dat,n_students)
@@ -1304,13 +1304,13 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param n_students Number of students per subsample
 #' @param components components in model
 #' @param features features in model
-#' @param covariates covariates in model
+#' @param interacts interacts in model
 #' @param fixedpars fixed pars in model
 #' @param get_hdi boolean to decide if generating HDI per coefficient
 #' @param cred_mass credibility mass parameter to decide width of HDI
 #' @export
 #' @return list of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat,n_boot,n_students,components,features,covariates,fixedpars, get_hdi = TRUE, cred_mass = .95){
+LKT_HDI <- function(dat,n_boot,n_students,components,features,interacts,fixedpars, get_hdi = TRUE, cred_mass = .95){
 
   #first fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat),interc=TRUE,
@@ -1324,7 +1324,7 @@ LKT_HDI <- function(dat,n_boot,n_students,components,features,covariates,fixedpa
 
   for(i in 1:n_boot){
     #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components,features,covariates,fixedpars)
+    temp=boot_fn(dat,n_students,components,features,interacts,fixedpars)
     idx = match(rownames(temp),colnames(par_reps))
     par_reps[i,idx] = as.numeric(temp)
     if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
@@ -1400,6 +1400,8 @@ buildLKTModel <- function(data,
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
                  "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe","base")
 
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1)
+
   if(!is.na(preset)){if(preset=="static"){allfeatures<-c("intercept")}
 
 
@@ -1420,7 +1422,6 @@ buildLKTModel <- function(data,
                                               "linesuc$","linefail$")}
     if(presetint==F){allfeatures<-allfeatures[allfeatures!="intercept"]}
   }
-  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1)
   currentfit<-list()
   startfitscor <- Inf
   currentfitscore<- Inf
@@ -1689,16 +1690,41 @@ buildLKTModel <- function(data,
 #' @param specialfeatures features for each special component (not crossed during search)
 #' @param specialpars parameters for the special features (if needed)
 #' @param gridpars a vector of parameters to create each feature at
+#' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
+#' @param presetint should the intercepts be included for preset components
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
 LASSOLKTData <- function(data,gridpars,
-                          allcomponents,allfeatures,
+                          allcomponents,allfeatures,preset=NA,presetint=T,
                           specialcomponents=c(),specialfeatures=c(),specialpars=c()){
 
+  #allowable features in search space
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
-                 "recency","expdecafm","recencysuc","recencyfail","logitdec")
-  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1)
+                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe","base")
+
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1)
+
+  if(!is.na(preset)){if(preset=="static"){allfeatures<-c("intercept")}
+
+
+    if(preset=="AFM"){allfeatures<-c("intercept","lineafm","logafm","lineafm")}
+
+    if(preset=="AFMLLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm","lineafm$","logafm$","lineafm$")}
+
+    if(preset=="PFA"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",  "linesuc","linefail")}
+
+    if(preset=="PFALLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",  "linesuc","linefail"
+                                         ,"lineafm$","logafm$","lineafm$", "logsuc$","logfail$",  "linesuc$","linefail$")}
+
+    if(preset=="advanced"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",
+                                          "linesuc","linefail", "logitdec","propdec","recency","base")}
+
+    if(preset=="advancedLLTM"){allfeatures<-c("intercept","lineafm","logafm","lineafm", "logsuc","logfail",
+                                              "linesuc","linefail", "logitdec","propdec","recency","base","lineafm$","logafm$","lineafm$", "logsuc$","logfail$",
+                                              "linesuc$","linefail$")}
+    if(presetint==F){allfeatures<-allfeatures[allfeatures!="intercept"]}
+  }
 
   cat(white$bgBlack$bold("\nStart making data\n"))
 
@@ -1738,13 +1764,15 @@ LASSOLKTData <- function(data,gridpars,
 #' @param specialpars parameters for the special features (if needed)
 #' @param gridpars a vector of parameters to create each feature at
 #' @param target_n chosen number of features in model
+#' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
+#' @param presetint should the intercepts be included for preset components
 #' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
 #' @export
-LASSOLKTModel <- function(data,gridpars,allcomponents,allfeatures,specialcomponents=c(),
+LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
                       specialfeatures=c(),specialpars=c(), target_n){
 
   datmat = LASSOLKTData(setDT(data),gridpars,
-                         allcomponents,allfeatures,
+                         allcomponents,allfeatures,preset=preset,presetint=presetint,
                          specialcomponents=c(),specialfeatures=c(),specialpars=c())
 
   m1 = as.matrix(datmat$lassodata[[2]])

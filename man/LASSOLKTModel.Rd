@@ -8,6 +8,8 @@ LASSOLKTModel(
   data,
   gridpars,
   allcomponents,
+  preset = NA,
+  presetint = T,
   allfeatures,
   specialcomponents = c(),
   specialfeatures = c(),
@@ -22,6 +24,10 @@ LASSOLKTModel(
 
 \item{allcomponents}{is search space for LKT components}
 
+\item{preset}{One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"}
+
+\item{presetint}{should the intercepts be included for preset components}
+
 \item{allfeatures}{is search space for LKT features}
 
 \item{specialcomponents}{add special components (not crossed with features, only paired with special features 1 for 1)}
@@ -30,10 +36,10 @@ LASSOLKTModel(
 
 \item{specialpars}{parameters for the special features (if needed)}
 
-\item{target_n}{yada yada yada}
+\item{target_n}{chosen number of features in model}
 }
 \value{
-list of values "dropped 1se", "retained 1se","target features","target dropped","target deviance ratio", and "best deviance ratio"
+list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
 }
 \description{
 runs LASSO search on the data

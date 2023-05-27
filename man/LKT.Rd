@@ -10,7 +10,7 @@ LKT(
   features,
   fixedpars = NA,
   seedpars = NA,
-  covariates = NA,
+  interacts = NA,
   curvefeats = NA,
   dualfit = FALSE,
   interc = FALSE,
@@ -42,7 +42,7 @@ LKT(
 
 \item{seedpars}{a vector of parameters for all features+components to seed non-linear parameter search.}
 
-\item{covariates}{A list of components that interacts with component by feature in the main specification.}
+\item{interacts}{A list of components that interacts with component by feature in the main specification.}
 
 \item{curvefeats}{vector of columns to use with "diff" functions}
 

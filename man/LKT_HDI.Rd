@@ -10,7 +10,7 @@ LKT_HDI(
   n_students,
   components,
   features,
-  covariates,
+  interacts,
   fixedpars,
   get_hdi = TRUE,
   cred_mass = 0.95
@@ -27,7 +27,7 @@ LKT_HDI(
 
 \item{features}{features in model}
 
-\item{covariates}{covariates in model}
+\item{interacts}{interacts in model}
 
 \item{fixedpars}{fixed pars in model}
 
