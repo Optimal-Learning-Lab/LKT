@@ -36,7 +36,7 @@ Get the full data if needed:
     val= setDT(val)
 
     #make unstratified folds for crossvaldiations
-    val$fold<-sample(1:4,length(val$Anon.Student.Id),replace=T)
+    val$fold<-sample(1:10,length(val$Anon.Student.Id),replace=T)
 
     # get the times of each trial in seconds from 1970
     val$CF..Time.<-as.numeric(as.POSIXct(as.character(val$Time),format="%Y-%m-%d %H:%M:%S"))
@@ -57,7 +57,6 @@ Get the full data if needed:
     val <- computeSpacingPredictors(val, "KC..Default.") #allows recency, spacing, forgetting features to run
     val <- computeSpacingPredictors(val, "KC..Cluster.") #allows recency, spacing, forgetting features to run
     val <- computeSpacingPredictors(val, "Anon.Student.Id") #allows recency, spacing, forgetting features to run
-
     val <- computeSpacingPredictors(val, "CF..Correct.Answer.") #allows recency, spacing, forgetting features to run
 ```
 
@@ -72,10 +71,33 @@ Get the full data if needed:
 
 # Performance Factors Analysis (PFA) fixed effect version
 ```{r, echo=TRUE}
-   system.time( modelob <- LKT(
-      data = val, interc=TRUE,
+
+
+library(pROC)
+LLs<-numeric(0)
+AUCs<-numeric(0)
+R2s<-numeric(0)
+for(i in unique(val$fold)){
+  
+  modelob <- LKT(usefolds = unique(val$fold)[-i],
+      data = val, interc=FALSE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
-      features = c("intercept", "intercept", "linesuc$","linefail$")))
+      features = c("intercept", "intercept", "linesuc$","linefail$"))
+  
+m1 = as.matrix(modelob$predictors[[2]])
+colnames(m1) = modelob$predictors[[1]]
+pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% i,], proba = TRUE)$probabilities[, 1],.00001),.99999)
+LLs[i]<-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1,pred,1 - pred))))
+AUCs[i]<- suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i],pred)[1])
+
+nullmodel <- glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]~1, data = as.data.frame(rep(1,length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),                              family = binomial(logit))        
+
+R2s[i]<-round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+}
+print(AUCs)
+print(R2s)
+
+
 ```
 
 # PFA using difficulty sensitive predictors (composite model requiring pred from prior model)
@@ -327,14 +349,14 @@ compl<-list(c("Anon.Student.Id","KC..Default."),
 featl<-list(c("intercept","intercept"),
             c("logitdec","intercept"),
             c("logitdec","intercept","lineafm"),
-            c("logitdec","intercept","lineafm$"),
+            c("logitdec","intercept","lineafm"),
             c("logitdec","intercept"))
 connl<-list(c("+"),
             c("*"),
             c("+","+"),
             c("*","+"),
             c("+"))
-for(i in 1:5){
+for(i in 1:4){
   modelob <<- LKT(data = val,components = compl[[i]],features = featl[[i]],connectors = connl[[i]],fixedpars=c(.925),interc=TRUE,
                   cv=FALSE,verbose = FALSE)
   #cat(mnames[i]," R2cv =  ",mean(modelob$cv_res$mcfad))
@@ -407,12 +429,94 @@ cat("\n")
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
-      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
-      features = c("logitdec", "logitdec","recency"),fixed =c(0.9677064,0.7955477,0.276081))
+      components = c("Anon.Student.Id","Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("logitdec","logitdec", "logitdec","recency"),connectors =c("+",":","+"),fixed  =c(0.9677064,.96,0.7955477,0.276081))
 print(modelob$coefs)
 cat("\n")
 
 
+    modelob <- LKT(
+      data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+      features = c("logitdec", "logitdec","recency"),fixedpars =c(0.9666941,0.7603941,0.2727939))
+print(modelob$coefs)
+cat("\n")
+
+
+    modelob <- LKT(
+      data = val, interc=TRUE,dualfit = FALSE,factrv=1e7,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+      features = c("logitdec", "linefail","linesuc","recency"),fixedpars =c(0.966,.325))
+print(modelob$coefs)
+cat("\n")
+
+
+
+
+modelob <- LKT(usefolds = c(1),
+               data = val, interc=TRUE,dualfit = FALSE,factrv=1e7,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+               features = c("logitdec", "logitdec","recency"),fixedpars =c(0.9666941,0.7603941,0.2727939))
+print(modelob$coefs)
+
+m1 = as.matrix(modelob$predictors[[2]])
+colnames(m1) = modelob$predictors[[1]]
+pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% c(4),], proba = TRUE)$probabilities[, 1],.00001),.99999)
+print(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% c(4)] == 1,pred,1 - pred))))
+
+
+
+
+modelob <- LKT(usefolds = c(1,2),
+               data = val, interc=TRUE,dualfit = FALSE,factrv=1e7,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+               features = c("logitdec", "logitdec","recency"),fixedpars =c(0.9666941,0.7603941,0.2727939))
+print(modelob$coefs)
+
+m1 = as.matrix(modelob$predictors[[2]])
+colnames(m1) = modelob$predictors[[1]]
+pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% c(4),], proba = TRUE)$probabilities[, 1],.00001),.99999)
+print(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% c(4)] == 1,pred,1 - pred))))
+
+
+
+
+
+modelob <- LKT(usefolds = c(1,2,3),
+               data = val, interc=TRUE,dualfit = FALSE,factrv=1e7,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default."),
+               features = c("logitdec", "logitdec","recency"),fixedpars =c(0.9666941,0.7603941,0.2727939))
+print(modelob$coefs)
+
+m1 = as.matrix(modelob$predictors[[2]])
+colnames(m1) = modelob$predictors[[1]]
+pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% c(4),], proba = TRUE)$probabilities[, 1],.00001),.99999)
+print(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% c(4)] == 1,pred,1 - pred))))
+
+
+
+
+
+
+
+
+
+```
+
+#Astonishing model
+```{r, echo=TRUE}
+modelob <- LKT(
+      data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
+      features = c("intercept", "intercept","lineafm$","lineafm"),interacts = c(NA,NA,NA,"Anon.Student.Id") ,fixedpars =c(0.9666941,0.7603941,0.2727939))
+
+
+modelob <- LKT(
+      data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
+      components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),connectors = c(""),
+      features = c("intercept", "intercept","lineafm$","lineafm"),interacts = c(NA,NA,NA,"Anon.Student.Id") ,fixedpars =c(0.9666941,0.7603941,0.2727939))
+write.csv(file="coefs2.csv",modelob$coefs)
+print(modelob$coefs)
 ```
 
 #Build LKT with special feature
@@ -554,4 +658,89 @@ str(modelob)
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
       features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
+```
+
+#Load Assistments 2009 skillbuilder (example how to load a remote dataset)
+```{r, echo=TRUE}
+library(dplyr)
+
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val2<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
+#val2=as.data.table(val2)
+val2$Anon.Student.Id<-val2$user_id
+
+
+val2 <- val2 %>%
+  group_by(user_id) %>%
+  filter(n() >= 20) %>%
+  ungroup()
+
+
+#val2<-val2[val2$attempt_count==1,]
+val2<-val2[val2$skill!="",]
+
+#Duplicate screening
+val2 <-
+     val2 %>%
+     distinct(user_id,start_time,.keep_all=T)
+
+val2 <- val2 %>%
+  group_by(user_id) %>%
+  filter(n() >= 20) %>%
+  ungroup()
+
+
+
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/algebra_2005_2006_train.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
+val2=as.data.table(val2)
+#val2=as.data.table(val2)
+val2$user_id<-val2$Anon.Student.Id
+
+
+#val2<-val2[val2$attempt_count==1,]
+val2<-val2[val2$KC.Default.!="",]
+
+#Duplicate screening
+val2 <-
+     val2 %>%
+     distinct(user_id,Step.Start.Time,.keep_all=T)
+
+val2 <- val2 %>%
+  group_by(user_id) %>%
+  filter(n() >= 20) %>%
+  ungroup()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$start_time),format="%Y-%m-%d %H:%M:%S"))
+
+    #make sure it is ordered in the way the code expects
+    val2<-val2[order(val2$Anon.Student.Id, val2$CF..Time.),]
+
+    #create a binary response column to predict and extract only data with a valid value
+
+    val2$Outcome<-ifelse(tolower(val2$Outcome)=="ok","CORRECT","INCORRECT")
+    val2$CF..ansbin.<-ifelse(tolower(val2$Outcome)=="correct",1,0)
+    val2<-val2[val2$CF..ansbin==0 | val2$CF..ansbin.==1,]
+
+#subtot<-  aggregate(val2$CF..ansbin.,by=list(val2$Anon.Student.Id),FUN=length)
+ # subtot<- subtot[subtot$x<20,]
+   # val2<-val2[!(val2$Anon.Student.Id %in% subtot$Group.1),]
+    val2<-val2[val2$Attempt.At.Step==1,]
+        val2<-val2[val2$KC..MATHia.!="",]
+     val2 <- suppressWarnings(computeSpacingPredictors(val2, "KC..MATHia.")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Problem.Name")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Anon.Student.Id")) #allows recency, spacing, forgetting features to run
 ```

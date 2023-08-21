@@ -21,12 +21,11 @@ computeSpacingPredictors <- function(data, KCs) {
   for (i in KCs) {
     data$index <- paste(eval(parse(text = paste("data$", i, sep = ""))), data$Anon.Student.Id, sep = "")
     eval(parse(text = paste("data$", i, "spacing <- componentspacing(data,data$index,data$CF..Time.)", sep = "")))
+    eval(parse(text = paste("data$", i, "previousstudy <- prevstudy(data,data$index,data$Outcome)", sep = "")))
     eval(parse(text = paste("data$", i, "relspacing <- componentspacing(data,data$index,data$CF..reltime.)", sep = "")))
     eval(parse(text = paste("data$", i, "prev <- componentprev(data,data$index,data$CF..ansbin.)", sep = "")))
-    data$index <- paste(eval(parse(text = paste("data$", i, sep = ""))), data$Anon.Student.Id, sep = "")
     eval(parse(text = paste("data$", i, "meanspacing <- meanspacingf(data,data$index,data$", i, "spacing)", sep = "")))
     eval(parse(text = paste("data$", i, "relmeanspacing <- meanspacingf(data,data$index,data$", i, "spacing)", sep = "")))
-    data$index <- paste(eval(parse(text = paste("data$", i, sep = ""))), data$Anon.Student.Id, sep = "")
     eval(parse(text = paste("data$", i, "spacinglagged <- laggedspacingf(data,data$index,data$", i, "spacing)", sep = "")))
   }
   return(data)
@@ -69,7 +68,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param factrv controls the optim() function
 #' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 #' @export
-LKT <- function(data,
+LKT <- function(data,usefolds = NA,
                 components,
                 features,
                 fixedpars = NA,
@@ -133,17 +132,17 @@ LKT <- function(data,
       k <- k + 1
 
       #setup the curvilinear feature input for inverted U shaped learning features
-     if(!is.na(curvefeats[k])){
-          e$data$curvefeat<- paste(eval(parse(text = paste("e$data$", curvefeats[k],sep = ""))), sep = "")
-          e$data$curvefeat<-as.numeric(e$data$curvefeat)
-        }
+      if(!is.na(curvefeats[k])){
+        e$data$curvefeat<- paste(eval(parse(text = paste("e$data$", curvefeats[k],sep = ""))), sep = "")
+        e$data$curvefeat<-as.numeric(e$data$curvefeat)
+      }
       else if ("pred" %in% colnames(e$data)){
-          e$data$curvefeat<-e$data$pred
-        }
+        e$data$curvefeat<-e$data$pred
+      }
 
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
-        "powafm", "recency", "recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
+        "powafm", "recency", "recencystudy", "recencytest","recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
         "logitdec","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
         "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe",
         "base5suc", "base5fail", "clogitdec", "crecency"
@@ -332,8 +331,8 @@ LKT <- function(data,
                                     sep = "")))} else
                                     {
                                       eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para"))
-                                        {para}else{""}, gsub("[%]", "", components[k]),
-                                        "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
+                                      {para}else{""}, gsub("[%]", "", components[k]),
+                                      "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                                         parc,pard,pare,components[k])",sep = "")))
                                     }
         }
@@ -434,11 +433,16 @@ LKT <- function(data,
       )
       predictset.csr <- as.matrix.csr(predictset.csc)
       predictset2 <- predictset.csr
+
       if(nosolve==FALSE){
-        temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
-                          bias = bias,
-                          cost = cost, epsilon = epsilon, type = type
-        )
+        if( is.na(usefolds)[1]){
+          temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
+                            bias = bias,
+                            cost = cost, epsilon = epsilon, type = type)
+        }else{
+          temp <- LiblineaR(predictset2[e$data$fold %in% usefolds,], e$data$CF..ansbin.[e$data$fold %in% usefolds],
+                            bias = bias,
+                            cost = cost, epsilon = epsilon, type = type)}
         if(temp$ClassNames[1]==0){temp$W=temp$W*(-1)}
         modelvs <- data.frame(temp$W)
         colnames(modelvs) <- colnames(predictset)
@@ -446,99 +450,75 @@ LKT <- function(data,
         colnames(e$modelvs) <- "coefficient"
         success <- FALSE
         while (!success) {
-          # do something
-          e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
-                                   .00001),.99999)
+          ####two versions
+          if( is.na(usefolds)[1]){
+            e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
+                                     .00001),.99999)}
+          else{
+            e$data$pred[e$data$fold %in% usefolds] <- pmin(pmax(predict(temp, predictset2[e$data$fold %in% usefolds,], proba = TRUE)$probabilities[, 1],
+                                                                 .00001),.99999)}
           # check for success
           success <- sum(is.nan(e$data$pred)) == 0}
 
-        if(cv==TRUE){
-          #all in one version, run through it 5 times
-          cv_rmse<-rep(0,length(unique(e$data$fold)))
-          cv_mcfad<-rep(0,length(unique(e$data$fold)))
-          for(i in 1:length(unique(e$data$fold))){
-            idx1 = which(e$data$fold!=i)
-            e1_tmp = e$data[idx1,]
+        ####two versions
+        e$predictset2=predictset2
 
-            predictsetf1=slice(t(predictset),idx1)
-            predictsetf1=t(predictsetf1)
-            predictsetf1.csc <- new("matrix.csc", ra = predictsetf1@x,
-                                    ja = predictsetf1@i + 1L,
-                                    ia = predictsetf1@p + 1L,
-                                    dimension = predictsetf1@Dim)
-            predictsetf1.csr <- as.matrix.csr(predictsetf1.csc)
-            idx2 = which(e$data$fold==i)
-            e2_tmp = e$data[idx2,]
-            predictsetf2=slice(t(predictset),idx2)
-            predictsetf2=t(predictsetf2)
-            predictsetf2.csc <- new("matrix.csc", ra = predictsetf2@x,
-                                    ja = predictsetf2@i + 1L,
-                                    ia = predictsetf2@p + 1L,
-                                    dimension = predictsetf2@Dim)
-            predictsetf2.csr <- as.matrix.csr(predictsetf2.csc)
-            tempTr<-LiblineaR(predictsetf1.csr,e1_tmp$CF..ansbin.,bias=0,
-                              cost=512,epsilon=.0001,type=0)
-            #fit test data too to get null model for mcfad
-            if(tempTr$ClassNames[1]==0){tempTr$W=tempTr$W*(-1)}
+        if( is.na(usefolds)[1])
+        {fitstat <- sum(log(ifelse(e$data$CF..ansbin. == 1, e$data$pred, 1 - e$data$pred)))}
+        else
+        {fitstat <- sum(log(ifelse(e$data$CF..ansbin.[e$data$fold %in% usefolds] == 1,
+                                   e$data$pred[e$data$fold %in% usefolds],
+                                   1 - e$data$pred[e$data$fold %in% usefolds])))}}}
 
-            pred3<-predict(tempTr,predictsetf2.csr,proba=TRUE)$probabilities[,1]
-
-            e1_ansbin <-e1_tmp$CF..ansbin.
-            e2_ansbin <-e2_tmp$CF..ansbin.
-            #mcfad time
-            cv_fitstat<- sum(log(ifelse(e2_ansbin==1,pred3,1-pred3)))
-            cv_nullmodel<-glm(as.formula(paste("CF..ansbin.~ 1",sep="")),data=e2_tmp,family=binomial(logit))
-            cv_nullfit<-logLik(cv_nullmodel)
-            cv_mcfad[i]= round(1-cv_fitstat/cv_nullfit,6)
-            cv_rmse[i] = sqrt(mean((e2_tmp$CF..ansbin.-pred3)^2))
+        if (dualfit == TRUE) { # fix for Liblin
+          rt.pred <- exp(-qlogis(e$data$pred[which(e$data$CF..ansbin. == 1)]))
+          outVals <- boxplot(e$data$Duration..sec., plot = FALSE)$out
+          outVals <- which(e$data$Duration..sec. %in% outVals)
+          e$data$Duration..sec. <- as.numeric(e$data$Duration..sec.)
+          if (length(outVals) > 0) {
+            e$data$Duration..sec.[outVals] <- quantile(e$data$Duration..sec., .95)
+          } # Winsorize outliers
+          the.rt <- e$data$Duration..sec.[which(e$data$CF..ansbin. == 1)]
+          e$lm.rt <- lm(the.rt ~ as.numeric(rt.pred))
+          fitstat2 <- cor(the.rt, predict(e$lm.rt, type = "response"))^2
+          if (verbose) {
+            cat(paste("R2 (cor squared) latency: ", fitstat2, "\n", sep = ""))
           }
-
-          e$cv_res = data.frame("rmse" = cv_rmse,"mcfad" = cv_mcfad)
-        }else{e$cv_res = data.frame("rmse" = rep(NA,5),"mcfad" = rep(NA,5))}
-
-        fitstat <- sum(log(ifelse(e$data$CF..ansbin. == 1, e$data$pred, 1 - e$data$pred)))
-      }
-    }
+        }
 
 
-    if (dualfit == TRUE) { # fix for Liblin
-      rt.pred <- exp(-qlogis(e$data$pred[which(e$data$CF..ansbin. == 1)]))
-      outVals <- boxplot(e$data$Duration..sec., plot = FALSE)$out
-      outVals <- which(e$data$Duration..sec. %in% outVals)
-      e$data$Duration..sec. <- as.numeric(e$data$Duration..sec.)
-      if (length(outVals) > 0) {
-        e$data$Duration..sec.[outVals] <- quantile(e$data$Duration..sec., .95)
-      } # Winsorize outliers
-      the.rt <- e$data$Duration..sec.[which(e$data$CF..ansbin. == 1)]
-      e$lm.rt <- lm(the.rt ~ as.numeric(rt.pred))
-      fitstat2 <- cor(the.rt, predict(e$lm.rt, type = "response"))^2
-      if (verbose) {
-        cat(paste("R2 (cor squared) latency: ", fitstat2, "\n", sep = ""))
+        if(nosolve==FALSE){
+          e$temp <- temp
+          if( is.na(usefolds)[1]){
+            e$nullmodel <- glm(as.formula(paste("CF..ansbin.~ 1", sep = "")), data = e$data, family = binomial(logit))
+          }else{
+            e$nullmodel <- glm(as.formula(paste("CF..ansbin.~ 1", sep = "")), data = e$data[e$data$fold %in% usefolds,],
+                               family = binomial(logit))        }
+          e$nullfit <- logLik(e$nullmodel)
+          e$loglike <- fitstat
+          e$mcfad <- round(1 - fitstat[1] / e$nullfit[1], 6)
+          if (verbose) {
+            cat(paste("McFadden's R2 logistic:", e$mcfad, "\n"))
+            cat(paste("LogLike logistic:", round(fitstat, 8), "\n"))
+          }
+          if (length(seedparameters) > 0 & verbose) {
+            cat(paste("step par values ="))
+            cat(seedparameters, sep = ",")
+            cat(paste("\n\n"))
+          }
+          -fitstat[1]
+        } else {list(
+          colnames(predictset),predictset2)}
       }
-    }
-    if(nosolve==FALSE){
-      e$temp <- temp
-      e$nullmodel <- glm(as.formula(paste("CF..ansbin.~ 1", sep = "")), data = e$data, family = binomial(logit))
-      e$nullfit <- logLik(e$nullmodel)
-      e$loglike <- fitstat
-      e$mcfad <- round(1 - fitstat[1] / e$nullfit[1], 6)
-      if (verbose) {
-        cat(paste("McFadden's R2 logistic:", e$mcfad, "\n"))
-        cat(paste("LogLike logistic:", round(fitstat, 8), "\n"))
-      }
-      if (length(seedparameters) > 0 & verbose) {
-        cat(paste("step par values ="))
-        cat(seedparameters, sep = ",")
-        cat(paste("\n\n"))
-      }
-      -fitstat[1]
-    } else {list(
-      colnames(predictset),predictset2)}
-  }
+
+
+
   if(nosolve==FALSE){
     parlength <-
       sum("powafm" == gsub("[$]", "", features)) +
       sum("recency" == gsub("[$]", "", features)) +
+      sum("recencystudy" == gsub("[$]", "", features)) +
+      sum("recencytest" == gsub("[$]", "", features)) +
       sum("crecency" == gsub("[$]", "", features)) +
       sum("recencysuc" == gsub("[$]", "", features)) +
       sum("recencyfail" == gsub("[$]", "", features)) +
@@ -613,7 +593,8 @@ LKT <- function(data,
                   by = list(e$data$Anon.Student.Id), FUN = mean)
         },
       "newdata" = e$data,
-      "cv_res" = e$cv_res,
+      "predictors" = list(
+        colnames(e$predictset),e$predictset2),
       "loglike" = e$loglike,
       "automat" = e$df
     )
@@ -658,9 +639,19 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   if (feat == "powafm") {
     return((data$cor + data$icor)^par1)
   }
-  if (feat == "recency") {
+    if (feat == "recency") {
     eval(parse(text = paste("data$rec <- data$", fcomp, "spacing", sep = "")))
     return(ifelse(data$rec == 0, 0, data$rec^-par1))
+  }
+    if (feat == "recencytest") {
+    eval(parse(text = paste("data$rec <- data$", fcomp, "spacing", sep = "")))
+    eval(parse(text = paste("data$stu <- data$", fcomp, "previousstudy", sep = "")))
+    return(ifelse(data$stu== 0, ifelse(data$rec == 0,0,data$rec^-par1),0))
+  }
+  if (feat == "recencystudy") {
+    eval(parse(text = paste("data$rec <- data$", fcomp, "spacing", sep = "")))
+    eval(parse(text = paste("data$stu <- data$", fcomp, "previousstudy", sep = "")))
+    return(ifelse(data$stu== 1, ifelse(data$rec == 0,0,data$rec^-par1),0))
   }
   if (feat == "expdecafm") {
     return(ave(rep(1, length(data$CF..ansbin.)), index, FUN = function(x) slideexpdec(x, par1)))
@@ -1075,6 +1066,17 @@ componentspacing <- function(data, index, times) {
 
   return(temp)
 }
+
+prevstudy <- function(data, index, outcomes) {
+
+  temp <- logical(nrow(data)) # initialize temp as a numeric vector
+
+  # calculate the differences within each group and assign to temp
+  temp <- ave(outcomes, index, FUN=function(x) c(F, head(x,-1)=="STUDY"))
+
+  return(temp)
+}
+
 
 componentprev <- function(data, index, answers) {
   prev_answers <- ave(answers, index, FUN = function(x) c(0, head(x, -1)))

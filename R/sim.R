@@ -30,9 +30,9 @@ initialize_student <- function(student_parameters) {
   return(student)
 }
 
-add_rows <- function(student, student_parameters, time, N) {
+add_rows <- function(currentdata, student_parameters, time, N) {
   # Generate an ordered sequence of 2-letter string pairs
-  string_sequence <- head(combn(LETTERS, 2, paste, collapse = ""), N)
+  string_sequence <- head(combn(LETTERS, 2, paste, collapse = ""), 5)
 
   # Create a new data.table of N rows with the same student parameters
   new_rows <- student[0,]  # Copy the structure of the student data.table
@@ -50,7 +50,7 @@ add_rows <- function(student, student_parameters, time, N) {
   new_rows[, KC..Default. := string_sequence]
 
   # Append the new rows to the student data.table
-  student <- rbind(student, new_rows)
+  student <- rbind(currentdata, new_rows)
 
   return(student)
 }
@@ -75,20 +75,49 @@ update_student <- function(data, practice, response) {
 
 
 # Function to estimate the knowledge tracing model
-estimate_knowledge_tracing <- function(data, time, items, student_parameters, KT_model_features) {
+estimate_knowledge_tracing <- function(data, time, items, student_model_features, student_model_components, student_parameters) {
+ lenolddat<-nrows(data)
+  fulldata <- add_rows(data, student_pars, time, length(items))
+  lendat <- nrows(data)
+  compute for fulld data
+  for (all data columns j) {
+  for(i in student_model_components){
+    if(j uses "Anon.Student.Id"){
+      make all the values equal to the first
 
-  dataest<- add_rows(data,items,student_parameters
+
+
+    }
+
+    if(j doesn't use "Anon.Student.Id"){
+      make all the values for each level equal to the first value for that level
+      e.g. if there is a second (or more) item in a cluster, the value is found from the first items that had that cluster
 
 
 
-                     # Estimate the student's knowledge based on the current model parameters
+    }
+
+
+  }
+
+
+  }
+
+  run logistic regression on this to get predicions for new items
+  }
+
+
+
+
+
+    # Estimate the student's knowledge based on the current model parameters
                      # join data and items
                      # call LKT features with knowledge tracing model
                      #non-linear params, features, components, coefficients
                      #get item features (correct for hierarchical chunk transfer)
                      #to correct, set all component values to the first value for that component
                      # compute the predictions (only for the items)
-
+stop()
 
 
                      estimated_knowledge <- NA
@@ -101,15 +130,18 @@ select_practice <- function(estimated_knowledge) {
   # This is a placeholder - you'll need to add your own code here
   practice <- NA
   return(practice)
-}
+
+iterate_practices(120,20,c("lineafm"),c("KC..Default."), 0)
 
 # Function to iterate through a sequence of practices for a single student
-iterate_practices <- function(duration, data, items,student_model_features, KT_model_features) {
+iterate_practices <- function(duration,  items,student_model_features, student_model_components,student_parameters) {
   starttime<-0
+  time<-0
+  data <- initialize_student()
   # For each practice in the duration:
-  While (time<starttime+duration) {
+  while (time<starttime+duration) {
     # The knowledge tracing model estimates the student's knowledge
-    estimated_knowledge <- estimate_knowledge_tracing(data, time, items, student_parameters, KT_model_features)
+    estimated_knowledge <- estimate_knowledge_tracing(data, time, items, student_model_features, student_model_components, student_parameters)
 
     # A practice is selected based on the estimated knowledge
     practiceitem <- select_practice(estimated_knowledge)
@@ -121,12 +153,14 @@ iterate_practices <- function(duration, data, items,student_model_features, KT_m
     data <- update_student(data, practice, response)
     time<-time+response$duration
 
-  )
+
 
   }
   # Return the final student model
   return(data)
 }
+
+
 
 # Function to iterate through multiple students
 iterate_students <- function(num_students, duration, items, student_parameters, student_model_features, KT_model_features) {
@@ -139,7 +173,7 @@ iterate_students <- function(num_students, duration, items, student_parameters, 
     data<- initialize_student(student_parameters[i, ])
 
     # Iterate through a sequence of practices for this student
-    student<- iterate_practices(duration, data, items, student_model_features, KT_model_features)
+    student<- iterate_practices(duration, data, items, student_model_features, KT_model_features,student_parameters,i)
 
     # Bind the student data.table to the combined data.table
     combined_data <- rbind(combined_data, student)
@@ -149,5 +183,4 @@ iterate_students <- function(num_students, duration, items, student_parameters, 
   return(combined_data)
 }
 
-
-
+x<-iterate_students(1,1000,1:10,as.data.frame(rnorm(10,0,1)),list(),list())
