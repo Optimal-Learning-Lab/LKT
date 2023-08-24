@@ -25,7 +25,7 @@ computeSpacingPredictors <- function(data, KCs) {
     eval(parse(text = paste("data$", i, "relspacing <- componentspacing(data,data$index,data$CF..reltime.)", sep = "")))
     eval(parse(text = paste("data$", i, "prev <- componentprev(data,data$index,data$CF..ansbin.)", sep = "")))
     eval(parse(text = paste("data$", i, "meanspacing <- meanspacingf(data,data$index,data$", i, "spacing)", sep = "")))
-    eval(parse(text = paste("data$", i, "relmeanspacing <- meanspacingf(data,data$index,data$", i, "spacing)", sep = "")))
+    eval(parse(text = paste("data$", i, "relmeanspacing <- meanspacingf(data,data$index,data$", i, "relspacing)", sep = "")))
     eval(parse(text = paste("data$", i, "spacinglagged <- laggedspacingf(data,data$index,data$", i, "spacing)", sep = "")))
   }
   return(data)
@@ -145,7 +145,7 @@ LKT <- function(data,usefolds = NA,
         "powafm", "recency", "recencystudy", "recencytest","recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
         "logitdec","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
         "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe",
-        "base5suc", "base5fail", "clogitdec", "crecency"
+        "base5suc", "base5fail"
       )) {
         if (is.na(e$fixedpars[m])) { # if not fixed them optimize it
           para <- seedparameters[optimparcount]
@@ -291,16 +291,6 @@ LKT <- function(data,usefolds = NA,
             e$data$cor <- as.numeric(paste(eval(parse(text = paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"CORRECT\",e$data$", KCs[[1]][3], ",\"", KCs[[1]][4], "\",e$data$", KCs[[1]][1], ",\"", KCs[[1]][2], "\")", sep = "")))))
             e$data$icor <- as.numeric(paste(eval(parse(text = paste("countOutcomeOther(e$data,e$data$Anon.Student.Id,\"INCORRECT\",e$data$", KCs[[1]][3], ",\"", KCs[[1]][4], "\",e$data$", KCs[[1]][1], ",\"", KCs[[1]][2], "\")", sep = "")))))
           }
-        else
-          if (length(grep("__", components[k]))) {
-            if (!(i %in% c("clogitdec"))) {
-              e$data$cor <- countOutcome(e$data, e$data$index, "CORRECT")
-              e$data$icor <- countOutcome(e$data, e$data$index, "INCORRECT")
-            }
-            #   #need an index for each subcomponent of component
-            #   #need to count for all these indexes
-            #   #will do this in feature....
-          }
         else { # normal KC type Q-matrix
           Anon.Student.Id<-index<-indexcomp<-NULL
           vec <- eval(parse(text = paste0("e$data$", components[k])))
@@ -311,9 +301,7 @@ LKT <- function(data,usefolds = NA,
             e$data$icor <- countOutcome(e$data, e$data$index, "INCORRECT")
           }
         }
-      }
 
-      if (e$flag == TRUE | e$counter < 2) {
         e$flag <- FALSE
         if (right(i, 1) == "@") {
           # random effect
@@ -324,13 +312,14 @@ LKT <- function(data,usefolds = NA,
           )))
         } else {
           # fixed effect
-          if(nosolve==FALSE){
+          if(nosolve==FALSE)
+            {
             eval(parse(text = paste("e$data$", gsub("\\$", "", i), gsub("[%]", "", components[k]),
                                     "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
-                              parc,pard,pare,components[k])",
-                                    sep = "")))} else
-                                    {
-                                      eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para"))
+                              parc,pard,pare,components[k])", sep = "")))}
+          else
+            {
+            eval(parse(text = paste("e$data$", gsub("\\$", "", i),if(exists("para"))
                                       {para}else{""}, gsub("[%]", "", components[k]),
                                       "<-computefeatures(e$data,i,para,parb,e$data$index,e$data$indexcomp,
                                         parc,pard,pare,components[k])",sep = "")))
@@ -519,7 +508,6 @@ LKT <- function(data,usefolds = NA,
       sum("recency" == gsub("[$]", "", features)) +
       sum("recencystudy" == gsub("[$]", "", features)) +
       sum("recencytest" == gsub("[$]", "", features)) +
-      sum("crecency" == gsub("[$]", "", features)) +
       sum("recencysuc" == gsub("[$]", "", features)) +
       sum("recencyfail" == gsub("[$]", "", features)) +
       sum("logit" == gsub("[$]", "", features)) +
@@ -528,7 +516,6 @@ LKT <- function(data,usefolds = NA,
       sum("propdec2" == gsub("[$]", "", features)) +
       sum("logitdec" == gsub("[$]", "", features)) +
       sum("baseratepropdec" == gsub("[$]", "", features)) +
-      sum("clogitdec" == gsub("[$]", "", features)) +
       sum("base" == gsub("[$]", "", features)) +
       sum("expdecafm" == gsub("[$]", "", features)) +
       sum("expdecsuc" == gsub("[$]", "", features)) +
@@ -621,6 +608,9 @@ LKT <- function(data,usefolds = NA,
 #' @export
 computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, par5, fcomp) {
   mn<-Anon.Student.Id<-temptemp<-icor<-CF..ansbin.<-NULL
+
+
+
   # fixed features
   feat <- gsub("[$@]", "", feat)
   if (feat == "intercept") {
