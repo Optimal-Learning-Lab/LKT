@@ -22,12 +22,13 @@ knitr::opts_chunk$set(
 ```
 
 
-# Load data
+# Load data (shows modifications to create needed columns)
 Get the full data if needed:
 
 <a href="https://pslcdatashop.web.cmu.edu/DatasetInfo?datasetId=5513" class="uri">https://pslcdatashop.web.cmu.edu/DatasetInfo?datasetId=5513</a>
 
 ```{r, echo=TRUE}
+set.seed(41)
     val<-largerawsample
 
     #clean it up
@@ -36,8 +37,15 @@ Get the full data if needed:
     val= setDT(val)
 
     #make unstratified folds for crossvaldiations
-    val$fold<-sample(1:6,length(val$Anon.Student.Id),replace=T)
+    val$fold<-sample(1:5,length(val$Anon.Student.Id),replace=T)
 
+    
+    # make student stratified folds (for crossvalidation for unseen population)
+unq = sample(unique(val$Anon.Student.Id))
+sfold = rep(1:5,length.out=length(unq))
+val$fold = rep(0,length(val[,1]))
+for(i in 1:5){val$fold[which(val$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
+    
     # get the times of each trial in seconds from 1970
     val$CF..Time.<-as.numeric(as.POSIXct(as.character(val$Time),format="%Y-%m-%d %H:%M:%S"))
 
@@ -58,7 +66,148 @@ Get the full data if needed:
     val <- computeSpacingPredictors(val, "KC..Cluster.") #allows recency, spacing, forgetting features to run
     val <- computeSpacingPredictors(val, "Anon.Student.Id") #allows recency, spacing, forgetting features to run
     val <- computeSpacingPredictors(val, "CF..Correct.Answer.") #allows recency, spacing, forgetting features to run
+    
+
+save(val,file="..\\LKTCloze.RData")
 ```
+
+
+
+
+#Load MATHia (example how to load a remote dataset)
+```{r, echo=TRUE}
+set.seed(41)
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
+val2=as.data.table(val2)
+val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$Time),format="%Y-%m-%d %H:%M:%S"))
+
+    #make sure it is ordered in the way the code expects
+    val2<-val2[order(val2$Anon.Student.Id, val2$CF..Time.),]
+
+    #create a binary response column to predict and extract only data with a valid value
+
+    val2$Outcome<-ifelse(tolower(val2$Outcome)=="ok","CORRECT","INCORRECT")
+    val2$CF..ansbin.<-ifelse(tolower(val2$Outcome)=="correct",1,0)
+    val2<-val2[val2$CF..ansbin==0 | val2$CF..ansbin.==1,]
+
+#subtot<-  aggregate(val2$CF..ansbin.,by=list(val2$Anon.Student.Id),FUN=length)
+ # subtot<- subtot[subtot$x<20,]
+   # val2<-val2[!(val2$Anon.Student.Id %in% subtot$Group.1),]
+    val2<-val2[val2$Attempt.At.Step==1,]
+        val2<-val2[val2$KC..MATHia.!="",]
+        # make student stratified folds (for crossvalidation for unseen population)
+unq = sample(unique(val2$Anon.Student.Id))
+sfold = rep(1:5,length.out=length(unq))
+val2$fold = rep(0,length(val2[,1]))
+for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
+    
+        
+     val2 <- suppressWarnings(computeSpacingPredictors(val2, "KC..MATHia.")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Problem.Name")) #allows recency, spacing, forgetting features to run
+    val2 <- suppressWarnings(computeSpacingPredictors(val2, "Anon.Student.Id")) #allows recency, spacing, forgetting features to run
+    
+    
+
+save(val2,file="..\\MATHia.RData")
+```
+
+
+
+#Load Assistments 2012 skillbuilder (example how to load a remote dataset)
+```{r, echo=TRUE}
+library(dplyr)
+set.seed(41)
+# From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
+val3$Anon.Student.Id<-val3$user_id
+
+# Identify 10% of the unique users
+selected_users <- sample(unique(val3$user_id), size = floor(.05 * length(unique(val3$user_id))))
+# Filter out the selected users
+val3 <- val3[val3$user_id %in% selected_users,]
+
+val3 <- val3 %>%
+  group_by(user_id) %>%
+  filter(n() >= 20) %>%
+  ungroup()
+
+val3<-val3[val3$skill!="",]
+
+#Duplicate screening
+val3 <-  val3 %>%  distinct(user_id,start_time,.keep_all=T)
+
+val3$CF..Time.<-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S"))
+val3<-val3[order(val3$Anon.Student.Id, val3$CF..Time.),]
+val3$CF..ansbin.<-val3$correct
+val3<-val3[val3$CF..ansbin.==0 | val3$CF..ansbin.==1,]
+val3$Duration..sec.<-as.numeric(as.POSIXct(as.character(val3$end_time),format="%Y-%m-%d %H:%M:%S"))-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S")) #allows recency, spacing, forgetting features to run
+val3$Outcome<-ifelse(val3$correct==1,"CORRECT","INCORRECT")
+
+
+# make student stratified folds (for crossvalidation for unseen population)
+unq = sample(unique(val3$Anon.Student.Id))
+sfold = rep(1:5,length.out=length(unq))
+val3$fold = rep(0,length(val3[,1]))
+for(i in 1:5){val3$fold[which(val3$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
+    
+
+val3 <- computeSpacingPredictors(val3, "skill") #allows recency, spacing, forgetting features to run
+val3 <- computeSpacingPredictors(val3, "Anon.Student.Id") #allows recency, spacing, forgetting features to run
+val3<-setDT(val3)
+
+
+save(val3,file="..\\Assistments2012.RData")
+
+set.seed(41)
+# From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
+datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
+val3$Anon.Student.Id<-val3$user_id
+
+# Identify 10% of the unique users
+#selected_users <- sample(unique(val3$user_id), size = floor(.05 * length(unique(val3$user_id))))
+# Filter out the selected users
+#val3 <- val3[val3$user_id %in% selected_users,]
+
+val3 <- val3 %>%
+  group_by(user_id) %>%
+  filter(n() >= 20) %>%
+  ungroup()
+
+val3<-val3[val3$skill!="",]
+
+#Duplicate screening
+val3 <-  val3 %>%  distinct(user_id,start_time,.keep_all=T)
+
+val3$CF..Time.<-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S"))
+val3<-val3[order(val3$Anon.Student.Id, val3$CF..Time.),]
+val3$CF..ansbin.<-val3$correct
+val3<-val3[val3$CF..ansbin.==0 | val3$CF..ansbin.==1,]
+val3$Duration..sec.<-as.numeric(as.POSIXct(as.character(val3$end_time),format="%Y-%m-%d %H:%M:%S"))-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S")) #allows recency, spacing, forgetting features to run
+val3$Outcome<-ifelse(val3$correct==1,"CORRECT","INCORRECT")
+
+
+# make student stratified folds (for crossvalidation for unseen population)
+unq = sample(unique(val3$Anon.Student.Id))
+sfold = rep(1:5,length.out=length(unq))
+val3$fold = rep(0,length(val3[,1]))
+for(i in 1:5){val3$fold[which(val3$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
+    
+
+val3 <- computeSpacingPredictors(val3, "skill") #allows recency, spacing, forgetting features to run
+val3 <- computeSpacingPredictors(val3, "Anon.Student.Id") #allows recency, spacing, forgetting features to run
+val3<-setDT(val3)
+
+
+save(val3,file="..\\Assistments2012full.RData")
+
+
+```
+
+
+
 
 # Additive Factors Model (AFM) fixed effect version
 ```{r, echo=TRUE}
@@ -593,18 +742,20 @@ EmptystartMATHia<-  buildLKTModel(data = val2, interc=TRUE,
       traceCV=FALSE,maxitv=8)
 ```
 
+
 #AFMstartCloze
 ```{r, echo=TRUE}
 
 AFMstartCloze<-  buildLKTModel(data = val, interc=TRUE,
       allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
-      currentcomponents = c("Anon.Student.Id","KC..Cluster.","KC..Cluster.","CF..Correct.Answer.","CF..Correct.Answer."),forv=5000,bacv=5000,
+      currentcomponents = c("Anon.Student.Id","KC..Cluster.","KC..Cluster.","CF..Correct.Answer.","CF..Correct.Answer."),forv=500,bacv=500,verbose=FALSE,
 
       allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
-                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),traceCV=TRUE,maxitv=8,
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),maxitv=8,
       currentfeatures = c("intercept", "intercept",         "lineafm$", "intercept",         "lineafm$"),metric="BIC")
 
 ```
+
 
 #BestLRstartCloze
 ```{r, echo=TRUE}
@@ -622,12 +773,90 @@ BestLRstartCloze<-  buildLKTModel(data = val, interc=TRUE,
 
 #EmptystartCloze
 ```{r, echo=TRUE}
-EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
+# EmptystartCloze<-  buildLKTModel(data = val, interc=TRUE,
+#       allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
+#       forv=5000,bacv=5000,
+#       allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+#                       "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
+#       traceCV=TRUE,maxitv=8)
+
+library(boot)
+library(crayon)
+library(pROC)
+LLs <- numeric(0)
+AUCs <- numeric(0)
+RMSEs <- numeric(0)
+R2s <- numeric(0)
+for (i in 1:5) {
+  print((1:5)[-i])
+  
+  modelob<-  buildLKTModel(
+    usefolds = (1:5)[-i],data = val, interc=TRUE,
+    removecomp = c("Anon.Student.Id","Anon.Student.Id","Anon.Student.Id"),
+    removefeat = c("intercept","logsuc$", "logfail$"),
       allcomponents = c("Anon.Student.Id", "KC..Default.","KC..Cluster.","CF..Correct.Answer."),
-      forv=5000,bacv=5000,
-      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+      forv=500,bacv=500,allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
                       "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),
-      traceCV=TRUE,maxitv=8)
+      maxitv=8)[[2]]
+  
+  pred <- as.vector(pmin(pmax(inv.logit(
+    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+  ), .00001), .99999)[modelob$newdata$fold %in% i])
+  LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
+  AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
+  print(AUCs[i])
+  nullmodel <-glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] ~ 1,data = 
+                    as.data.frame(rep(1, length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),
+      family = binomial(logit))
+  R2s[i] <- round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+  
+    RMSEs[i]<- sqrt(mean((modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]
+                          -pred)^2))
+  print(R2s[i])
+}
+print(AUCs)
+print(R2s)
+print(RMSEs)
+
+
+
+```
+
+
+#EMPTYstartAssist
+```{r, echo=TRUE}
+
+
+
+
+val2<-NULL
+library(pROC)
+library(crayon)
+LLs<-numeric(0)
+AUCs<-numeric(0)
+R2s<-numeric(0)
+for(i in unique(val3$fold)){
+  
+  modelob <- buildLKTModel(data = val3, interc=TRUE,
+      allcomponents = c("Anon.Student.Id", "skill"),forv=.005,bacv=.005,verbose=FALSE,
+      allfeatures = c("intercept","lineafm","logafm","logsuc","logfail",
+                      "linesuc","linefail","logitdec","propdec","recency","logsuc$", "logfail$"),maxitv=8,metric="AUC")[[2]]
+  
+  m1 = as.matrix(modelob$predictors[[2]])
+  colnames(m1) = modelob$predictors[[1]]
+  pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% i,], proba = TRUE)$probabilities[, 1],.00001),.99999)
+  m1<-NULL
+  LLs[i]<-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1,pred,1 - pred))))
+  AUCs[i]<- suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i],pred)[1])
+  
+  nullmodel <- glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]~1, data = as.data.frame(rep(1,length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),                              family = binomial(logit))        
+  
+  R2s[i]<-round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+}
+print(AUCs)
+print(R2s)
+
+
 ```
 
 # example of LASSOLKT
@@ -660,67 +889,46 @@ str(modelob)
       features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
 ```
 
-#Load Assistments 2012 skillbuilder (example how to load a remote dataset)
+#Assistments 12 data CV example (True crossvalidation of entire search process)
 ```{r, echo=TRUE}
-library(dplyr)
-set.seed(42)
-# From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
-datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
-val2<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
-val2$Anon.Student.Id<-val2$user_id
-
-# Identify 10% of the unique users
-selected_users <- sample(unique(val2$user_id), size = floor(.05 * length(unique(val2$user_id))))
-# Filter out the selected users
-val2 <- val2[val2$user_id %in% selected_users,]
-
-val2 <- val2 %>%
-  group_by(user_id) %>%
-  filter(n() >= 20) %>%
-  ungroup()
-
-val2<-val2[val2$skill!="",]
-
-#Duplicate screening
-val2 <-  val2 %>%  distinct(user_id,start_time,.keep_all=T)
-
-val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$start_time),format="%Y-%m-%d %H:%M:%S"))
-val2<-val2[order(val2$Anon.Student.Id, val2$CF..Time.),]
-val2$CF..ansbin.<-val2$correct
-val2<-val2[val2$CF..ansbin.==0 | val2$CF..ansbin.==1,]
-val2$Duration..sec.<-as.numeric(as.POSIXct(as.character(val2$end_time),format="%Y-%m-%d %H:%M:%S"))-as.numeric(as.POSIXct(as.character(val2$start_time),format="%Y-%m-%d %H:%M:%S")) #allows recency, spacing, forgetting features to run
-val2$Outcome<-ifelse(val2$correct==1,"correct","incorrect")
-
-val3<-val2
-val3$fold<-sample(1:6,length(val2$Anon.Student.Id),replace=T)
-val3 <- computeSpacingPredictors(val3, "skill") #allows recency, spacing, forgetting features to run
-val3<-setDT(val3)
-
 library(pROC)
-LLs<-numeric(0)
-AUCs<-numeric(0)
-R2s<-numeric(0)
-for(i in unique(val3$fold)){
+LLs <- numeric(0)
+AUCs <- numeric(0)
+R2s <- numeric(0)
+val3$problem_id <- as.character(val3$problem_id)
+for (i in 1:5) {
+  print((1:5)[-i])
   
-  modelob <- LKT(usefolds = unique(val3$fold)[-i],
-                 data = val3, interc=FALSE,
-                 components = c("Anon.Student.Id", "skill", "skill", "skill"),
-                 features = c("intercept", "intercept", "linesuc","recency"))
+  modelob <- LKT(
+    usefolds = (1:5)[-i],
+    data = val3,
+    interc = FALSE,
+    fixedpars = c(.8),
+    cost = 32,
+    components = c(
+      "skill",
+      "Anon.Student.Id",
+      "skill",
+      "Anon.Student.Id",
+      "Anon.Student.Id"
+    ),
+    features = c("propdec", "intercept", "intercept", "logfail$", "logsuc$")
+  )
   
-  m1 = as.matrix(modelob$predictors[[2]])
-  colnames(m1) = modelob$predictors[[1]]
-  pred <- pmin(pmax(predict(modelob$model,m1[modelob$newdata$fold %in% i,], proba = TRUE)$probabilities[, 1],.00001),.99999)
-  LLs[i]<-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1,pred,1 - pred))))
-  AUCs[i]<- suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i],pred)[1])
-  
-  nullmodel <- glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]~1, data = as.data.frame(rep(1,length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),                              family = binomial(logit))        
-  
-  R2s[i]<-round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+  pred <- as.vector(pmin(pmax(inv.logit(
+    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+  ), .00001), .99999)[modelob$newdata$fold %in% i])
+  LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
+  AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
+  print(AUCs[i])
+  nullmodel <-glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] ~ 1,data = 
+                    as.data.frame(rep(1, length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),
+      family = binomial(logit))
+  R2s[i] <- round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+  print(R2s[i])
 }
 print(AUCs)
 print(R2s)
-
-save(val3,file="Assistments2012")
 
 
 ```

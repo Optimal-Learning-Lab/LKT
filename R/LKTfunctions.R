@@ -21,7 +21,7 @@ computeSpacingPredictors <- function(data, KCs) {
   for (i in KCs) {
     data$index <- paste(eval(parse(text = paste("data$", i, sep = ""))), data$Anon.Student.Id, sep = "")
     eval(parse(text = paste("data$", i, "spacing <- componentspacing(data,data$index,data$CF..Time.)", sep = "")))
-    eval(parse(text = paste("data$", i, "previousstudy <- prevstudy(data,data$index,data$Outcome)", sep = "")))
+    #eval(parse(text = paste("data$", i, "previousstudy <- prevstudy(data,data$index,data$Outcome)", sep = "")))
     eval(parse(text = paste("data$", i, "relspacing <- componentspacing(data,data$index,data$CF..reltime.)", sep = "")))
     eval(parse(text = paste("data$", i, "prev <- componentprev(data,data$index,data$CF..ansbin.)", sep = "")))
     eval(parse(text = paste("data$", i, "meanspacing <- meanspacingf(data,data$index,data$", i, "spacing)", sep = "")))
@@ -1380,13 +1380,13 @@ LKTStartupMessage <- function()
 #' @param metric One of "BIC","AUC","AIC", and "RMSE"
 #' @return list of values "tracetable" and "currentfit"
 #' @export
-buildLKTModel <- function(data,
+buildLKTModel <- function(data,usefolds = NA,
                           allcomponents,allfeatures,
                           currentcomponents=c(),specialcomponents=c(),specialfeatures=c()
                           ,forv,bacv,preset=NA,presetint=T,
-                          currentfeatures=c(),verbose=FALSE,traceCV=TRUE,
+                          currentfeatures=c(),verbose=FALSE,
                           currentfixedpars =c(),maxitv=10,interc = FALSE,
-                          forward= TRUE, backward=TRUE, metric="BIC"){
+                          forward= TRUE, backward=TRUE, metric="BIC",removefeat=c(), removecomp=c()){
 
   #allowable features in search space
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
@@ -1431,19 +1431,17 @@ buildLKTModel <- function(data,
 
       if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){
         fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
-    currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+    currentfit<-LKT(data = data, usefolds=usefolds,interc=interc,maxitv=maxitv,verbose=verbose,
                     components = currentcomponents,
                     features = currentfeatures,fixedpars = ifelse(is.na(currentfixedpars),rep(NA,fixedparct),currentfixedpars)
-                    ,cv=traceCV)
+                    )
 
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
     AICis<- (length(currentfit$coefs)+fixedparct)*2-2*currentfit$loglik
     RMSEis<- sqrt(mean((data$CF..ansbin.-currentfit$prediction)^2))
-    if(traceCV){cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
-                    "current RMSE",RMSEis," CV McFadden's R2",mean(currentfit$cv_res$mcfad),"\n")} else
-                    {cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
-                         "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")}
+  cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
+                         "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")
     cat(currentfeatures,"\n",currentcomponents,"\n")
     if(!is.atomic(currentfit$optimizedpars)){
       cat("pars",currentfit$optimizedpars$par,"\n")
@@ -1511,6 +1509,11 @@ buildLKTModel <- function(data,
 
       complist<-c(specialcomponents, complist)
       featlist<-c(specialfeatures, featlist)
+      combined_list <- paste(complist, featlist, sep = "_")
+      remove_list <- paste(removecomp, removefeat, sep = "_")
+      indices_to_keep <- !combined_list %in% remove_list
+      complist <- complist[indices_to_keep]
+      featlist <- featlist[indices_to_keep]
       for(w in 1:length(complist)){
         i<-complist[w]
         j<-featlist[w]
@@ -1523,7 +1526,7 @@ buildLKTModel <- function(data,
         fixedparct<-0
         for(ct in testfeatures){
           if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
-        fittest<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+        fittest<-LKT(data = data,usefolds=usefolds, interc=interc,maxitv=maxitv,verbose=verbose,
                      components = testcomponents,
                      features = testfeatures,fixedpars = c(paramvec,rep(NA,featpars[match(gsub("[$]","",j),gsub("[$]","",allfeatlist))])))
 
@@ -1595,7 +1598,7 @@ buildLKTModel <- function(data,
           pc<-pc+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]
           featct<-featct+1
         }
-        fittest<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+        fittest<-LKT(data = data, usefolds=usefolds,interc=interc,maxitv=maxitv,verbose=verbose,
                      components = testcomponents,
                      features = testfeatures,fixedpars = testpars)
         BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
@@ -1636,18 +1639,16 @@ buildLKTModel <- function(data,
       fixedparct<-0
       for(ct in currentfeatures){
         if(match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))>0){fixedparct<-fixedparct+featpars[match(gsub("[$]","",ct),gsub("[$]","",allfeatlist))]}}
-      currentfit<-LKT(data = data, interc=interc,maxitv=maxitv,verbose=verbose,
+      currentfit<-LKT(data = data, usefolds=usefolds, interc=interc,maxitv=maxitv,verbose=verbose,
                       components = currentcomponents,
-                      features = currentfeatures,fixedpars = rep(NA,fixedparct),cv=traceCV)
+                      features = currentfeatures,fixedpars = rep(NA,fixedparct))
 
       BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
       AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
       AICis<- (length(currentfit$coefs)+fixedparct)*2-2*currentfit$loglik
       RMSEis<- sqrt(mean((data$CF..ansbin.-currentfit$prediction)^2))
-      if(traceCV){cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
-                      "current RMSE",RMSEis," CV McFadden's R2",mean(currentfit$cv_res$mcfad),"\n")} else
-                      {cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
-                           "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")}
+      cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
+                           "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")
 
       cat(currentfeatures,"\n",currentcomponents,"\n")
       if(!is.atomic(currentfit$optimizedpars)){
@@ -1689,7 +1690,7 @@ buildLKTModel <- function(data,
 #' @export
 LASSOLKTData <- function(data,gridpars,
                           allcomponents,allfeatures,preset=NA,presetint=T,
-                          specialcomponents=c(),specialfeatures=c(),specialpars=c()){
+                          specialcomponents=c(),specialfeatures=c(),specialpars=c(),removefeat=c(), removecomp=c()){
 
   #allowable features in search space
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
@@ -1736,6 +1737,12 @@ LASSOLKTData <- function(data,gridpars,
 
   complist<-c(specialcomponents, complist)
   featlist<-c(specialfeatures, featlist)
+
+  combined_list <- paste(complist, featlist, sep = "_")
+  remove_list <- paste(removecomp, removefeat, sep = "_")
+  indices_to_keep <- !combined_list %in% remove_list
+  complist <- complist[indices_to_keep]
+  featlist <- featlist[indices_to_keep]
   allpars<-c(specialpars, allpars)
   # retain the best model data
   return(
@@ -1761,11 +1768,11 @@ LASSOLKTData <- function(data,gridpars,
 #' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
-                      specialfeatures=c(),specialpars=c(), target_n){
+                      specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c()){
 
   datmat = LASSOLKTData(setDT(data),gridpars,
                          allcomponents,allfeatures,preset=preset,presetint=presetint,
-                         specialcomponents=c(),specialfeatures=c(),specialpars=c())
+                         specialcomponents=c(),specialfeatures=c(),specialpars=c(),removefeat=c(), removecomp=c())
 
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
