@@ -1751,6 +1751,8 @@ LASSOLKTData <- function(data,gridpars,
   indices_to_keep <- !combined_list %in% remove_list
   complist <- complist[indices_to_keep]
   featlist <- featlist[indices_to_keep]
+
+
   allpars<-c(specialpars, allpars)
   # retain the best model data
   return(
@@ -1780,7 +1782,8 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
 
   datmat = LASSOLKTData(setDT(data),gridpars,
                          allcomponents,allfeatures,preset=preset,presetint=presetint,
-                         specialcomponents=c(),specialfeatures=c(),specialpars=c(),removefeat=c(), removecomp=c())
+                         specialcomponents=specialcomponents,specialfeatures=specialfeatures,
+                        specialpars=specialpars,removefeat=removefeat, removecomp=removecomp)
 
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
