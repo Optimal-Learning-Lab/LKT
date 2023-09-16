@@ -423,7 +423,10 @@ LKT <- function(data,usefolds = NA,
       predictset.csr <- as.matrix.csr(predictset.csc)
       predictset2 <- predictset.csr
 
+      success <- FALSE
       if(nosolve==FALSE){
+
+        while (!success) {
         if( is.na(usefolds)[1]){
           temp <- LiblineaR(predictset2, e$data$CF..ansbin.,
                             bias = bias,
@@ -437,17 +440,22 @@ LKT <- function(data,usefolds = NA,
         colnames(modelvs) <- colnames(predictset)
         e$modelvs <- t(modelvs)
         colnames(e$modelvs) <- "coefficient"
-        success <- FALSE
-        while (!success) {
           ####two versions
           if( is.na(usefolds)[1]){
             e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
-                                     .00001),.99999)}
+                                     .00001),.99999)
+
+        success <- sum(is.nan(e$data$pred)) == 0 & sum(is.na(e$data$pred))==0 }
           else{
             e$data$pred[e$data$fold %in% usefolds] <- pmin(pmax(predict(temp, predictset2[e$data$fold %in% usefolds,], proba = TRUE)$probabilities[, 1],
-                                                                 .00001),.99999)}
+                                                                 .00001),.99999)
+
+            success <- sum(is.nan(e$data$pred[e$data$fold %in% usefolds])) == 0 &
+              sum(is.na(e$data$pred[e$data$fold %in% usefolds]))==0
+
+            if (verbose) { print(summary(e$data$pred[e$data$fold %in% usefolds]))}}}
           # check for success
-          success <- sum(is.nan(e$data$pred)) == 0}
+
 
         ####two versions
         e$predictset2=predictset2
@@ -1439,7 +1447,7 @@ buildLKTModel <- function(data,usefolds = NA,
     BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
     AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
     AICis<- (length(currentfit$coefs)+fixedparct)*2-2*currentfit$loglik
-    RMSEis<- sqrt(mean((data$CF..ansbin.-currentfit$prediction)^2))
+    RMSEis<- sqrt(mean((data$CF..ansbin.[data$fold %in% usefolds]-currentfit$prediction[data$fold %in% usefolds])^2))
   cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
                          "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")
     cat(currentfeatures,"\n",currentcomponents,"\n")
@@ -1463,11 +1471,11 @@ buildLKTModel <- function(data,usefolds = NA,
              currentfitscore<- -currentfit$r2})
   } else {
     meancor<-mean(data$CF..ansbin.)
-    ll<- sum(log(ifelse(data$CF..ansbin.==1,meancor,1-meancor)))
-    BICis<- log(length(data$CF..ansbin.))-2*ll
+    ll<- sum(log(ifelse(data$CF..ansbin.[data$fold %in% usefolds]==1,meancor,1-meancor)))
+    BICis<- log(length(data$CF..ansbin.[data$fold %in% usefolds]))-2*ll
     AUCis<- .5
     AICis<- 2-2*ll
-    RMSEis<- sqrt(mean((data$CF..ansbin.-mean(data$CF..ansbin.))^2))
+    RMSEis<- sqrt(mean((data$CF..ansbin.[data$fold %in% usefolds]-mean(data$CF..ansbin.[data$fold %in% usefolds]))^2))
     tracetable[nrow(tracetable) + 1,] =
       list(comp="none",feat="none",r2=0,ind=0,params=1,
            BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("null model"))
@@ -1533,7 +1541,7 @@ buildLKTModel <- function(data,usefolds = NA,
         BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
         AUCis<- suppressMessages(auc(data$CF..ansbin.,fittest$prediction)[1])
         AICis<- (length(fittest$coefs)+fixedparct)*2-2*fittest$loglik
-        RMSEis<- sqrt(mean((data$CF..ansbin.-fittest$prediction)^2))
+        RMSEis<- sqrt(mean((data$CF..ansbin.[data$fold %in% usefolds]-fittest$prediction[data$fold %in% usefolds])^2))
         testtable[nrow(testtable) + 1,] =
           list(comp=i,feat=j,r2=fittest$r2,ind=ij,params=length(fittest$coefs)+fixedparct,
                BIC=BICis,AUC=AUCis,AIC=AICis,RMSE=RMSEis,action=paste("add\n" ,paste(j,i,sep="-")))
@@ -1604,7 +1612,7 @@ buildLKTModel <- function(data,usefolds = NA,
         BICis<- (length(fittest$coefs)+fixedparct)*log(length(fittest$prediction))-2*fittest$loglik
         AUCis<- suppressMessages(auc(data$CF..ansbin.,fittest$prediction)[1])
         AICis<- (length(fittest$coefs)+fixedparct)*2-2*fittest$loglik
-        RMSEis<- sqrt(mean((data$CF..ansbin.-fittest$prediction)^2))
+        RMSEis<- sqrt(mean((data$CF..ansbin.[data$fold %in% usefolds]-fittest$prediction[data$fold %in% usefolds])^2))
 
 
         testtable[nrow(testtable) + 1,] =
@@ -1646,7 +1654,7 @@ buildLKTModel <- function(data,usefolds = NA,
       BICis<- (length(currentfit$coefs)+fixedparct)*log(length(currentfit$prediction))-2*currentfit$loglik
       AUCis<- suppressMessages(auc(data$CF..ansbin.,currentfit$prediction)[1])
       AICis<- (length(currentfit$coefs)+fixedparct)*2-2*currentfit$loglik
-      RMSEis<- sqrt(mean((data$CF..ansbin.-currentfit$prediction)^2))
+      RMSEis<- sqrt(mean((data$CF..ansbin.[data$fold %in% usefolds]-currentfit$prediction[data$fold %in% usefolds])^2))
       cat("\nStep",k,"results - pars ",length(currentfit$coefs)+fixedparct," current BIC",BICis,"current AIC",AICis,"current AUC",AUCis,
                            "current RMSE",RMSEis," McFadden's R2",currentfit$r2,"\n")
 
