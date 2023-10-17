@@ -1130,11 +1130,13 @@ propdec2 <- function(v, d) {
   sum((v[1:w] * d^((w - 1):0)) / sum(d^((w + 2):0)))
 }
 
-# 2 failed and 1 success ghost RPFA success function
+# 2 failed and 1 success ghost RPFA success function bug fixed 10/17/23 upload to github
 propdec <- function(v, d) {
   w <- length(v)
   #  (cat(v,d,w,"\n"))
-  sum((c(1, v[1:w]) * d^((w):0)) / sum(d^((w + 1):0)))
+  corv <- sum(c(1, v[1:w]) * d^(w:0))
+  incorv <- sum(c(1, abs(v[1:w] - 1)) * d^(w:0))
+  corv / (corv+incorv)
 }
 
 logitdec <- function(v, d) {
