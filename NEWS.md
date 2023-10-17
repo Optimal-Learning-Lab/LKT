@@ -23,3 +23,7 @@
 * buildLKTModel
 * LASSOLKTModel
 * New examples
+
+# Version 1.6.0
+* usefolds input to LKT specifies subset of data to fit, but precomputed features for test folds are also created for convenience
+* restrict LASSOLKT and buildLKTModel by removing component feature pairs that are known to be unjustified

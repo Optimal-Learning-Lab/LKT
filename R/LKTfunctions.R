@@ -50,7 +50,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param interacts A list of components that interacts with component by feature in the main specification.
 #' @param curvefeats vector of columns to use with "diff" functions
 #' @param dualfit TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.
-#' @param cv TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds
 #' @param interc TRUE or FALSE, include a global intercept.
 #' @param verbose provides more output in some cases.
 #' @param epsilon passed to LiblineaR
@@ -66,6 +65,7 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @param connectors a vector if linear equation R operators including +, * and :
 #' @param nosolve causes the function to return a sparse data matrix of the features, rather than a solution
 #' @param factrv controls the optim() function
+#' @param usefolds Numeric Vector | Specifies the folds for model fitting in LKT; the features are still calculated across all folds to compute test fold fit externally
 #' @return list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
 #' @export
 LKT <- function(data,usefolds = NA,
@@ -77,7 +77,6 @@ LKT <- function(data,usefolds = NA,
                 curvefeats = NA,
                 dualfit = FALSE,
                 interc = FALSE,
-                cv=FALSE,
                 verbose = TRUE,
                 epsilon = 1e-4,
                 cost = 512,
@@ -847,16 +846,16 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
 }
 
 #boot function for LKT_HDI
-boot_fn <- function(dat,n_students,components,features,interacts,fixedpars){
+boot_fn <- function(dat,n_students,componentsv,featuresv,interactsv=NA,fixedparsv){
 
 
   dat_ss = smallSet(dat,n_students)
 
   mod = LKT(setDT(dat_ss),interc=TRUE,
-            components,
-            features,
-            fixedpars = fixedpars,
-            seedpars = c(NA),verbose=FALSE, cv = FALSE)
+            components=componentsv ,interacts = interactsv,
+            features=featuresv,
+            fixedpars = fixedparsv,
+            seedpars = c(NA),verbose=FALSE)
   return((mod$coefs))
 }
 
@@ -1082,8 +1081,7 @@ componentprev <- function(data, index, answers) {
 }
 
 # computes mean spacing
-meanspacingf <- function(data, index, spacings) {
-  temp <- ave(spacings, index, FUN = function(x) {
+meanspacingf <- function(data, index, spacings) {  temp <- ave(spacings, index, FUN= function(x) {
     j <- length(x)
     tempx <- rep(0,j)
     if (j > 1) {
@@ -1168,9 +1166,7 @@ slidelogitdec <- function(x, d) {
 baseratepropdec <- function(v, d) {
   w <- length(v)
   targetvalue <- v[w]
-  print(v)
   v <- v==targetvalue
-  print(v)
   corv <- sum(c(1, v[1:w]) * d^(w:0))
   incorv <- sum(c(1, abs(v[1:w] - 1)) * d^(w:0))
   log(corv / incorv)
@@ -1310,21 +1306,23 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param cred_mass credibility mass parameter to decide width of HDI
 #' @export
 #' @return list of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat,n_boot,n_students,components,features,interacts,fixedpars, get_hdi = TRUE, cred_mass = .95){
+LKT_HDI <- function(dat,n_boot,n_students,componentsv,featuresv,interactsv=NA,fixedparsv, get_hdi = TRUE, cred_mass = .95){
 
   #first fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat),interc=TRUE,
-                 components,
-                 features,
-                 fixedpars = fixedpars,
-                 seedpars = c(NA),verbose=FALSE, cv = FALSE)
+                 interacts=interactsv,
+                 components=componentsv,
+                 features=featuresv,
+                 fixedpars = fixedparsv,
+                 seedpars = c(NA),verbose=FALSE)
 
   par_reps = matrix(nrow=n_boot,ncol=length(mod_full$coefs))
   colnames(par_reps) <- rownames(mod_full$coefs)
 
   for(i in 1:n_boot){
     #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components,features,interacts,fixedpars)
+    temp=boot_fn(dat,n_students,components=componentsv,features=featuresv,
+                 interacts=interactsv,fixedpars=fixedparsv )
     idx = match(rownames(temp),colnames(par_reps))
     par_reps[i,idx] = as.numeric(temp)
     if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
@@ -1379,13 +1377,15 @@ LKTStartupMessage <- function()
 #' @param presetint should the intercepts be included for preset components
 #' @param currentfeatures features to start search from
 #' @param verbose passed to LKT
-#' @param traceCV produce a CV fromt he LKT method at the beginnign of each cycle
 #' @param currentfixedpars used for current features as an option to start
 #' @param maxitv passed to LKT
 #' @param interc passed to LKT
 #' @param forward TRUE or FALSE
 #' @param backward TRUE or FALSE
 #' @param metric One of "BIC","AUC","AIC", and "RMSE"
+#' @param usefolds Numeric Vector | Specifies the folds for model fitting in LKT; the features are still calculated across all folds to compute test fold fit externally
+#' @param removefeat Character Vector | Excludes specified features from the test list.
+#' @param removecomp Character Vector | Excludes specified components from the test list.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
 buildLKTModel <- function(data,usefolds = NA,
@@ -1396,11 +1396,21 @@ buildLKTModel <- function(data,usefolds = NA,
                           currentfixedpars =c(),maxitv=10,interc = FALSE,
                           forward= TRUE, backward=TRUE, metric="BIC",removefeat=c(), removecomp=c()){
 
+
+  if(is.na(usefolds))
+  {data$fold<-1
+  usefolds=1}
+
+  if(is.null(data$fold))
+  {data$fold<-1
+    usefolds=1}
+
+
   #allowable features in search space
   allfeatlist<-c("numer","intercept","lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec",
-                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe","base")
+                 "recency","expdecafm","recencysuc","recencyfail","logitdec","base2","ppe","base","powafm")
 
-  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1)
+  featpars<-c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,2,4,1,1)
 
   if(!is.na(preset)){if(preset=="static"){allfeatures<-c("intercept")}
 
@@ -1562,8 +1572,6 @@ buildLKTModel <- function(data,usefolds = NA,
         if(min(compstat)==currentcompstat)(bestmod<-fittest)
       }
 
-
-
       if(min(compstat)+forv<currentfitscore){cat("added","\n")
         tracetable<-rbind(tracetable,testtable[which.min(compstat),])
         currentfitscore<-min(compstat)
@@ -1693,6 +1701,8 @@ buildLKTModel <- function(data,usefolds = NA,
 #' @param gridpars a vector of parameters to create each feature at
 #' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
 #' @param presetint should the intercepts be included for preset components
+#' @param removefeat Character Vector | Excludes specified features from the test list.
+#' @param removecomp Character Vector | Excludes specified components from the test list.
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
@@ -1775,6 +1785,8 @@ LASSOLKTData <- function(data,gridpars,
 #' @param target_n chosen number of features in model
 #' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
 #' @param presetint should the intercepts be included for preset components
+#' @param removefeat Character Vector | Excludes specified features from the test list.
+#' @param removecomp Character Vector | Excludes specified components from the test list.
 #' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),

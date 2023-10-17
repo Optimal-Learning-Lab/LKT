@@ -14,7 +14,9 @@ LASSOLKTModel(
   specialcomponents = c(),
   specialfeatures = c(),
   specialpars = c(),
-  target_n
+  target_n,
+  removefeat = c(),
+  removecomp = c()
 )
 }
 \arguments{
@@ -37,6 +39,10 @@ LASSOLKTModel(
 \item{specialpars}{parameters for the special features (if needed)}
 
 \item{target_n}{chosen number of features in model}
+
+\item{removefeat}{Character Vector | Excludes specified features from the test list.}
+
+\item{removecomp}{Character Vector | Excludes specified components from the test list.}
 }
 \value{
 list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"

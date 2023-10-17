@@ -6,6 +6,7 @@
 \usage{
 LKT(
   data,
+  usefolds = NA,
   components,
   features,
   fixedpars = NA,
@@ -14,7 +15,6 @@ LKT(
   curvefeats = NA,
   dualfit = FALSE,
   interc = FALSE,
-  cv = FALSE,
   verbose = TRUE,
   epsilon = 1e-04,
   cost = 512,
@@ -34,6 +34,8 @@ LKT(
 \arguments{
 \item{data}{A dataset with Anon.Student.Id and CF..ansbin.}
 
+\item{usefolds}{Numeric Vector | Specifies the folds for model fitting in LKT; the features are still calculated across all folds to compute test fold fit externally}
+
 \item{components}{A vector of factors that can be used to compute each features for each subject.}
 
 \item{features}{a vector methods to use to compute a feature for the component.}
@@ -49,8 +51,6 @@ LKT(
 \item{dualfit}{TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.}
 
 \item{interc}{TRUE or FALSE, include a global intercept.}
-
-\item{cv}{TRUE or FALSE, if TRUE runs N-fold cv. Requires premade column named 'fold' with integers denoting the N folds}
 
 \item{verbose}{provides more output in some cases.}
 

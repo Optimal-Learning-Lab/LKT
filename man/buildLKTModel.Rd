@@ -6,6 +6,7 @@
 \usage{
 buildLKTModel(
   data,
+  usefolds = NA,
   allcomponents,
   allfeatures,
   currentcomponents = c(),
@@ -17,17 +18,20 @@ buildLKTModel(
   presetint = T,
   currentfeatures = c(),
   verbose = FALSE,
-  traceCV = TRUE,
   currentfixedpars = c(),
   maxitv = 10,
   interc = FALSE,
   forward = TRUE,
   backward = TRUE,
-  metric = "BIC"
+  metric = "BIC",
+  removefeat = c(),
+  removecomp = c()
 )
 }
 \arguments{
 \item{data}{is a dataset with Anon.Student.Id and CF..ansbin.}
+
+\item{usefolds}{Numeric Vector | Specifies the folds for model fitting in LKT; the features are still calculated across all folds to compute test fold fit externally}
 
 \item{allcomponents}{is search space for LKT components}
 
@@ -51,8 +55,6 @@ buildLKTModel(
 
 \item{verbose}{passed to LKT}
 
-\item{traceCV}{produce a CV fromt he LKT method at the beginnign of each cycle}
-
 \item{currentfixedpars}{used for current features as an option to start}
 
 \item{maxitv}{passed to LKT}
@@ -64,6 +66,10 @@ buildLKTModel(
 \item{backward}{TRUE or FALSE}
 
 \item{metric}{One of "BIC","AUC","AIC", and "RMSE"}
+
+\item{removefeat}{Character Vector | Excludes specified features from the test list.}
+
+\item{removecomp}{Character Vector | Excludes specified components from the test list.}
 }
 \value{
 list of values "tracetable" and "currentfit"
