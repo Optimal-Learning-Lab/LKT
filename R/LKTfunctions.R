@@ -142,7 +142,7 @@ LKT <- function(data,usefolds = NA,
       # track parameters used
       if (gsub("[$@]", "", i) %in% c(
         "powafm", "recency", "recencystudy", "recencytest","recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
-        "logitdec","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
+        "logitdec","logitdecevol","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
         "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe",
         "base5suc", "base5fail"
       )) {
@@ -408,6 +408,7 @@ LKT <- function(data,usefolds = NA,
     e$form <- as.formula(paste(equation, eq, sep = ""))
 
     if (any(grep("[@]", features)) & dualfit == FALSE) {
+      cat(paste("Using glmer, which uses lme4 package, which is not efficient for large complex data and has memory limitations."))
       temp <- glmer(e$form, data = e$data, family = binomial(logit))
       fitstat <- logLik(temp)
     } else  {
@@ -522,6 +523,7 @@ LKT <- function(data,usefolds = NA,
       sum("propdec" == gsub("[$]", "", features)) +
       sum("propdec2" == gsub("[$]", "", features)) +
       sum("logitdec" == gsub("[$]", "", features)) +
+      sum("logitdecevol" == gsub("[$]", "", features)) +
       sum("baseratepropdec" == gsub("[$]", "", features)) +
       sum("base" == gsub("[$]", "", features)) +
       sum("expdecafm" == gsub("[$]", "", features)) +
@@ -836,6 +838,10 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   }
   if (feat == "logitdec") {
     return(ave(data$CF..ansbin., index, FUN = function(x) slidelogitdec(x, par1)))
+  }
+
+  if (feat == "logitdecevol") {
+    return(ave(data$CF..ansbin., index2, FUN = function(x) slidelogitdecfree(x, par1)))
   }
   if (feat == "baseratepropdec") {
     return(as.numeric(ave(index2, data$Anon.Student.Id, FUN = function(x) baserateslidedec(x, par1))))

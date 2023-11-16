@@ -1,5 +1,4 @@
 # Precompiled vignettes that are slow
-# Must manually move image files from LKT/ to LKT/vignettes/ after knit
 
 #remove old version
 list<-list.files(path ="vignettes/",pattern="(*)+(.png)", full.names=TRUE)

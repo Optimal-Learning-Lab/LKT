@@ -437,6 +437,12 @@ for (i in c(3,6)){
 
 # Synthetic discrimination parameter testing (experimental)
 ```{r}
+# discrimintion parameters normally control how well strongly ability affects correctness at an item level
+# "synthetic" version here proposes something similar, that the student ability interacts with the item difficulty
+# here a running estimate of student ability (logitdec) is multiplied by a value for the item to indicate the importance of student ability to answer that item
+# consider the results, which suggest the first example is highly correlated with overall learning..., and the second example where it is slightly less than baseline value (.69 is the baseline for the influence of the student on all items)
+# A model like this means that some items are discriminated better by higher or lower student ability (more or less senitive to ability)
+
 
 mnames<-c("IRT",
           "IRT ad inter",
@@ -461,6 +467,7 @@ connl<-list(c("+"),
             c("+"))
 for(i in 1:4){
   modelob <<- LKT(data = val,components = compl[[i]],features = featl[[i]],connectors = connl[[i]],fixedpars=c(.925),interc=TRUE,verbose = FALSE)
+  cat("coefs",length(modelob$coefs))
   cat(" R2 =  ",modelob$r2,"\n")
   r2s$r2s[i]<-modelob$r2
 }
@@ -532,6 +539,14 @@ modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
                components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
                ,features = c("logitdec", "logsuc","recency","intercept"),fixedpars =c(0.98, 0.24))
 
+```
+
+# Test of new feature to trace KC intercepts across time (not within subjects)
+```{r, echo=TRUE}
+    val<-val[order(val$CF..Time.),]
+modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
+               ,features = c("logitdec", "logsuc","recency","logitdecevol"),fixedpars =c(0.98, 0.24,.99))
 
 ```
 
@@ -1073,6 +1088,101 @@ val3 <- val3 %>%
   )
 
 val3[, difficuty_level := ifelse(.N <= 4, "e", difficuty_level), by = problem_id]
+
+ #spacing,forgetting features to run
+val3<-setDT(val3)
+
+#propdec logitdec recency
+ #skill type skill
+#pars 0.8027777 0.9387416 0.2549787
+
+  modelob <- LKT(
+    usefolds = (1:5)[-i],
+    data = val3,
+    interc = TRUE,
+    fixedpars = c(.8,.94,.25),
+    cost = 512,
+    components = c(
+      "skill",
+      "type",
+      "skill",
+      "difficuty_level"
+    ),
+    features = c("propdec", "logitdec", "recency", "intercept")
+  )
+
+  pred <- as.vector(pmin(pmax(inv.logit(
+    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+  ), .00001), .99999)[modelob$newdata$fold %in% i])
+  LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
+  AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
+  print(AUCs[i])
+  nullmodel <-glm(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] ~ 1,data =
+                    as.data.frame(rep(1, length(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]))),
+      family = binomial(logit))
+  R2s[i] <- round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+  RMSEs[i]<- sqrt(mean((modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]
+                          -pred)^2))
+  print(R2s[i])
+  print(RMSEs[i])
+}
+print(AUCs)
+print(R2s)
+
+
+```
+
+
+#Assistments 12 data CV example (True crossvalidation of entire search process)
+```{r, echo=TRUE}
+LLs <- numeric(0)
+AUCs <- numeric(0)
+R2s <- numeric(0)
+RMSEs <- numeric(0)
+
+# Filter rows from val3 where Anon.Student.Id exists in both val3 (95% heldout) and val4 (the 5% fit previously) - from EDM2023 journal paper
+#val3 <- val3 %>%
+#  anti_join(val4, by = "Anon.Student.Id")
+
+#uncomment above lines and section in Load MATHia to load big file into val3, then load small 5% file in val4, and these linese will then crossvaldiate for the held out subset
+# currently this code (without lines above) simple crossvalidates with the 5% using the difficulty_levels described in the EDM 2023 conference journal paper (submitted by invite after the conference)
+
+val3$problem_id <- as.character(val3$problem_id)
+for (i in 1:5) {
+  print((1:5)[-i])
+
+val3$mean_correct<-NULL
+# Calculate the mean for each problem_id when fold is not i
+mean_data_not_i <- val3 %>%
+  filter(fold != i) %>%
+  group_by(problem_id) %>%
+  summarise(mean_correct = mean(correct)) %>%
+  ungroup()
+
+# Perform k-means clustering
+kmeans_result_not_i <- kmeans(mean_data_not_i$mean_correct, centers = 4)
+
+# Create breaks
+breaks_not_i <- c(min(mean_data_not_i$mean_correct), sort(kmeans_result_not_i$centers), max(mean_data_not_i$mean_correct))
+
+# Merge the calculated means back into the original data frame
+val3 <- left_join(val3, mean_data_not_i, by = "problem_id")
+
+# Label quintiles for the entire dataset based on the calculated breaks
+ val3 <- val3 %>%
+  mutate(
+    difficuty_level = cut(mean_correct,
+                         breaks = breaks_not_i,
+                         labels = c("a", "b", "c", "d", "e"),
+                         include.lowest = TRUE)  )
+
+# Assign label "c" to problem_id instances that have NA in difficuty_level
+val3 <- val3 %>%
+  mutate(
+    difficuty_level = if_else(is.na(difficuty_level), "c", as.character(difficuty_level))
+  )
+
+val3[, difficuty_level := ifelse(.N <= 4, "c", difficuty_level), by = problem_id]
 
  #spacing,forgetting features to run
 val3<-setDT(val3)
