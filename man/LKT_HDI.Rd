@@ -8,10 +8,10 @@ LKT_HDI(
   dat,
   n_boot,
   n_students,
-  components,
-  features,
-  interacts,
-  fixedpars,
+  componentsv,
+  featuresv,
+  interactsv = NA,
+  fixedparsv,
   get_hdi = TRUE,
   cred_mass = 0.95
 )
@@ -23,6 +23,10 @@ LKT_HDI(
 
 \item{n_students}{Number of students per subsample}
 
+\item{get_hdi}{boolean to decide if generating HDI per coefficient}
+
+\item{cred_mass}{credibility mass parameter to decide width of HDI}
+
 \item{components}{components in model}
 
 \item{features}{features in model}
@@ -30,10 +34,6 @@ LKT_HDI(
 \item{interacts}{interacts in model}
 
 \item{fixedpars}{fixed pars in model}
-
-\item{get_hdi}{boolean to decide if generating HDI per coefficient}
-
-\item{cred_mass}{credibility mass parameter to decide width of HDI}
 }
 \value{
 list of values "par_reps", "mod_full", "coef_hdi"
