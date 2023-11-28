@@ -1010,13 +1010,23 @@ par(mar=c(18, 5, 1, 1))
 
 # example of LASSOLKT
 ```{r, echo=TRUE}
-    modelob <- LASSOLKTModel(
-      data = val, gridpars=(1:9)/10,
-      allcomponents = c("Anon.Student.Id","KC..Default."),
-      allfeatures = c( "lineafm","linesuc","linefail","recency"),target_n = 5)
+LASSO_Model<- LASSOLKTModel(
+  data = setDT(val),gridpars=(1:9)/10,
+  removecomp = c("Anon.Student.Id","Anon.Student.Id","Anon.Student.Id",
+                 "KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default.","KC..Default."),
+  removefeat = c("intercept","logsuc$","logfail$",
+                 "lineafm","logafm","logsuc","logfail","logsuc","logfail","linesuc","linefail","logitdec","propdec","recency","logsuc$","logfail$"),
+  allcomponents = c("Anon.Student.Id","KC..Cluster.","KC..Default."),
+  allfeatures = c("intercept","lineafm","logafm","logsuc","logfail","logsuc","logfail","linesuc","linefail","logitdec","propdec","recency","logsuc$","logfail$"),#,"logsuc","logfail","linesuc","linefail","logitdec","propdec","recency"
+  target_n = 100, test_fold = 1)
 
+plot(LASSO_Model$n_features,LASSO_Model$auc_lambda,pch=16)
+points(LASSO_Model$n_features[target_idx],LASSO_Model$auc_lambda[target_idx],col="red",pch=15)
+plot(LASSO_Model$n_features,LASSO_Model$rmse_lambda,pch=16)
+points(LASSO_Model$n_features[target_idx],LASSO_Model$rmse_lambda[target_idx],col="red",pch=15)
+plot(LASSO_Model$n_features,LASSO_Model$BIC_lambda,pch=16)
+points(LASSO_Model$n_features[target_idx],LASSO_Model$BIC_lambda[target_idx],col="red",pch=15)
 
-str(modelob)
 ```
 
 # example of LASSOLKT with preset
