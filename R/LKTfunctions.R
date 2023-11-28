@@ -1793,65 +1793,75 @@ LASSOLKTData <- function(data,gridpars,
 #' @param target_n chosen number of features in model
 #' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
 #' @param presetint should the intercepts be included for preset components
-#' @param removefeat Character Vector | Excludes specified features from the test list.
-#' @param removecomp Character Vector | Excludes specified components from the test list.
-#' @return list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
+#' @param test_fold the fold that the chosen LASSO model will be tested on
+#' @return list of matrices and values "train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx", "preds"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
-                      specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c()){
-
+                          specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1){
+  
   datmat = LASSOLKTData(setDT(data),gridpars,
-                         allcomponents,allfeatures,preset=preset,presetint=presetint,
-                         specialcomponents=specialcomponents,specialfeatures=specialfeatures,
+                        allcomponents,allfeatures,preset=preset,presetint=presetint,
+                        specialcomponents=specialcomponents,specialfeatures=specialfeatures,
                         specialpars=specialpars,removefeat=removefeat, removecomp=removecomp)
-
+  
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
-
+  
   train_x <- m1
   train_y <- data$CF..ansbin.
-
-  #23 seconds on largerawsample
+  
+  
+  allfold = unique(data$fold)
+  all_x = m1
+  all_y = data$CF..ansbin.
+  
+  train_fold = allfold[which(allfold!=test_fold)]
+  train_x = all_x[which(val$fold %in% train_fold),]
+  train_y = all_y[which(val$fold %in% train_fold)]
+  test_x = all_x[which(val$fold %in% test_fold),]
+  test_y = all_y[which(val$fold %in% test_fold)]
+  #Test on remaining fold
+  
   start=Sys.time()
-  fit  = glmnet(train_x,train_y,family="binomial",intercept = FALSE)
+  fit=glmnet(x = train_x, y = train_y, family = "binomial")
   end=Sys.time()
-  dur1 = end-start
-  print(dur1)
+  end-start
+  print(end-start)
+  
+  preds = predict(fit, newx = test_x, s = fit$lambda,type="response")#runs fast
+  
+  
+  n_features=rep(NA,length(fit$lambda))
+  for(j in 1:length(fit$lambda)){
+    coefs=coef(fit, s = fit$lambda[j])
+    n_features[j] = length(which(!(coefs==0)))
+  }
+  
+  auc_lambda <- apply(preds, 2, function(col) {
+   roc(test_y, col)$auc 
+    })
+  
+  rmse_lambda <- apply(preds, 2, function(col) {
+    rmse_obj <- sqrt(mean((test_y-col)^2))
+  })
+  
+  target_auc = roc_lambda[which.min(abs(n_features - target_n))]
+  target_rmse = rmse_lambda[which.min(abs(n_features - target_n))]
+  
+  #save(preds,target25,target100,cloze_test_results,file=paste0("cloze_testFold_",testf,".RData"))
+  BIC_lambda = rep(NA,length(fit$lambda))
+  
+  for(i in 1:length(fit$lambda)){
+    tLL <- -deviance(fit)[i] 
+    k <- fit$df[i]
+    n <- nobs(fit)
+    BIC_lambda[i] = log(n)*k - tLL
+    print(i)
+  }
 
-  #4 minutes in largerawsample
-  start=Sys.time()
-  cvfit = cv.glmnet(train_x, train_y,family="binomial",intercept=FALSE)
-  end=Sys.time()
-  dur2 = end-start
-  print(dur2)
-
-  coef_1se = coef(cvfit, s = "lambda.1se")
-  nonzero_1se = rownames(coef_1se)[which(coef_1se!=0)]
-  zero_1se = rownames(coef_1se)[which(coef_1se==0)]
-  #Larger lambda (to the right) results in fewer features
-
-  target_lambda = cvfit$glmnet.fit$lambda[which.min(abs(cvfit$glmnet.fit$df - target_n))]
-  #Get new lasso
-  target_fit = coef(cvfit, s = target_lambda)
-  target_features = rownames(target_fit)[which(target_fit!=0)]
-  target_dropped = rownames(target_fit)[which(target_fit==0)]
-
-  target_dev_ratio = cvfit$glmnet.fit$dev.ratio[which.min(abs(cvfit$glmnet.fit$df - target_n))]
-  best_dev_ratio = max(cvfit$glmnet.fit$dev.ratio)
-
-  preds=predict(cvfit,train_x,s=target_lambda,type="response")
-  target_mod_rmse = mean(tapply(preds-train_y,data$Anon.Student.Id,function(x){sqrt(mean(x^2))}))
-  target_mod_auc = auc(as.numeric(train_y),as.numeric(preds))
-
-  fit=glmnet(x = train_x, y = train_y, family = "binomial",lambda=target_lambda)
-  tLL <-  -deviance(fit)
-  k <- fit$df
-  n <- fit$nobs
-  target_mod_bic=log(n)*k - tLL
-
-  return_list=list(zero_1se,nonzero_1se,target_features,target_dropped,target_dev_ratio,best_dev_ratio,target_mod_rmse,target_mod_auc,target_mod_bic)
-  names(return_list) = c("dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc","target_mod_bic")
-
-
+  
+  return_list = list(train_x,train_y,test_x,test_y,fit,target_auc,target_rmse,n_features,auc_lambda,rmse_lambda,BIC_lambda,target_idx,preds)#,fit)
+  names(return_list) = c("train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx","preds")
+  
   return(return_list)
 }
