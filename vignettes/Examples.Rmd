@@ -1021,11 +1021,12 @@ LASSO_Model<- LASSOLKTModel(
   target_n = 100, test_fold = 1)
 
 plot(LASSO_Model$n_features,LASSO_Model$auc_lambda,pch=16)
-points(LASSO_Model$n_features[target_idx],LASSO_Model$auc_lambda[target_idx],col="red",pch=15)
+points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$auc_lambda[LASSO_Model$target_idx],col="red",pch=15)
 plot(LASSO_Model$n_features,LASSO_Model$rmse_lambda,pch=16)
-points(LASSO_Model$n_features[target_idx],LASSO_Model$rmse_lambda[target_idx],col="red",pch=15)
+points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$rmse_lambda[LASSO_Model$target_idx],col="red",pch=15)
 plot(LASSO_Model$n_features,LASSO_Model$BIC_lambda,pch=16)
-points(LASSO_Model$n_features[target_idx],LASSO_Model$BIC_lambda[target_idx],col="red",pch=15)
+points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$BIC_lambda[LASSO_Model$target_idx],col="red",pch=15)
+
 
 ```
 
