@@ -1027,6 +1027,15 @@ points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$rmse_lambda[LA
 plot(LASSO_Model$n_features,LASSO_Model$BIC_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$BIC_lambda[LASSO_Model$target_idx],col="red",pch=15)
 
+#Kept features in model with target N features
+LASSO_Model$model_features
+
+#New model features from different lambda penalty term
+new_lambda = which.min(abs(LASSO_Model$n_features-150))
+target_coefs = coef(LASSO_Model$fit, s = LASSO_Model$fit$lambda[new_lambda])
+kept_features = rownames(target_coefs)[which(!(target_coefs==0))]
+kept_coefs = target_coefs[which(!(target_coefs==0))]
+kept_features
 
 ```
 
