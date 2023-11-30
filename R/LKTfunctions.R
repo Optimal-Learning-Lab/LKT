@@ -1845,7 +1845,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
     rmse_obj <- sqrt(mean((test_y-col)^2))
   })
   
-  target_auc = roc_lambda[which.min(abs(n_features - target_n))]
+  target_auc = auc_lambda[which.min(abs(n_features - target_n))]
   target_rmse = rmse_lambda[which.min(abs(n_features - target_n))]
   
   #save(preds,target25,target100,cloze_test_results,file=paste0("cloze_testFold_",testf,".RData"))
