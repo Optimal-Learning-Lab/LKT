@@ -1860,9 +1860,15 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
     print(i)
   }
 
+  #Returning features retained in lasso model with target lambda along with coefficients
+  target_coefs = coef(fit, s = fit$lambda[target_idx])
+  kept_features = rownames(target_coefs)[which(!(target_coefs==0))]
+  kept_coefs = target_coefs[which(!(target_coefs==0))]
+  model_features = data.frame(kept_features = kept_features,kept_coefs = kept_coefs)
   
-  return_list = list(train_x,train_y,test_x,test_y,fit,target_auc,target_rmse,n_features,auc_lambda,rmse_lambda,BIC_lambda,target_idx,preds)#,fit)
-  names(return_list) = c("train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx","preds")
+  return_list = list(train_x,train_y,test_x,test_y,fit,target_auc,target_rmse,n_features,auc_lambda,rmse_lambda,BIC_lambda,target_idx,preds,target_coefs,model_features)#,fit)
+  names(return_list) = c("train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx","preds","target_coefs","model_features")
+  
   
   return(return_list)
 }
