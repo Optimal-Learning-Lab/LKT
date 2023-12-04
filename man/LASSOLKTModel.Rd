@@ -16,7 +16,8 @@ LASSOLKTModel(
   specialpars = c(),
   target_n,
   removefeat = c(),
-  removecomp = c()
+  removecomp = c(),
+  test_fold = 1
 )
 }
 \arguments{
@@ -40,12 +41,10 @@ LASSOLKTModel(
 
 \item{target_n}{chosen number of features in model}
 
-\item{removefeat}{Character Vector | Excludes specified features from the test list.}
-
-\item{removecomp}{Character Vector | Excludes specified components from the test list.}
+\item{test_fold}{the fold that the chosen LASSO model will be tested on}
 }
 \value{
-list of values "dropped 1se", "retained 1se","target features","target dropped","target pseudo R2","best pseudo R2","target mod rmse","target mod auc", and "target_mod_bic"
+list of matrices and values "train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx", "preds"
 }
 \description{
 runs LASSO search on the data

@@ -1405,7 +1405,7 @@ buildLKTModel <- function(data,usefolds = NA,
                           forward= TRUE, backward=TRUE, metric="BIC",removefeat=c(), removecomp=c()){
 
 
-  if(is.na(usefolds))
+  if(is.na(usefolds)[1])
   {data$fold<-1
   usefolds=1}
 
@@ -1682,14 +1682,19 @@ buildLKTModel <- function(data,usefolds = NA,
 
   # repeat until no more above threshold
   # report final
-  par(mar=c(16, 5, 1, 1))
-  matplot(cbind(-scale(tracetable$r2),scale(tracetable$BIC),-scale(tracetable$AUC),
-                scale(tracetable$AIC),scale(tracetable$RMSE)), type="l", xaxt = "n",
-          ylab = "Scaled Score", lwd=2,cex=1.5)
+  tryCatch({
+    par(mar=c(16, 5, 1, 1))
+    matplot(cbind(-scale(tracetable$r2),scale(tracetable$BIC),-scale(tracetable$AUC),
+                  scale(tracetable$AIC),scale(tracetable$RMSE)), type="l", xaxt = "n",
+            ylab = "Scaled Score", lwd=2, cex=1.5)
 
-  axis(1, at = 1:nrow(tracetable), labels = paste(tracetable$action), cex.axis = 1,las=2)
-  legend("topright", c("R2","BIC","AUC","AIC","RMSE"), col=1:5, cex=1, lty=1:5, lwd=2)
-  mtext(side=1, text="Step action", line=14)
+    axis(1, at = 1:nrow(tracetable), labels = paste(tracetable$action), cex.axis = 1, las=2)
+    legend("topright", c("R2", "BIC", "AUC", "AIC", "RMSE"), col=1:5, cex=1, lty=1:5, lwd=2)
+    mtext(side=1, text="Step action", line=14)
+  }, error = function(e) {
+    print("Problem creating figure.")
+  })
+
 
   return(list(tracetable,currentfit))
 }
@@ -1798,49 +1803,49 @@ LASSOLKTData <- function(data,gridpars,
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
                           specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1){
-  
+
   datmat = LASSOLKTData(setDT(data),gridpars,
                         allcomponents,allfeatures,preset=preset,presetint=presetint,
                         specialcomponents=specialcomponents,specialfeatures=specialfeatures,
                         specialpars=specialpars,removefeat=removefeat, removecomp=removecomp)
-  
+
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
-  
+
   train_x <- m1
   train_y <- data$CF..ansbin.
-  
-  
+
+
   allfold = unique(data$fold)
   all_x = m1
   all_y = data$CF..ansbin.
-  
+
   train_fold = allfold[which(allfold!=test_fold)]
   train_x = all_x[which(val$fold %in% train_fold),]
   train_y = all_y[which(val$fold %in% train_fold)]
   test_x = all_x[which(val$fold %in% test_fold),]
   test_y = all_y[which(val$fold %in% test_fold)]
   #Test on remaining fold
-  
+
   start=Sys.time()
   fit=glmnet(x = train_x, y = train_y, family = "binomial")
   end=Sys.time()
   end-start
   print(end-start)
-  
+
   preds = predict(fit, newx = test_x, s = fit$lambda,type="response")#runs fast
-  
-  
+
+
   n_features=rep(NA,length(fit$lambda))
   for(j in 1:length(fit$lambda)){
     coefs=coef(fit, s = fit$lambda[j])
     n_features[j] = length(which(!(coefs==0)))
   }
-  
+
   auc_lambda <- apply(preds, 2, function(col) {
-   roc(test_y, col)$auc 
+   roc(test_y, col)$auc
     })
-  
+
   rmse_lambda <- apply(preds, 2, function(col) {
     rmse_obj <- sqrt(mean((test_y-col)^2))
   })
@@ -1848,12 +1853,12 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   target_idx = which.min(abs(n_features - target_n))
   target_auc = auc_lambda[which.min(abs(n_features - target_n))]
   target_rmse = rmse_lambda[which.min(abs(n_features - target_n))]
-  
+
   #save(preds,target25,target100,cloze_test_results,file=paste0("cloze_testFold_",testf,".RData"))
   BIC_lambda = rep(NA,length(fit$lambda))
-  
+
   for(i in 1:length(fit$lambda)){
-    tLL <- -deviance(fit)[i] 
+    tLL <- -deviance(fit)[i]
     k <- fit$df[i]
     n <- nobs(fit)
     BIC_lambda[i] = log(n)*k - tLL
@@ -1865,10 +1870,10 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   kept_features = rownames(target_coefs)[which(!(target_coefs==0))]
   kept_coefs = target_coefs[which(!(target_coefs==0))]
   model_features = data.frame(kept_features = kept_features,kept_coefs = kept_coefs)
-  
+
   return_list = list(train_x,train_y,test_x,test_y,fit,target_auc,target_rmse,n_features,auc_lambda,rmse_lambda,BIC_lambda,target_idx,preds,target_coefs,model_features)#,fit)
   names(return_list) = c("train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx","preds","target_coefs","model_features")
-  
-  
+
+
   return(return_list)
 }
