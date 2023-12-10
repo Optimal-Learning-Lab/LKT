@@ -1,6 +1,6 @@
 #' @importFrom graphics boxplot
 #' @importFrom methods new
-#' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile
+#' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile nobs
 #' @importFrom utils packageVersion
 #' @importFrom graphics axis legend matplot mtext par
 
@@ -852,15 +852,15 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
 }
 
 #boot function for LKT_HDI
-boot_fn <- function(dat,n_students,componentsv,featuresv,interactsv=NA,fixedparsv){
+boot_fn <- function(dat,n_students,components,features,interacts=NA,fixedpars){
 
 
   dat_ss = smallSet(dat,n_students)
 
   mod = LKT(setDT(dat_ss),interc=TRUE,
-            components=componentsv ,interacts = interactsv,
-            features=featuresv,
-            fixedpars = fixedparsv,
+            components=components ,interacts = interacts,
+            features=features,
+            fixedpars = fixedpars,
             seedpars = c(NA),verbose=FALSE)
   return((mod$coefs))
 }
@@ -1314,14 +1314,14 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param cred_mass credibility mass parameter to decide width of HDI
 #' @export
 #' @return list of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat,n_boot,n_students,componentsv,featuresv,interactsv=NA,fixedparsv, get_hdi = TRUE, cred_mass = .95){
+LKT_HDI <- function(dat,n_boot,n_students,components,features,interacts=NA,fixedpars, get_hdi = TRUE, cred_mass = .95){
 
   #first fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat),interc=TRUE,
-                 interacts=interactsv,
-                 components=componentsv,
-                 features=featuresv,
-                 fixedpars = fixedparsv,
+                 interacts=interacts,
+                 components=components,
+                 features=features,
+                 fixedpars = fixedpars,
                  seedpars = c(NA),verbose=FALSE)
 
   par_reps = matrix(nrow=n_boot,ncol=length(mod_full$coefs))
@@ -1329,8 +1329,8 @@ LKT_HDI <- function(dat,n_boot,n_students,componentsv,featuresv,interactsv=NA,fi
 
   for(i in 1:n_boot){
     #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components=componentsv,features=featuresv,
-                 interacts=interactsv,fixedpars=fixedparsv )
+    temp=boot_fn(dat,n_students,components=components,features=features,
+                 interacts=interacts,fixedpars=fixedpars )
     idx = match(rownames(temp),colnames(par_reps))
     par_reps[i,idx] = as.numeric(temp)
     if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
@@ -1716,10 +1716,11 @@ buildLKTModel <- function(data,usefolds = NA,
 #' @param presetint should the intercepts be included for preset components
 #' @param removefeat Character Vector | Excludes specified features from the test list.
 #' @param removecomp Character Vector | Excludes specified components from the test list.
+#' @param interc TRUE or FALSE, include a global intercept.
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
-LASSOLKTData <- function(data,gridpars,
+LASSOLKTData <- function(data,gridpars,interc=F,
                           allcomponents,allfeatures,preset=NA,presetint=T,
                           specialcomponents=c(),specialfeatures=c(),specialpars=c(),removefeat=c(), removecomp=c()){
 
@@ -1779,7 +1780,7 @@ LASSOLKTData <- function(data,gridpars,
   allpars<-c(specialpars, allpars)
   # retain the best model data
   return(
-    LKT(data = data,   components = complist,
+    LKT(data = data,   components = complist,interc = interc,
         features = featlist,fixedpars = allpars, nosolve=TRUE)
   )
 }
@@ -1799,15 +1800,20 @@ LASSOLKTData <- function(data,gridpars,
 #' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
 #' @param presetint should the intercepts be included for preset components
 #' @param test_fold the fold that the chosen LASSO model will be tested on
+#' @param removefeat Character Vector | Excludes specified features from the test list.
+#' @param removecomp Character Vector | Excludes specified components from the test list.
+#' @param interc TRUE or FALSE, include a global intercept.
 #' @return list of matrices and values "train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx", "preds"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
-                          specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1){
+                          specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1,interc=F){
 
   datmat = LASSOLKTData(setDT(data),gridpars,
                         allcomponents,allfeatures,preset=preset,presetint=presetint,
                         specialcomponents=specialcomponents,specialfeatures=specialfeatures,
-                        specialpars=specialpars,removefeat=removefeat, removecomp=removecomp)
+                        specialpars=specialpars,removefeat=removefeat, removecomp=removecomp,
+                        interc=interc)
+  #print(row.names(datmat))
 
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
@@ -1821,14 +1827,14 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   all_y = data$CF..ansbin.
 
   train_fold = allfold[which(allfold!=test_fold)]
-  train_x = all_x[which(val$fold %in% train_fold),]
-  train_y = all_y[which(val$fold %in% train_fold)]
-  test_x = all_x[which(val$fold %in% test_fold),]
-  test_y = all_y[which(val$fold %in% test_fold)]
+  train_x = all_x[which(data$fold %in% train_fold),]
+  train_y = all_y[which(data$fold %in% train_fold)]
+  test_x = all_x[which(data$fold %in% test_fold),]
+  test_y = all_y[which(data$fold %in% test_fold)]
   #Test on remaining fold
 
   start=Sys.time()
-  fit=glmnet(x = train_x, y = train_y, family = "binomial")
+  fit=glmnet(x = train_x, y = train_y, family = "binomial",intercept = interc)
   end=Sys.time()
   end-start
   print(end-start)
@@ -1843,7 +1849,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   }
 
   auc_lambda <- apply(preds, 2, function(col) {
-   roc(test_y, col)$auc
+    suppressMessages(roc(test_y, col)$auc)
     })
 
   rmse_lambda <- apply(preds, 2, function(col) {
@@ -1862,7 +1868,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
     k <- fit$df[i]
     n <- nobs(fit)
     BIC_lambda[i] = log(n)*k - tLL
-    print(i)
+  #  print(i)
   }
 
   #Returning features retained in lasso model with target lambda along with coefficients
