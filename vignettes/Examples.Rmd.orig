@@ -75,7 +75,7 @@ set.seed(41)
 
 
 
-#Load MATHia (example how to load a remote dataset)
+# Load MATHia (example how to load a remote dataset)
 ```{r, echo=TRUE}
 set.seed(41)
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
@@ -115,7 +115,7 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 
 
 
-#Load Assistments 2012 skillbuilder (example how to load a remote dataset)
+# Load Assistments 2012 skillbuilder (example how to load a remote dataset)
 ```{r, echo=TRUE}
 # set.seed(41)
 # # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
@@ -474,7 +474,7 @@ for(i in 1:4){
 ```
 
 
-#Credibility intervals
+# Credibility intervals
 ```{r}
 
 components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
@@ -522,7 +522,7 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
       fixedpars=c(NA,NA))
 ```
 
-#brpropdec (experimental feature)
+# brpropdec (experimental feature)
 ```{r, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
@@ -550,7 +550,7 @@ modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
 
 ```
 
-#Astonishing model (theory analysis)
+# Astonishing model (theory analysis)
 ```{r, echo=TRUE}
 modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
@@ -566,7 +566,7 @@ modelob <- LKT(
 
 ```
 
-#Build LKT with special feature
+# Build LKT with special feature
 ```{r, echo=TRUE}
 
 q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency.",specialfeatures = "numer",
@@ -578,7 +578,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 ```
 
 
-#AFMstartMATHia
+# AFMstartMATHia
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -625,7 +625,7 @@ save(savedata,file="AFMMATHia.RData")
 
 ```
 
-#BestLRstartMATHia
+# BestLRstartMATHia
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -672,7 +672,7 @@ save(savedata,file="bestLRMATHia.RData")
 
 ```
 
-#EmptystartMATHia
+# EmptystartMATHia
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -719,7 +719,7 @@ save(savedata,file="emptyMATHia.RData")
 
 
 
-#AFMstartCloze
+# AFMstartCloze
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -769,7 +769,7 @@ save(savedata,file="AFMcloze.RData")
 ```
 
 
-#BestLRstartCloze
+# BestLRstartCloze
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -820,7 +820,7 @@ save(savedata,file="bestLRcloze.RData")
 
 ```
 
-#EmptystartCloze
+# EmptystartCloze
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
@@ -867,7 +867,7 @@ save(savedata,file="emptycloze.RData")
 
 
 ```
-#EmptystartAssist
+# EmptystartAssist
 ```{r, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)

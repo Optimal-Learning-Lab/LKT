@@ -1,7 +1,7 @@
 ---
 title: "Examples"
 author: "Philip I. Pavlik Jr."
-date: "2023-12-08"
+date: "2023-12-10"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Examples}
@@ -74,7 +74,7 @@ set.seed(41)
 
 
 
-#Load MATHia (example how to load a remote dataset)
+# Load MATHia (example how to load a remote dataset)
 
 ```r
 set.seed(41)
@@ -114,7 +114,7 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 
 
 
-#Load Assistments 2012 skillbuilder (example how to load a remote dataset)
+# Load Assistments 2012 skillbuilder (example how to load a remote dataset)
 
 ```r
 # set.seed(41)
@@ -668,7 +668,7 @@ system.time( modelob <- LKT(
 #> LogLike logistic: -24883.5736715 
 #> step par values =0.4095353,0.2174653,0.2247826
 #>    user  system elapsed 
-#>   57.87    0.82  122.64
+#>   60.52    1.42  132.76
 ```
 
 # Performance Prediction Equation (PPE)
@@ -935,7 +935,7 @@ plot<-ggplot(r2s,
 plot
 ```
 
-![plot of chunk unnamed-chunk-17](vigfig-unnamed-chunk-17-1.png)
+![plot of chunk unnamed-chunk-15](vigfig-unnamed-chunk-15-1.png)
 
 ```r
 
@@ -985,7 +985,7 @@ for (i in c(3,6)){
 #>  R2 =   0.303657
 ```
 
-![plot of chunk unnamed-chunk-17](vigfig-unnamed-chunk-17-2.png)
+![plot of chunk unnamed-chunk-15](vigfig-unnamed-chunk-15-2.png)
 
 ```
 #>  R2 =   0.318756 
@@ -1004,7 +1004,7 @@ for (i in c(3,6)){
 #>  R2 =   0.317242
 ```
 
-![plot of chunk unnamed-chunk-17](vigfig-unnamed-chunk-17-3.png)
+![plot of chunk unnamed-chunk-15](vigfig-unnamed-chunk-15-3.png)
 
 # Synthetic discrimination parameter testing (experimental)
 
@@ -1050,7 +1050,7 @@ for(i in 1:4){
 ```
 
 
-#Credibility intervals
+# Credibility intervals
 
 ```r
 
@@ -1083,7 +1083,7 @@ system.time({
 })
 #> 0%...2%...3%...4%...5%...6%...7%...8%...9%...10%...11%...12%...13%...14%...15%...16%...17%...18%...19%...20%...21%...22%...23%...24%...25%...26%...27%...28%...29%...30%...31%...32%...33%...34%...35%...36%...37%...38%...39%...40%...41%...42%...43%...44%...45%...46%...47%...48%...49%...50%...51%...52%...53%...54%...55%...56%...57%...58%...59%...60%...61%...62%...63%...64%...65%...66%...67%...68%...69%...70%...71%...72%...73%...74%...75%...76%...77%...78%...79%...80%...81%...82%...83%...84%...85%...86%...87%...88%...89%...90%...91%...92%...93%...94%...95%...96%...97%...98%...99%...100%
 #>    user  system elapsed 
-#>  117.54    3.64  245.40
+#>   65.13    2.60  198.24
 
 
 #Names of coefficients that are non-significant (interval includes zero)
@@ -1366,7 +1366,7 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 #> step par values =0.5086748,0.3362671
 ```
 
-#brpropdec (experimental feature)
+# brpropdec (experimental feature)
 
 ```r
     modelob <- LKT(
@@ -1426,7 +1426,7 @@ modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
 #> LogLike logistic: -26389.05800396
 ```
 
-#Astonishing model (theory analysis)
+# Astonishing model (theory analysis)
 
 ```r
 modelob <- LKT(
@@ -1463,7 +1463,7 @@ modelob <- LKT(
 #> Latency Intercept: 6.78509949532675
 ```
 
-#Build LKT with special feature
+# Build LKT with special feature
 
 ```r
 
@@ -1667,10 +1667,10 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 #> pars 1e-05 0.99999 0.3694426
 ```
 
-![plot of chunk unnamed-chunk-25](vigfig-unnamed-chunk-25-1.png)
+![plot of chunk unnamed-chunk-23](vigfig-unnamed-chunk-23-1.png)
 
 
-#AFMstartMATHia
+# AFMstartMATHia
 
 ```r
 LLs <- numeric(0)
@@ -1849,7 +1849,7 @@ for (i in 1:2) {
 #>  KC..MATHia.
 ```
 
-![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-1.png)
+![plot of chunk unnamed-chunk-24](vigfig-unnamed-chunk-24-1.png)
 
 ```
 #> [1] 0.7226126
@@ -1994,7 +1994,7 @@ for (i in 1:2) {
 #>  KC..MATHia.
 ```
 
-![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-2.png)
+![plot of chunk unnamed-chunk-24](vigfig-unnamed-chunk-24-2.png)
 
 ```
 #> [1] 0.7134662
@@ -2010,7 +2010,7 @@ save(savedata,file="AFMMATHia.RData")
 
 ```
 
-#BestLRstartMATHia
+# BestLRstartMATHia
 
 ```r
 LLs <- numeric(0)
@@ -2368,7 +2368,7 @@ for (i in 1:2) {
 #>  KC..MATHia.
 ```
 
-![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-1.png)
+![plot of chunk unnamed-chunk-25](vigfig-unnamed-chunk-25-1.png)
 
 ```
 #> [1] 0.7226126
@@ -2691,7 +2691,7 @@ for (i in 1:2) {
 #>  KC..MATHia.
 ```
 
-![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-2.png)
+![plot of chunk unnamed-chunk-25](vigfig-unnamed-chunk-25-2.png)
 
 ```
 #> [1] 0.7134662
@@ -2706,7 +2706,7 @@ savedata<-list(modelobtable,AUCs,R2s,RMSEs)
 save(savedata,file="bestLRMATHia.RData")
 ```
 
-#EmptystartMATHia
+# EmptystartMATHia
 
 ```r
 LLs <- numeric(0)
@@ -2831,7 +2831,7 @@ for (i in 1:2) {
 #> pars 0.9052715
 ```
 
-![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-1.png)
+![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-1.png)
 
 ```
 #> [1] 0.7651378
@@ -2924,7 +2924,7 @@ for (i in 1:2) {
 #> pars 0.924255
 ```
 
-![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-2.png)
+![plot of chunk unnamed-chunk-26](vigfig-unnamed-chunk-26-2.png)
 
 ```
 #> [1] 0.7660516
@@ -2942,7 +2942,7 @@ save(savedata,file="emptyMATHia.RData")
 
 
 
-#AFMstartCloze
+# AFMstartCloze
 
 ```r
 LLs <- numeric(0)
@@ -3278,7 +3278,7 @@ for (i in 1:2) {
 #>  CF..Correct.Answer.
 ```
 
-![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-1.png)
+![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-1.png)
 
 ```
 #> [1] 0.7541528
@@ -3579,7 +3579,7 @@ for (i in 1:2) {
 #>  CF..Correct.Answer.
 ```
 
-![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-2.png)
+![plot of chunk unnamed-chunk-27](vigfig-unnamed-chunk-27-2.png)
 
 ```
 #> [1] 0.7474713
@@ -3597,7 +3597,7 @@ save(savedata,file="AFMcloze.RData")
 ```
 
 
-#BestLRstartCloze
+# BestLRstartCloze
 
 ```r
 LLs <- numeric(0)
@@ -4338,7 +4338,7 @@ for (i in 1:2) {
 #> pars 0.2593097 0.7544957
 ```
 
-![plot of chunk unnamed-chunk-30](vigfig-unnamed-chunk-30-1.png)
+![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-1.png)
 
 ```
 #> [1] 0.7816425
@@ -4916,7 +4916,7 @@ for (i in 1:2) {
 #>  CF..Correct.Answer.
 ```
 
-![plot of chunk unnamed-chunk-30](vigfig-unnamed-chunk-30-2.png)
+![plot of chunk unnamed-chunk-28](vigfig-unnamed-chunk-28-2.png)
 
 ```
 #> [1] 0.7440391
@@ -4934,7 +4934,7 @@ save(savedata,file="bestLRcloze.RData")
 
 ```
 
-#EmptystartCloze
+# EmptystartCloze
 
 ```r
 LLs <- numeric(0)
@@ -5082,7 +5082,7 @@ for (i in 1:2) {
 #>  KC..Default.
 ```
 
-![plot of chunk unnamed-chunk-31](vigfig-unnamed-chunk-31-1.png)
+![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-1.png)
 
 ```
 #> [1] 0.7183348
@@ -5197,7 +5197,7 @@ for (i in 1:2) {
 #>  KC..Default.
 ```
 
-![plot of chunk unnamed-chunk-31](vigfig-unnamed-chunk-31-2.png)
+![plot of chunk unnamed-chunk-29](vigfig-unnamed-chunk-29-2.png)
 
 ```
 #> [1] 0.725237
@@ -5214,7 +5214,7 @@ savedata<-list(modelobtable,AUCs,R2s,RMSEs)
 save(savedata,file="emptycloze.RData")
 
 ```
-#EmptystartAssist
+# EmptystartAssist
 
 ```r
 LLs <- numeric(0)
@@ -5366,7 +5366,7 @@ for (i in 1:2) {
 #> pars 0.8281909
 ```
 
-![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-1.png)
+![plot of chunk unnamed-chunk-30](vigfig-unnamed-chunk-30-1.png)
 
 ```
 #> [1] 0.6805414
@@ -5483,7 +5483,7 @@ for (i in 1:2) {
 #> pars 0.7840287
 ```
 
-![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-2.png)
+![plot of chunk unnamed-chunk-30](vigfig-unnamed-chunk-30-2.png)
 
 ```
 #> [1] 0.6539366
@@ -5730,27 +5730,27 @@ LASSO_Model<- LASSOLKTModel(
 #> logfail$ KC..Cluster.      
 #> intercept KC..Default.      
 #> interceptKC..Default.+logfailKC..Cluster.:e$data$KC..Cluster.+logsucKC..Cluster.:e$data$KC..Cluster.+recency0.9KC..Cluster.+recency0.8KC..Cluster.+recency0.7KC..Cluster.+recency0.6KC..Cluster.+recency0.5KC..Cluster.+recency0.4KC..Cluster.+recency0.3KC..Cluster.+recency0.2KC..Cluster.+recency0.1KC..Cluster.+propdec0.9KC..Cluster.+propdec0.8KC..Cluster.+propdec0.7KC..Cluster.+propdec0.6KC..Cluster.+propdec0.5KC..Cluster.+propdec0.4KC..Cluster.+propdec0.3KC..Cluster.+propdec0.2KC..Cluster.+propdec0.1KC..Cluster.+logitdec0.9KC..Cluster.+logitdec0.8KC..Cluster.+logitdec0.7KC..Cluster.+logitdec0.6KC..Cluster.+logitdec0.5KC..Cluster.+logitdec0.4KC..Cluster.+logitdec0.3KC..Cluster.+logitdec0.2KC..Cluster.+logitdec0.1KC..Cluster.+linefailKC..Cluster.+linesucKC..Cluster.+logfailKC..Cluster.+logsucKC..Cluster.+logfailKC..Cluster.+logsucKC..Cluster.+logafmKC..Cluster.+lineafmKC..Cluster.+interceptKC..Cluster.+recency0.9Anon.Student.Id+recency0.8Anon.Student.Id+recency0.7Anon.Student.Id+recency0.6Anon.Student.Id+recency0.5Anon.Student.Id+recency0.4Anon.Student.Id+recency0.3Anon.Student.Id+recency0.2Anon.Student.Id+recency0.1Anon.Student.Id+propdec0.9Anon.Student.Id+propdec0.8Anon.Student.Id+propdec0.7Anon.Student.Id+propdec0.6Anon.Student.Id+propdec0.5Anon.Student.Id+propdec0.4Anon.Student.Id+propdec0.3Anon.Student.Id+propdec0.2Anon.Student.Id+propdec0.1Anon.Student.Id+logitdec0.9Anon.Student.Id+logitdec0.8Anon.Student.Id+logitdec0.7Anon.Student.Id+logitdec0.6Anon.Student.Id+logitdec0.5Anon.Student.Id+logitdec0.4Anon.Student.Id+logitdec0.3Anon.Student.Id+logitdec0.2Anon.Student.Id+logitdec0.1Anon.Student.Id+linefailAnon.Student.Id+linesucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+logafmAnon.Student.Id+lineafmAnon.Student.Id+0 
-#> Time difference of 22.1494 secs
+#> Time difference of 23.84233 secs
 
 plot(LASSO_Model$n_features,LASSO_Model$auc_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$auc_lambda[LASSO_Model$target_idx],col="red",pch=15)
 ```
 
-![plot of chunk unnamed-chunk-34](vigfig-unnamed-chunk-34-1.png)
+![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-1.png)
 
 ```r
 plot(LASSO_Model$n_features,LASSO_Model$rmse_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$rmse_lambda[LASSO_Model$target_idx],col="red",pch=15)
 ```
 
-![plot of chunk unnamed-chunk-34](vigfig-unnamed-chunk-34-2.png)
+![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-2.png)
 
 ```r
 plot(LASSO_Model$n_features,LASSO_Model$BIC_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$BIC_lambda[LASSO_Model$target_idx],col="red",pch=15)
 ```
 
-![plot of chunk unnamed-chunk-34](vigfig-unnamed-chunk-34-3.png)
+![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-3.png)
 
 ```r
 
@@ -6140,7 +6140,7 @@ kept_features
 #> linesuc KC..Default.      
 #> linefail KC..Default.      
 #> linefailKC..Default.+linesucKC..Default.+logfailKC..Default.+logsucKC..Default.+lineafmKC..Default.+logafmKC..Default.+lineafmKC..Default.+interceptKC..Default.+linefailAnon.Student.Id+linesucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+lineafmAnon.Student.Id+logafmAnon.Student.Id+lineafmAnon.Student.Id+interceptAnon.Student.Id+0 
-#> Time difference of 1.125509 mins
+#> Time difference of 1.170926 mins
 
 
 str(modelob)
@@ -6313,7 +6313,8 @@ val3<-setDT(val3)
   print(RMSEs[i])
 }
 #> [1] 2 3 4 5
-#> Warning in set(x, j = name, value = value): Column 'mean_correct' does not exist to remove
+#> Warning in set(x, j = name, value = value): Column 'mean_correct' does not exist to
+#> remove
 #> propdec skill 0.8     
 #> logitdec type 0.94     
 #> recency skill 0.25     
