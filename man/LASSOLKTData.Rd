@@ -7,7 +7,6 @@
 LASSOLKTData(
   data,
   gridpars,
-  interc = F,
   allcomponents,
   allfeatures,
   preset = NA,
@@ -23,8 +22,6 @@ LASSOLKTData(
 \item{data}{is a dataset with Anon.Student.Id and CF..ansbin.}
 
 \item{gridpars}{a vector of parameters to create each feature at}
-
-\item{interc}{TRUE or FALSE, include a global intercept.}
 
 \item{allcomponents}{is search space for LKT components}
 

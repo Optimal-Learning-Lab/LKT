@@ -8,10 +8,11 @@ LKT_HDI(
   dat,
   n_boot,
   n_students,
-  components,
-  features,
-  interacts = NA,
-  fixedpars,
+  componentsv,
+  featuresv,
+  connectorsv,
+  interactsv = NA,
+  fixedparsv,
   get_hdi = TRUE,
   cred_mass = 0.95
 )
@@ -23,13 +24,15 @@ LKT_HDI(
 
 \item{n_students}{Number of students per subsample}
 
-\item{components}{components in model}
+\item{componentsv}{components in model}
 
-\item{features}{features in model}
+\item{featuresv}{features in model}
 
-\item{interacts}{interacts in model}
+\item{connectorsv}{r notation for linear equation connectors in model}
 
-\item{fixedpars}{fixed pars in model}
+\item{interactsv}{interacts in model}
+
+\item{fixedparsv}{fixed pars in model}
 
 \item{get_hdi}{boolean to decide if generating HDI per coefficient}
 

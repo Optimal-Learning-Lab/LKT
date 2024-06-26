@@ -1,7 +1,7 @@
 ---
 title: "Examples"
 author: "Philip I. Pavlik Jr."
-date: "2023-12-10"
+date: "2024-06-08"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Examples}
@@ -10,7 +10,7 @@ vignette: >
 ---
 
 
-```r
+``` r
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -18,11 +18,129 @@ knitr::opts_chunk$set(
   fig.path = "vigfig-"
 )
     library(LKT)
+```
+
+```
+## Loading required package: SparseM
+```
+
+```
+## 
+## Attaching package: 'SparseM'
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     backsolve
+```
+
+```
+## Loading required package: Matrix
+```
+
+```
+## Loading required package: data.table
+```
+
+```
+## data.table 1.14.8 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```
+## Loading required package: LiblineaR
+```
+
+```
+##   LL      KK  KK TTTTTTT
+##   LL      KK KK    TTT
+##   LL      KKKK     TTT
+##   LL      KK KK    TTT
+##   LLLLLLL KK  KK   TTT
+## 
+##   Join the mailing list: lkt@freelists.org
+##   Version 1.6.0
+## Type 'citation("LKT")' for citing this R package in publications.
+```
+
+``` r
     library(ggplot2)
+```
+
+```
+## Keep up to date with changes at https://www.tidyverse.org/blog/
+```
+
+``` r
     library(pROC)
+```
+
+```
+## Type 'citation("pROC")' for a citation.
+```
+
+```
+## 
+## Attaching package: 'pROC'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     cov, smooth, var
+```
+
+``` r
     library(glmnet)
+```
+
+```
+## Loaded glmnet 4.1-7
+```
+
+``` r
     library(crayon)
+```
+
+```
+## 
+## Attaching package: 'crayon'
+```
+
+```
+## The following object is masked from 'package:ggplot2':
+## 
+##     %+%
+```
+
+``` r
     library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:data.table':
+## 
+##     between, first, last
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+``` r
     library(boot)
 # precomputed as per https://ropensci.org/blog/2019/12/08/precompute-vignettes/
 ```
@@ -30,7 +148,7 @@ knitr::opts_chunk$set(
 
 # Load data (shows modifications to create needed columns)
 
-```r
+``` r
 set.seed(41)
     val<-largerawsample
 
@@ -76,7 +194,7 @@ set.seed(41)
 
 # Load MATHia (example how to load a remote dataset)
 
-```r
+``` r
 set.seed(41)
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
@@ -116,7 +234,7 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 
 # Load Assistments 2012 skillbuilder (example how to load a remote dataset)
 
-```r
+``` r
 # set.seed(41)
 # # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
 # datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
@@ -213,7 +331,7 @@ val3<-setDT(val3)
 
 # Additive Factors Model (AFM) fixed effect version
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -229,7 +347,7 @@ val3<-setDT(val3)
 
 # Performance Factors Analysis (PFA) fixed effect version
 
-```r
+``` r
 
 
   modelob <- LKT(data = val, interc=FALSE,
@@ -246,7 +364,7 @@ val3<-setDT(val3)
 
 # PFA using difficulty sensitive predictors (composite model requiring pred from prior model for estimation)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -258,6 +376,9 @@ val3<-setDT(val3)
 #> linefailKC..Default.:e$data$KC..Default.+linesucKC..Default.:e$data$KC..Default.+interceptKC..Default.+interceptAnon.Student.Id+1 
 #> McFadden's R2 logistic: 0.295228 
 #> LogLike logistic: -26769.69416527
+```
+
+``` r
     # have to have prior predictions in data to do the next model in and adaptive system
     #   this needs to be added to the data wth a first moodel like this
     val$pred<-modelob$prediction
@@ -277,7 +398,7 @@ val3<-setDT(val3)
 
 # Recent Performance Factors Analysis (RPFA)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -294,7 +415,7 @@ val3<-setDT(val3)
 
 # Recency tracing with logitdec
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -311,7 +432,7 @@ val3<-setDT(val3)
 
 # Recency tracing with logitdec and transfer from cluster
 
-```r
+``` r
 
 system.time( modelob <- LKT(
       data = val, interc=TRUE,
@@ -668,12 +789,12 @@ system.time( modelob <- LKT(
 #> LogLike logistic: -24883.5736715 
 #> step par values =0.4095353,0.2174653,0.2247826
 #>    user  system elapsed 
-#>   60.52    1.42  132.76
+#>    4.48    0.85   56.36
 ```
 
 # Performance Prediction Equation (PPE)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -690,7 +811,7 @@ system.time( modelob <- LKT(
 
 # base4
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -712,7 +833,7 @@ the main R code for package
 
 # Simple interactions
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -728,7 +849,7 @@ the main R code for package
 
 # Individualized Additive Factors Model (iAFM) fixed effect version
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
@@ -747,7 +868,7 @@ the main R code for package
 
 # Connectors (another way to do interactions)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       connectors = c("+","*"),
@@ -764,7 +885,7 @@ the main R code for package
 
 # AutoKC
 
-```r
+``` r
 
 mnames<-c("IRT",
           "Faculty",
@@ -926,6 +1047,9 @@ for(i in 1:length(compl)){
 #> McFadden's R2 logistic: 0.316213 
 #> LogLike logistic: -25972.60034411 
 #>  R2 =   0.316213
+```
+
+``` r
 
 r2s$name <- factor(r2s$name,levels = rev(mnames))
 plot<-ggplot(r2s,
@@ -937,7 +1061,7 @@ plot
 
 ![plot of chunk unnamed-chunk-15](vigfig-unnamed-chunk-15-1.png)
 
-```r
+``` r
 
 
 mnames<-seq(2,71,10)
@@ -1008,7 +1132,7 @@ for (i in c(3,6)){
 
 # Synthetic discrimination parameter testing (experimental)
 
-```r
+``` r
 # discrimintion parameters normally control how well strongly ability affects correctness at an item level
 # "synthetic" version here proposes something similar, that the student ability interacts with the item difficulty
 # here a running estimate of student ability (logitdec) is multiplied by a value for the item to indicate the importance of student ability to answer that item
@@ -1052,7 +1176,7 @@ for(i in 1:4){
 
 # Credibility intervals
 
-```r
+``` r
 
 components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
 features = c("intercept", "intercept", "linesuc$","linefail$")
@@ -1075,6 +1199,9 @@ mod1 = LKT(setDT(val),interc=TRUE,
 #> linefailKC..Default.+linesucKC..Default.+logitKC..Default.+logitAnon.Student.Id+1 
 #> McFadden's R2 logistic: 0.165447 
 #> LogLike logistic: -31699.23101113
+```
+
+``` r
 
 n_students=400
 n_boot = 100
@@ -1083,13 +1210,19 @@ system.time({
 })
 #> 0%...2%...3%...4%...5%...6%...7%...8%...9%...10%...11%...12%...13%...14%...15%...16%...17%...18%...19%...20%...21%...22%...23%...24%...25%...26%...27%...28%...29%...30%...31%...32%...33%...34%...35%...36%...37%...38%...39%...40%...41%...42%...43%...44%...45%...46%...47%...48%...49%...50%...51%...52%...53%...54%...55%...56%...57%...58%...59%...60%...61%...62%...63%...64%...65%...66%...67%...68%...69%...70%...71%...72%...73%...74%...75%...76%...77%...78%...79%...80%...81%...82%...83%...84%...85%...86%...87%...88%...89%...90%...91%...92%...93%...94%...95%...96%...97%...98%...99%...100%
 #>    user  system elapsed 
-#>   65.13    2.60  198.24
+#>   10.34    1.78   88.67
+```
+
+``` r
 
 
 #Names of coefficients that are non-significant (interval includes zero)
 zero_idx = which(boot_res$coef_hdi$includes_zero==TRUE)
 boot_res$coef_hdi$coef_name[zero_idx]
 #> character(0)
+```
+
+``` r
 
 if(!is.na(unique(boot_res$par_reps[,zero_idx[1]]))){
   hist(boot_res$par_reps[,zero_idx[1]],breaks=50,main=boot_res$coef_hdi$coef_name[zero_idx][1])
@@ -1109,7 +1242,7 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 
 # Recency tracing with RPFA propdec2 feature (the one in the original Galyardt and Goldin paper)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -1368,7 +1501,7 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 
 # brpropdec (experimental feature)
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
       components = c("KC..Default.","Anon.Student.Id","KC..Default.","KC..Default."),
@@ -1384,6 +1517,9 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 #> Failure latency:  26.490591139291 
 #> Latency Scalar: 0.774555522136031
 #> Latency Intercept: 6.42015387155178
+```
+
+``` r
 print(modelob$coefs)
 #>                             coefficient
 #> (Intercept)                  -0.7356173
@@ -1395,7 +1531,7 @@ print(modelob$coefs)
 
 # Simple adaptive model for practice optimization
 
-```r
+``` r
 
 
 modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
@@ -1412,7 +1548,7 @@ modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
 
 # Test of new feature to trace KC intercepts across time (not within subjects)
 
-```r
+``` r
     val<-val[order(val$CF..Time.),]
 modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
                components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
@@ -1428,7 +1564,7 @@ modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
 
 # Astonishing model (theory analysis)
 
-```r
+``` r
 modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
       components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
@@ -1444,6 +1580,9 @@ modelob <- LKT(
 #> Failure latency:  26.490591139291 
 #> Latency Scalar: 0.373122000230565
 #> Latency Intercept: 6.78509949532675
+```
+
+``` r
 
 
 modelob <- LKT(
@@ -1465,7 +1604,7 @@ modelob <- LKT(
 
 # Build LKT with special feature
 
-```r
+``` r
 
 q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency.",specialfeatures = "numer",
       allcomponents = c("Anon.Student.Id", "KC..Default."),
@@ -1672,7 +1811,7 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 
 # AFMstartMATHia
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -1999,12 +2138,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.7134662
 #> [1] 0.114235
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7226126 0.7134662
+```
+
+``` r
 print(R2s)
 #> [1] 0.120224 0.114235
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4198516 0.4172793
+```
+
+``` r
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
 save(savedata,file="AFMMATHia.RData")
 
@@ -2012,7 +2163,7 @@ save(savedata,file="AFMMATHia.RData")
 
 # BestLRstartMATHia
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -2696,19 +2847,31 @@ for (i in 1:2) {
 ```
 #> [1] 0.7134662
 #> [1] 0.114235
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7226126 0.7134662
+```
+
+``` r
 print(R2s)
 #> [1] 0.120224 0.114235
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4198516 0.4172793
+```
+
+``` r
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
 save(savedata,file="bestLRMATHia.RData")
 ```
 
 # EmptystartMATHia
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -2929,12 +3092,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.7660516
 #> [1] 0.152626
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7651378 0.7660516
+```
+
+``` r
 print(R2s)
 #> [1] 0.156892 0.152626
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4089813 0.4062784
+```
+
+``` r
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
 save(savedata,file="emptyMATHia.RData")
 
@@ -2944,7 +3119,7 @@ save(savedata,file="emptyMATHia.RData")
 
 # AFMstartCloze
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -3584,12 +3759,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.7474713
 #> [1] 0.109058
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7541528 0.7474713
+```
+
+``` r
 print(R2s)
 #> [1] 0.119272 0.109058
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4530747 0.4552391
+```
+
+``` r
 
 
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
@@ -3599,7 +3786,7 @@ save(savedata,file="AFMcloze.RData")
 
 # BestLRstartCloze
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -4921,12 +5108,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.7440391
 #> [1] 0.159671
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7816425 0.7440391
+```
+
+``` r
 print(R2s)
 #> [1] 0.204865 0.159671
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4309843 0.4419365
+```
+
+``` r
 
 
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
@@ -4936,7 +5135,7 @@ save(savedata,file="bestLRcloze.RData")
 
 # EmptystartCloze
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -5202,12 +5401,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.725237
 #> [1] 0.149349
+```
+
+``` r
 print(AUCs)
 #> [1] 0.7183348 0.7252370
+```
+
+``` r
 print(R2s)
 #> [1] 0.144894 0.149349
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.4496199 0.4456497
+```
+
+``` r
 
 
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
@@ -5216,7 +5427,7 @@ save(savedata,file="emptycloze.RData")
 ```
 # EmptystartAssist
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -5488,12 +5699,24 @@ for (i in 1:2) {
 ```
 #> [1] 0.6539366
 #> [1] 0.051714
+```
+
+``` r
 print(AUCs)
 #> [1] 0.6805414 0.6539366
+```
+
+``` r
 print(R2s)
 #> [1] 0.071524 0.051714
+```
+
+``` r
 print(RMSEs)
 #> [1] 0.437169 0.450151
+```
+
+``` r
 
 
 savedata<-list(modelobtable,AUCs,R2s,RMSEs)
@@ -5508,12 +5731,18 @@ print(tracetable[,c(3,5,6,7,9,10)],row.names=FALSE)
 #>     r2 params      BIC  AUC  RMSE              action
 #>  0.000      1 29795.09 0.50 0.458          null model
 #>  0.074      3 27612.15 0.68 0.437 add\n propdec-skill
+```
+
+``` r
 
 print(paste(sep="",
             "CV AUC mean(SD)= ",round(mean(savedata[[2]]),5),"(",round(sd(savedata[[2]]),5),"),",
             "CV R-squared CV mean(SD) = ",round(mean(savedata[[3]]),5),"(",round(sd(savedata[[3]]),4),"),",
             "CV RMSE mean(SD) = ",round(mean(savedata[[4]]),5),"(",round(sd(savedata[[4]]),4),")"))
 #> [1] "CV AUC mean(SD)= 0.66724(0.01881),CV R-squared CV mean(SD) = 0.06162(0.014),CV RMSE mean(SD) = 0.44366(0.0092)"
+```
+
+``` r
 png(file="C:\\Users\\ppavl\\Dropbox\\Active projects\\emptyAssistrev.png",width=6.3,height=6.3,res=600, units="in")
 par(mar=c(18, 5, 1, 1))
   matplot(cbind(-scale(tracetable$r2),scale(tracetable$BIC),-scale(tracetable$AUC),
@@ -5530,7 +5759,7 @@ par(mar=c(18, 5, 1, 1))
 
 # Figures for EDM 2024 paper
 
-```r
+``` r
 
 filenames<-c("AFMcloze.RData", "bestLRcloze.RData", "AFMMATHia.RData", "bestLRMATHia.RData", "emptyMATHia.RData", "emptycloze.RData", "emptyAssistrev.RData"
 )
@@ -5643,7 +5872,7 @@ gg}
 
 # example of LASSOLKT
 
-```r
+``` r
 LASSO_Model<- LASSOLKTModel(
   data = setDT(val),gridpars=(1:9)/10,
   removecomp = c("Anon.Student.Id","Anon.Student.Id","Anon.Student.Id",
@@ -5730,7 +5959,10 @@ LASSO_Model<- LASSOLKTModel(
 #> logfail$ KC..Cluster.      
 #> intercept KC..Default.      
 #> interceptKC..Default.+logfailKC..Cluster.:e$data$KC..Cluster.+logsucKC..Cluster.:e$data$KC..Cluster.+recency0.9KC..Cluster.+recency0.8KC..Cluster.+recency0.7KC..Cluster.+recency0.6KC..Cluster.+recency0.5KC..Cluster.+recency0.4KC..Cluster.+recency0.3KC..Cluster.+recency0.2KC..Cluster.+recency0.1KC..Cluster.+propdec0.9KC..Cluster.+propdec0.8KC..Cluster.+propdec0.7KC..Cluster.+propdec0.6KC..Cluster.+propdec0.5KC..Cluster.+propdec0.4KC..Cluster.+propdec0.3KC..Cluster.+propdec0.2KC..Cluster.+propdec0.1KC..Cluster.+logitdec0.9KC..Cluster.+logitdec0.8KC..Cluster.+logitdec0.7KC..Cluster.+logitdec0.6KC..Cluster.+logitdec0.5KC..Cluster.+logitdec0.4KC..Cluster.+logitdec0.3KC..Cluster.+logitdec0.2KC..Cluster.+logitdec0.1KC..Cluster.+linefailKC..Cluster.+linesucKC..Cluster.+logfailKC..Cluster.+logsucKC..Cluster.+logfailKC..Cluster.+logsucKC..Cluster.+logafmKC..Cluster.+lineafmKC..Cluster.+interceptKC..Cluster.+recency0.9Anon.Student.Id+recency0.8Anon.Student.Id+recency0.7Anon.Student.Id+recency0.6Anon.Student.Id+recency0.5Anon.Student.Id+recency0.4Anon.Student.Id+recency0.3Anon.Student.Id+recency0.2Anon.Student.Id+recency0.1Anon.Student.Id+propdec0.9Anon.Student.Id+propdec0.8Anon.Student.Id+propdec0.7Anon.Student.Id+propdec0.6Anon.Student.Id+propdec0.5Anon.Student.Id+propdec0.4Anon.Student.Id+propdec0.3Anon.Student.Id+propdec0.2Anon.Student.Id+propdec0.1Anon.Student.Id+logitdec0.9Anon.Student.Id+logitdec0.8Anon.Student.Id+logitdec0.7Anon.Student.Id+logitdec0.6Anon.Student.Id+logitdec0.5Anon.Student.Id+logitdec0.4Anon.Student.Id+logitdec0.3Anon.Student.Id+logitdec0.2Anon.Student.Id+logitdec0.1Anon.Student.Id+linefailAnon.Student.Id+linesucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+logafmAnon.Student.Id+lineafmAnon.Student.Id+0 
-#> Time difference of 23.84233 secs
+#> Time difference of 25.616 secs
+```
+
+``` r
 
 plot(LASSO_Model$n_features,LASSO_Model$auc_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$auc_lambda[LASSO_Model$target_idx],col="red",pch=15)
@@ -5738,21 +5970,21 @@ points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$auc_lambda[LAS
 
 ![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-1.png)
 
-```r
+``` r
 plot(LASSO_Model$n_features,LASSO_Model$rmse_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$rmse_lambda[LASSO_Model$target_idx],col="red",pch=15)
 ```
 
 ![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-2.png)
 
-```r
+``` r
 plot(LASSO_Model$n_features,LASSO_Model$BIC_lambda,pch=16)
 points(LASSO_Model$n_features[LASSO_Model$target_idx],LASSO_Model$BIC_lambda[LASSO_Model$target_idx],col="red",pch=15)
 ```
 
 ![plot of chunk unnamed-chunk-32](vigfig-unnamed-chunk-32-3.png)
 
-```r
+``` r
 
 #Kept features in model with target N features
 LASSO_Model$model_features
@@ -5956,6 +6188,9 @@ LASSO_Model$model_features
 #> 97 -0.001082779
 #> 98 -0.012324016
 #> 99  0.040487964
+```
+
+``` r
 
 #New model features from different lambda penalty term
 new_lambda = which.min(abs(LASSO_Model$n_features-150))
@@ -6116,7 +6351,7 @@ kept_features
 
 # example of LASSOLKT with preset
 
-```r
+``` r
     modelob <- LASSOLKTModel(
       data = val, gridpars=(1:9)/10,interc = F,
       allcomponents = c("Anon.Student.Id","KC..Default."),
@@ -6140,7 +6375,10 @@ kept_features
 #> linesuc KC..Default.      
 #> linefail KC..Default.      
 #> linefailKC..Default.+linesucKC..Default.+logfailKC..Default.+logsucKC..Default.+lineafmKC..Default.+logafmKC..Default.+lineafmKC..Default.+interceptKC..Default.+linefailAnon.Student.Id+linesucAnon.Student.Id+logfailAnon.Student.Id+logsucAnon.Student.Id+lineafmAnon.Student.Id+logafmAnon.Student.Id+lineafmAnon.Student.Id+interceptAnon.Student.Id+0 
-#> Time difference of 1.170926 mins
+#> Time difference of 1.299943 mins
+```
+
+``` r
 
 
 str(modelob)
@@ -6210,7 +6448,7 @@ str(modelob)
 
 # example for the nosolve parameter to make it return the model matrix
 
-```r
+``` r
     modelob <- LKT(
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -6225,7 +6463,7 @@ str(modelob)
 
 # Assistments 12 data CV example (True crossvalidation of entire search process)
 
-```r
+``` r
 LLs <- numeric(0)
 AUCs <- numeric(0)
 R2s <- numeric(0)
@@ -6313,8 +6551,7 @@ val3<-setDT(val3)
   print(RMSEs[i])
 }
 #> [1] 2 3 4 5
-#> Warning in set(x, j = name, value = value): Column 'mean_correct' does not exist to
-#> remove
+#> Warning in set(x, j = name, value = value): Column 'mean_correct' does not exist to remove
 #> propdec skill 0.8     
 #> logitdec type 0.94     
 #> recency skill 0.25     
@@ -6379,8 +6616,14 @@ val3<-setDT(val3)
 #> [1] 0.6959889
 #> [1] -0.152942
 #> [1] 0.435492
+```
+
+``` r
 print(AUCs)
 #> [1] 0.6983834 0.6742791 0.7100560 0.7070606 0.6959889
+```
+
+``` r
 print(R2s)
 #> [1] -0.185449 -0.252017 -0.125409 -0.137083 -0.152942
 ```

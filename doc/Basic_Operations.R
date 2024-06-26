@@ -4,6 +4,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ---- echo=FALSE, results='asis'----------------------------------------------
+## ----echo=FALSE, results='asis'-----------------------------------------------
 knitr::kable(head(LKT::samplelkt, 10))
 

@@ -1,6 +1,6 @@
 #' @importFrom graphics boxplot
 #' @importFrom methods new
-#' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median optim predict qlogis quantile nobs
+#' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median nobs optim predict qlogis quantile
 #' @importFrom utils packageVersion
 #' @importFrom graphics axis legend matplot mtext par
 
@@ -217,61 +217,63 @@ LKT <- function(data,usefolds = NA,
         m <- m + 1
       }
 
+      # Check if clustering should be applied based on the 'autoKC' value for the current feature
       if(autoKC[k]>1){
+        # Clearing the 'CF..ansbin.' variable in preparation for aggregation
         CF..ansbin.<-NULL
-        aggdata<- e$data[,mean(CF..ansbin.),
-                         by=list(eval(parse(text=components[k])),
-                                 Anon.Student.Id)]
-        colnames(aggdata)<-c(components[k],'Anon.Student.Id','CF..ansbin.')
-        aggdata<-aggdata[with(aggdata,order(eval(parse(text=components[k])))),]
-        mydata<-eval(parse(text=paste('dcast(aggdata,',components[k],'
-                                      ~ Anon.Student.Id, value.var=\"CF..ansbin.\")'))) #reshape to wide data format
-        rownamesmydata<-eval(parse(text=paste('mydata$',
-                                              components[k])))
-        mydata<-mydata[,-1]
-        # determine the column names that contain NA values
+
+        # Aggregating the data by the specified component and student ID, computing the mean of 'CF..ansbin.'
+        aggdata <- e$data[,mean(CF..ansbin.), by=list(eval(parse(text=components[k])), Anon.Student.Id)]
+        colnames(aggdata) <- c(components[k],'Anon.Student.Id','CF..ansbin.')
+        aggdata <- aggdata[with(aggdata, order(eval(parse(text=components[k])))),]
+
+        # Reshaping aggregated data to wide format, making students the columns
+        mydata <- eval(parse(text=paste('dcast(aggdata,',components[k],' ~ Anon.Student.Id, value.var="CF..ansbin.")')))
+        rownamesmydata <- eval(parse(text=paste('mydata$', components[k])))
+        mydata <- mydata[,-1]  # Remove the first column containing component names
+
+        # Replace NA values in the matrix with the mean of their respective columns
         nm <- names(mydata)[colSums(is.na(mydata)) != 0]
-        ## replace with the mean - by 'id'
         mydata[, (nm) := lapply(nm, function(x) {
           x <- get(x)
           x[is.na(x)] <- mean(x, na.rm = TRUE)
           x
         })]
 
-        mydata<-log(mydata/(1-mydata))
-        mydata[mydata>2] <- 2
-        mydata[mydata<(-2)] <- -2
-        rownames(mydata)<-rownamesmydata
+        # Apply logit transformation and limit extreme values
+        mydata <- log(mydata/(1-mydata))
+        mydata[mydata > 2] <- 2
+        mydata[mydata < -2] <- -2
+        rownames(mydata) <- rownamesmydata
 
-        #Feature matrix
-        mydata[, names(mydata) :=lapply(.SD, function(x) x - mean(x)), .SDcols = names(mydata)]
-        df <- mydata[,as.matrix(.SD) %*% t(as.matrix(.SD)),.SDcols=names(mydata)]
-        df<-df/nrow(df)
-        rownames(df)<-1:nrow(mydata)
-        colnames(df)<-rownames(mydata)
-        rownames(df)<-colnames(df)
+        # Normalize the features by subtracting the mean from each
+        mydata[, names(mydata) := lapply(.SD, function(x) x - mean(x)), .SDcols = names(mydata)]
+        df <- mydata[, as.matrix(.SD) %*% t(as.matrix(.SD)), .SDcols = names(mydata)]
+        df <- df / nrow(df)
+        rownames(df) <- 1:nrow(mydata)
+        colnames(df) <- rownames(mydata)
+        rownames(df) <- colnames(df)
 
-        #cluster matrix
-        cm <- pam(df,autoKC[k])
-        KCmodel<-as.data.frame(cm$clustering)
+        # Cluster the features using Partitioning Around Medoids (PAM)
+        cm <- pam(df, autoKC[k])
+        KCmodel <- as.data.frame(cm$clustering)
+        colnames(KCmodel)[1] <- paste("AC", k, sep="")
 
-        colnames(KCmodel)[1] <- paste("AC",k,sep="")
-        eval(parse(text=paste(sep="",
-                              "KCmodel$AC",k,"<-as.character(KCmodel$AC",k,")")))
+        # Convert cluster labels to character
+        eval(parse(text=paste(sep="", "KCmodel$AC", k, "<-as.character(KCmodel$AC", k, ")")))
 
-        if (autoKCcont[k]=="rand"){
-          eval(parse(text=paste(sep="",
-                                "KCmodel$AC",k,"<-sample(KCmodel$AC",k,")")))        }
+        # Optionally randomize cluster labels
+        if (autoKCcont[k] == "rand") {
+          eval(parse(text=paste(sep="", "KCmodel$AC", k, "<-sample(KCmodel$AC", k, ")")))
+        }
 
-        KCmodel$rows<-rownames(KCmodel)
-        e$df<-c(list(KCmodel),e$df)
-        e$data<-merge(e$data,
-                      KCmodel,
-                      by.y = 'rows',
-                      by.x = components[k],
-                      sort = FALSE)
-        components[k]<-paste("AC",k,sep="")
-        e$data<-e$data[order(e$data$Anon.Student.Id,e$data$CF..Time.),]        }
+        # Add cluster labels back to the main data frame
+        KCmodel$rows <- rownames(KCmodel)
+        e$df <- c(list(KCmodel), e$df)
+        e$data <- merge(e$data, KCmodel, by.y = 'rows', by.x = components[k], sort = FALSE)
+        components[k] <- paste("AC", k, sep="")
+        e$data <- e$data[order(e$data$Anon.Student.Id, e$data$CF..Time.),]
+      }
 
       if (e$flag == TRUE | e$counter < 2) {
 
@@ -601,6 +603,65 @@ LKT <- function(data,usefolds = NA,
   return(results)
 }
 
+
+#' @title Predict for LKT Models
+#' @import pROC
+#' @importFrom stats glm
+#' @importFrom stats plogis
+#' @importFrom stats logLik
+#' @importFrom stats binomial
+#' @description Generates predictions and evaluates logistic regression models tailored for learning data, specifically designed for Logistic Knowledge Tracing (LKT) models. This function provides flexibility in returning either just the predicted probabilities or both the predictions and key evaluation statistics.
+#' @param modelob An LKT model object containing necessary model coefficients and predictors for generating predictions.
+#' @param data A dataset including predictor variables, the outcome variable `CF..ansbin.`, and fold information.
+#' @param fold Optional. Numeric vector specifying which folds to include for prediction. If NULL or empty, uses all data.
+#' @param min_pred_limit Minimum prediction limit. Default is 0.00001.
+#' @param max_pred_limit Maximum prediction limit. Default is 0.99999.
+#' @param return_stats Logical. If TRUE, returns both predictions and evaluation statistics (Log-Likelihood, AUC, RMSE, R^2). If FALSE, returns only the predictions.
+#' @return If return_stats is FALSE, returns a list containing:
+#' \itemize{
+#'   \item \code{predictions}: The predicted probabilities for each observation in the specified fold(s).
+#' }
+#' If return_stats is TRUE, returns a list containing:
+#' \itemize{
+#'   \item \code{predictions}: The predicted probabilities for each observation in the specified fold(s).
+#'   \item \code{LL}: Log-Likelihood of the model given the actual outcomes.
+#'   \item \code{AUC}: Area Under the ROC Curve.
+#'   \item \code{RMSE}: Root Mean Squared Error.
+#'   \item \code{R2}: R-squared value, indicating the proportion of variance explained by the model.
+#' }
+#' @export
+predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
+                        min_pred_limit = .00001, max_pred_limit = .99999) {
+  # Check if fold is NULL or empty, use all data if so
+  if (is.null(fold) || length(fold) == 0) {
+    fold <- unique(data$fold)
+  }
+
+  # modelob$predictors and modelob$coefs are multiplied
+  predictionsMatrix <- as.matrix(data[, modelob$predictors]) %*% modelob$coefs
+
+  # Apply configurable min and max limits
+  pred <- pmin(pmax(plogis(predictionsMatrix), min_pred_limit), max_pred_limit)
+  pred <- pred[data$fold %in% fold]
+
+  # Calculate Log-Likelihood, AUC, R2, and RMSE using actual values and predictions
+  actuals <- data$CF..ansbin.[data$fold %in% fold]
+  LL <- sum(log(ifelse(actuals == 1, pred, 1 - pred)))
+  AUC <- auc(actuals, pred)[1]
+  nullmodel <- glm(actuals ~ 1, family = binomial(logit))
+  R2 <- round(1 - LL / logLik(nullmodel)[1], 6)
+  RMSE <- sqrt(mean((actuals - pred)^2))
+
+  # Return predictions and optionally evaluation statistics
+  if (!return_stats) {
+    return(list(predictions = pred))
+  } else {
+    return(list(predictions = pred, LL = LL, AUC = AUC, RMSE = RMSE, R2 = R2))
+  }
+}
+
+
+
 #' @title computefeatures
 #' @description Compute feature describing prior practice effect.
 #' @param data copy of main data frame.
@@ -852,15 +913,15 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
 }
 
 #boot function for LKT_HDI
-boot_fn <- function(dat,n_students,components,features,interacts=NA,fixedpars){
+boot_fn <- function(dat,n_students,componentsv,featuresv,interactsv=NA,fixedparsv,connectorsv){
 
 
   dat_ss = smallSet(dat,n_students)
 
   mod = LKT(setDT(dat_ss),interc=TRUE,
-            components=components ,interacts = interacts,
-            features=features,
-            fixedpars = fixedpars,
+            components=componentsv ,interacts = interactsv,
+            features=featuresv,connectors=connectorsv,
+            fixedpars = fixedparsv,
             seedpars = c(NA),verbose=FALSE)
   return((mod$coefs))
 }
@@ -1154,6 +1215,13 @@ logitdec <- function(v, d) {
 }
 
 
+logitdec4 <- function(v, d) {
+  w <- length(v)
+  #  (cat(v,d,w,"\n"))
+  corv <- sum(c(1,1,1,1, v[1:w]) * d^((w+3):0))
+  incorv <- sum(c(1,1,1,1, abs(v[1:w] - 1)) * d^((w+3):0))
+  log(corv / incorv)
+}
 
 slidelogitdecfree <- function(x, d) {
   v <- c(rep(0, length(x)))
@@ -1306,22 +1374,23 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param dat Dataframe
 #' @param n_boot Number of subsamples to fit
 #' @param n_students Number of students per subsample
-#' @param components components in model
-#' @param features features in model
-#' @param interacts interacts in model
-#' @param fixedpars fixed pars in model
+#' @param componentsv components in model
+#' @param featuresv features in model
+#' @param interactsv interacts in model
+#' @param fixedparsv fixed pars in model
+#' @param connectorsv r notation for linear equation connectors in model
 #' @param get_hdi boolean to decide if generating HDI per coefficient
 #' @param cred_mass credibility mass parameter to decide width of HDI
 #' @export
 #' @return list of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat,n_boot,n_students,components,features,interacts=NA,fixedpars, get_hdi = TRUE, cred_mass = .95){
+LKT_HDI <- function(dat,n_boot,n_students,componentsv,featuresv,connectorsv, interactsv=NA,fixedparsv, get_hdi = TRUE, cred_mass = .95){
 
   #first fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat),interc=TRUE,
-                 interacts=interacts,
-                 components=components,
-                 features=features,
-                 fixedpars = fixedpars,
+                 interacts=interactsv,connectors=connectorsv,
+                 components=componentsv,
+                 features=featuresv,
+                 fixedpars = fixedparsv,
                  seedpars = c(NA),verbose=FALSE)
 
   par_reps = matrix(nrow=n_boot,ncol=length(mod_full$coefs))
@@ -1329,8 +1398,8 @@ LKT_HDI <- function(dat,n_boot,n_students,components,features,interacts=NA,fixed
 
   for(i in 1:n_boot){
     #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components=components,features=features,
-                 interacts=interacts,fixedpars=fixedpars )
+    temp=boot_fn(dat,n_students,components=componentsv,features=featuresv,connectors=connectorsv,
+                 interacts=interactsv,fixedpars=fixedparsv )
     idx = match(rownames(temp),colnames(par_reps))
     par_reps[i,idx] = as.numeric(temp)
     if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
@@ -1716,11 +1785,10 @@ buildLKTModel <- function(data,usefolds = NA,
 #' @param presetint should the intercepts be included for preset components
 #' @param removefeat Character Vector | Excludes specified features from the test list.
 #' @param removecomp Character Vector | Excludes specified components from the test list.
-#' @param interc TRUE or FALSE, include a global intercept.
 #' @return data which is the same frame with the added spacing relevant columns.
 #' @return list of values "tracetable" and "currentfit"
 #' @export
-LASSOLKTData <- function(data,gridpars,interc=F,
+LASSOLKTData <- function(data,gridpars,
                           allcomponents,allfeatures,preset=NA,presetint=T,
                           specialcomponents=c(),specialfeatures=c(),specialpars=c(),removefeat=c(), removecomp=c()){
 
@@ -1780,7 +1848,7 @@ LASSOLKTData <- function(data,gridpars,interc=F,
   allpars<-c(specialpars, allpars)
   # retain the best model data
   return(
-    LKT(data = data,   components = complist,interc = interc,
+    LKT(data = data,   components = complist,
         features = featlist,fixedpars = allpars, nosolve=TRUE)
   )
 }
@@ -1797,23 +1865,20 @@ LASSOLKTData <- function(data,gridpars,interc=F,
 #' @param specialpars parameters for the special features (if needed)
 #' @param gridpars a vector of parameters to create each feature at
 #' @param target_n chosen number of features in model
+#' @param removefeat Character Vector | Excludes specified features from the test list.
+#' @param removecomp Character Vector | Excludes specified components from the test list.
 #' @param preset One of "static","AFM","PFA","advanced","AFMLLTM","PFALLTM","advancedLLTM"
 #' @param presetint should the intercepts be included for preset components
 #' @param test_fold the fold that the chosen LASSO model will be tested on
-#' @param removefeat Character Vector | Excludes specified features from the test list.
-#' @param removecomp Character Vector | Excludes specified components from the test list.
-#' @param interc TRUE or FALSE, include a global intercept.
 #' @return list of matrices and values "train_x","train_y","test_x","test_y","fit","target_auc","target_rmse","n_features","auc_lambda","rmse_lambda","BIC_lambda","target_idx", "preds"
 #' @export
 LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allfeatures,specialcomponents=c(),
-                          specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1,interc=F){
+                          specialfeatures=c(),specialpars=c(), target_n,removefeat=c(), removecomp=c(),test_fold = 1){
 
   datmat = LASSOLKTData(setDT(data),gridpars,
                         allcomponents,allfeatures,preset=preset,presetint=presetint,
                         specialcomponents=specialcomponents,specialfeatures=specialfeatures,
-                        specialpars=specialpars,removefeat=removefeat, removecomp=removecomp,
-                        interc=interc)
-  #print(row.names(datmat))
+                        specialpars=specialpars,removefeat=removefeat, removecomp=removecomp)
 
   m1 = as.matrix(datmat$lassodata[[2]])
   colnames(m1) = datmat$lassodata[[1]]
@@ -1834,7 +1899,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   #Test on remaining fold
 
   start=Sys.time()
-  fit=glmnet(x = train_x, y = train_y, family = "binomial",intercept = interc)
+  fit=glmnet(x = train_x, y = train_y, family = "binomial")
   end=Sys.time()
   end-start
   print(end-start)
@@ -1849,7 +1914,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
   }
 
   auc_lambda <- apply(preds, 2, function(col) {
-    suppressMessages(roc(test_y, col)$auc)
+   roc(test_y, col)$auc
     })
 
   rmse_lambda <- apply(preds, 2, function(col) {
@@ -1868,7 +1933,7 @@ LASSOLKTModel <- function(data,gridpars,allcomponents,preset=NA,presetint=T,allf
     k <- fit$df[i]
     n <- nobs(fit)
     BIC_lambda[i] = log(n)*k - tLL
-  #  print(i)
+    print(i)
   }
 
   #Returning features retained in lasso model with target lambda along with coefficients

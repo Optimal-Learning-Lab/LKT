@@ -20,28 +20,33 @@ knitr::opts_chunk$set(
 # LKT (Logistic Knowledge Tracing) Framework
 
 To use LKT, one needs to have:
-* Terms of the model, each including a component level that can be characterized by a feature that describes change across repetitions.
-* 	A sequence of learner event data with user id and correctness columns (at barest minimum).
+* Terms of the model, each including a component level that can be characterized by a feature that describes change across repetitions. These are typically just the some of the column headers like the skill, student or item.
+* 	A sequence of learner event data with user id (must be "Anon.Student.Id" for studenyt column) and correctness columns (must be "Outcome", with values as "CORRECT" and "INCORRECT") (at barest minimum).
+
+It is wise to check the example datasets to see how they is coded. The small sample "samplelkt" has only 4 columns and can be used to create simple models. It illustrates a minimal format for functionality. "largerrawsample" illustrates a typical dataset with more complex components and additional information. The many examples in the Examples webpage on CRAN use this dataset to illustrate a plethora of possible analyses. In the Examples file we also illustrate how to load in Carnegie Learning Cognitive Tutor and Assistments datasets (well know learning systems).
 
 ## Component Level
 
-The component specifies the subsets of the data for which the feature applies. We might think of the most basic component as the subject itself. There are other components as well, such as the items and knowledge components. In the model, the effects for each feature for each component sum together to compute the additive effect of multiple features. It is assumed that, except for constant intercepts, a feature is applied for all component levels individually within the data for each subject.
+The component specifies the subsets of the data (i.e. specified by a column header for the dataset) for which the feature applies. We might think of the most basic component as the student. There are other components as well, such as the items and knowledge components. In the model, the effects for each feature for each component sum together to compute the additive effect of multiple features. Interactions between features are permitted.
 
-* Items - Items as a component capture the fact that idiosyncratic differences exist for any specific instantiated problem for a topic or concept, and therefore an item component intercept is isomorphic with the difficulty parameter in item-response theory. Such difficulties may come from any source, including the context of the problem, numbers used in the item (e.g., for a math problem), vocabulary used in the item (e.g., for a story problem or essay response item), and any other factors that result in the item being difficult for the average student. While we may consider the existence of item by person interactions (e.g., Item A is easy for Sally, but not for John), they are rarely possible to identify ahead of time and so are not used in the models here. Item components may also be traced using a learning or performance tracing feature. Items are most simply defined as problems with a constant response to a constant stimulus, and people tend to learn constant responses to exact stimulus repetitions very quickly. Often, item-level learning tracing is not used because adaptive systems are built to never repeat items and focus on KC component level learning and performance tracing. Item-level components in LKT to allow researchers to compare with KC-level models, which may help identify possible model weaknesses and lead to model respecification.
+* Items - Items as a component capture the fact that idiosyncratic differences exist for any specific instantiated problem for a topic or concept or knowledge component. An item component intercept is isomorphic with the difficulty parameter in item-response theory. Such difficulties may come from any source, including the context of the problem, numbers used in the item (e.g., for a math problem), vocabulary used in the item (e.g., for a story problem or essay response item), and any other factors that result in the item being relatively difficult. Item components may also be traced using a learning or performance tracing feature. Items are most simply defined as problems with a constant response to a constant stimulus, and people tend to learn constant responses to exact stimulus repetitions very quickly. Often, item-level learning tracing is not used because adaptive systems are built to never repeat items and focus on KC component level learning and performance tracing. Item-level components in LKT allow researchers to compare with KC-level models, which may help identify possible model weaknesses and lead to model respecification.
 
-* Knowledge components - Any common factor in a cluster of items that controls performance for that cluster may be described as a knowledge component. Knowledge components are intended to capture transfer between related tasks so that practicing the component in one context is assumed to benefit other contexts that also share the component. It is conceivable that performance for an item may depend on one or more knowledge components. In the case where multiple knowledge components are present, it is possible to use probability rules to model situations where all the knowledge components are needed to succeed for an item; however, in the work here, we take a compensatory approach, in which the sum of the influence of the knowledge components is used to estimate the performance for the item if multiple KCs or Items influence that performance.
+* Knowledge components - Any common factor in a cluster of items that controls performance for that cluster may be described as a knowledge component. Knowledge components are intended to capture transfer between related tasks so that practicing the component in one context is assumed to benefit other contexts that also share the component. It is conceivable that performance for an item may depend on one or more knowledge components. In the case where multiple knowledge components are present, it is possible to use basic probability rules to model situations where multiple knowledge components are needed to succeed for an item; however, in LKT, there is generally a compensatory approach, in which the sum of the influence of the knowledge components is used to estimate the performance for the item if multiple KCs or Items influence that performance.
 
-* Overall individual - This is simply the student component level, so a dynamic feature computed here will be a function of the prior performance of each student on all prior data. In the case of a student intercept, the entire student’s data are used in estimating a constant value. It should be noted that most features are dynamic in this method. In fact, the only fixed features used in this paper are intercepts to represent subjects (initial models) and intercepts to represent items (main comparison models). A “dynamic” feature means that its effect in the model potentially changes with each trial for a subject. Most dynamic features start at a value of 0 and change as a function of the changing history of the student as time passes in some learning system.
+* Student - This is simply the student component level, so a dynamic feature computed here will be a function of the prior performance of each student on all prior data for that student. In the case of a student intercept, the entire student’s data are used in estimating a constant value. 
 
-* Other components - The flexibility of LKT means that users are not limited to the common components above. For example, if students were grouped into 4 clusters, a column of the data could be used for component levels to fit each cluster using a different intercept.
+* Other components - The flexibility of LKT means that users are not limited to the common components above. For example, if students were grouped into 4 clusters, a column of the data could be used for component level to fit each cluster using a different intercept. Recent versions of LKT might  different learning rates for skills as a function of cluster by introducing an interaction between the learning rate for the KC component and the categorical levels as indicated by a cluster component.
 
 ## Features
 
-These are the functions for computing the effect of the components’ histories for each student (except for the fixed feature, the constant intercept). Some features have a single term like exponential decay (expdecafm, described in 2.C.6), which is a transform using the sequence of prior trials and a decay parameter. Other features are inherently interactive, such as base2, which scales the logarithmic effect of practice by multiplying by a memory decay effect term. Other terms like base4 and ppe involve the interaction of at least 3 inputs. Table 1 summarizes 25 features currently supported in the LearnSphere, indicating if the feature is linear, adaptive, and/or dynamic and explaining the input data required from the knowledge components. 
+These are the functions for computing the effect of the components’ histories for each student (except for the fixed feature, the constant intercept). Some features have a single term like exponential decay (expdecafm), which is a transform using the sequence of prior trials and a decay parameter. Other features are inherently interactive, such as base2, which scales the logarithmic effect of practice by multiplying by a memory decay effect term. Other terms like base4 and ppe involve the interaction of at least 3 inputs. 
+
+It should be noted that most features are dynamic in this method. A “dynamic” feature means that its effect in the model potentially changes with each trial for a subject. Most dynamic features start at a value of 0 and change as a function of the changing history of the student as time passes in some learning system.
+
 
 * Constant (intercept) - This is a simple generalized linear model intercept, computed for a categorical factor (i.e., whatever categories are specified by the levels of the component factor).
 
-* Total count (lineafm) - This feature is from the well-known AFM model [7], which predicts performance as a linear function of the total prior experiences with the KC.
+* Total count (lineafm) - This feature is from the well-known AFM model [7], which predicts performance as a linear function of the total prior experiences with the KC (here of course it could also be the count for the student or item or other categorical factor in the history.
 
 * Log total count (logafm) - This predictor has been sometimes used in prior work and implies that there will be decreasing marginal returns for practice as total prior opportunities increase, according to a natural log function. For simplicity, we add 1 to the prior trial count to avoid taking the log(0), which is undefined.
 
@@ -49,76 +54,43 @@ These are the functions for computing the effect of the components’ histories 
 
 * Recency (recency) - This feature is inspired by the strong effect of the time interval since the previous encounter with a component (typically an item or KC). This feature was created for this paper and has not been presented previously. This recency effect is well-known in psychology and is captured with a simple power-law decay function to simulate improvement of performance when the prior practice was recent. This feature only considers the just prior observation; older trials are not considered in the computation.
 
-* Exponential decay (expdecafm) - This predictor considers the effect of the TOC as a decaying quantity according to an exponential function. It behaves similarly to logafm or powafm, as shown in Fig. 3. It is similar to the mechanisms first used in the PFA-Decay model.
+* Exponential decay (expdecafm) - This predictor considers the effect of the component as a decaying quantity according to an exponential function. It behaves similarly to logafm or powafm, as shown in Fig. 3. 
 
 * Power-law decay (base,base2) - This predictor multiplies logafm by the age since the first practice (trace creation) to the power of a decay rate (negative power), as shown in Fig. 4. This predictor characterizes situations where forgetting is expected to occur in the context of accumulating practice effects. Because this factor doesn’t consider the time between individual trials, it is essentially fit with the assumption of even spacing between repetitions and doesn’t capture recency effects. The base 2 version modifies the time by shrinking the time between sessions by some factor, for example, .5, which would make time between sessions count only 50% towards the estimation of age. This mechanism to scale forgetting when interference is less was originally introduced in the context of cognitive modeling. 
 
-* Power-law decay with spacing (base4) - This predictor involves the same configuration as base2, multiplied by the means spacing to a fractional power. The fractional power scales the effect of spacing such that if the power is 0 or close to 0, then spacing the scaling factor is 1. If the fractional power is between 0 and 1, there are diminishing marginal returns for increasing average spacing between trials. This feature was introduced for this paper as a comparison to the PPE feature.
+* Power-law decay with spacing (base4) - This predictor involves the same configuration as base2, multiplied by the means spacing to a fractional power. The fractional power scales the effect of spacing such that if the power is 0 or close to 0, then spacing the scaling factor is 1. If the fractional power is between 0 and 1, there are diminishing marginal returns for increasing average spacing between trials. 
 
-* Performance Prediction Equation (ppe) - This predictor was introduced over the last several years and shows great efficacy in fitting spacing effect data . It is novel in that it scales practice like the powafm mechanism, captures power-law decay forgetting, spacing effects, and has an interesting mechanism that weights trials according to their recency.
+* Performance Prediction Equation (ppe) - This predictor was introduced over the last several years and shows great efficacy in fitting spacing effect data (cite). It is novel in that it scales practice like the powafm mechanism, captures power-law decay forgetting, spacing effects, and has an interesting mechanism that weights trials according to their recency.
 
-* Log performance measures (logsuc and logfail) - This expression is simply the log-transformed performance factor (total successes or failures), corresponding to the hypothesis that there are declining marginal returns according to a natural log function. 
+* Log PFA (Performance Factors Analaysis) (logsuc and logfail) - These expressiond are simply the log-transformed performance factor (total successes or failures), corresponding to the hypothesis that there are declining marginal returns according to a natural log function. 
 
 * Linear PFA (linesuc and linefail) - These terms are equivalent to the terms in performance factors analysis (PFA).
 
 * Exponential decay (expdecsuc and expdecfail) - This expression uses the decayed count of right or wrong. This method appears to have been first tested by Gong, Beck, and Heffernan. This method is also part of R-PFA, where it is used for tracking failures only, whereas R-PFA uses propdec to track correctness. The function is generally the same as for expdecafm. However, when used with a performance factor, the exponential decay weights on the events seen recently, so a history of recent successes or failures might quickly change predictions since only the recent events count for much, especially if the decay rate is relatively fast.
 
-* Linear sum performance (linecomp) - This term uses the success minus failures to provide a simple summary of overall performance. The advantage of this model is that it is parsimonious and therefore is less likely to lead to overfitting or multicollinearity in the model. This feature was created for this paper and has not been presented previously.
+* Linear sum performance (linecomp) - This term uses the success minus failures to provide a simple summary of overall performance. The advantage of this model is that it is parsimonious and therefore is less likely to lead to overfitting or multicollinearity in the model.
 
-* Proportion (prop) - This expression uses the prior probability correct. It is seeded at .5 for the first attempt. This feature was created for this paper and has not been presented previously.
+* Proportion (prop) - This expression uses the prior probability correct. It is seeded at .5 for the first attempt.
 
 * Exponential decay of proportion (propdec and propdec2) - This expression uses the prior probability correct and was introduced as part of the R-PFA model. This function requires an additional nonlinear parameter to characterize the exponential rate of decay. For propdec, we set the number of ghost successes at 1 and ghost failures at 1 as a modification of Galyardt and Goldin. This modification produces an initial value that can either decrease or increase, unlike the Galyardt and Goldin version (propdec2), which can only increase due to the use of 3 ghost failures and no ghost successes. Our initial comparisons below show that the modified version works as well for tracking subject level variance during learning. Galyardt and Goldin illustrate an extensive number of examples of propdec2s behavior across patterns of successful and unsuccessful trials at various parameter values. The new propdec behaves analogously, except it starts at a value of .5 to represent the different ratio of ghost success to failure at the beginning of practice. As a point of fact, the number of ghost attempts of each type are additional parameters, and we have implemented two settings: 1 ghost success and 1 ghost failure (propdec), or 3 ghost failures (prodec2).
 
-* Logit (logit) - This expression uses the logit (natural log of the success divided by failures). This function requires an additional nonlinear parameter to characterize the initial amount of successes or failures. This feature was created for this paper and has not been presented previously.
+* Logit (logit) - This expression uses the logit (natural log of the success divided by failures). This function requires an additional nonlinear parameter to characterize the initial amount of successes or failures. 
 
-* Exponential decay of logit (logitdec) - This expression uses the logit (natural log of the success divided by failures). Instead of using the simple counts, it uses the decayed counts like R-PFA, with the assumption of exponential decay and 1 ghost success and 1 ghost failure. This feature was created for this paper and has not been presented previously.
+* Exponential decay of logit (logitdec) - This expression uses the logit (natural log of the success divided by failures). Instead of using the simple counts, it uses the decayed counts like R-PFA, with the assumption of exponential decay and 1 ghost success and 1 ghost failure.
 
 ## Feature Types
 
 The standard feature type (except for intercept, which is always “extended”) is fit with the same coefficient for all levels of the component factor. Features may also be extended with the \$ operator, which causes LKT to “extend” the feature to fit a coefficient for each level of the component factor. The most straightforward example of this extension is for KCs. Typically, models have used a different coefficient for each knowledge component. For example, in AFM, each KC gets a coefficient to characterize how fast it is learned across opportunities specified in the notation with a \$ operator in LKT. If a \$ operator is not present, a single coefficient is fit for the feature. 
 
-Intercept features can also be modified with the @ operator, which produces random intercepts instead of the default fixed intercepts. This feature was included primarily to show the initial comparisons of options for modeling student individual differences in this paper. For this paper, we wished to compare fixed-effect and random-effect intercepts with other methods for identifying subject variability, like propdec, propdec2, and logitdec.
+Intercept features can also be modified with the @ operator, which produces random intercepts instead of the default fixed intercepts. However, it can be slow, since it requires a slow R package to implement.
 	
 ## Learner Data Requirements
 
 The LKT model relies on data being in the DataShop format, but only some columns are needed for the models. See the data example below for the minimal format. Data is assumed to be consecutive, grouped by user ids.
 
-## Column Requirements for `computeSpacingPredictors` and Dependencies
-
 ### Main Function: `computeSpacingPredictors`
 
-#### Required Columns
-- `Anon.Student.Id`
-- `CF..ansbin.`
-
-#### Optionally Generated Columns
-- `CF..reltime.` (Generated by `practiceTime` if not present)
-- `CF..Time.` (Generated if not present)
-
-### Dependencies
-
-#### `practiceTime`
-- Requires: `CF..ansbin.`, `Anon.Student.Id`, `Duration..sec.`
-
-#### `componentspacing`
-- Requires: `index` (Generated in the main function), `CF..Time.` or `CF..reltime.`
-
-#### `componentprev`
-- Requires: `index` (Generated in the main function), `CF..ansbin.`
-
-#### `meanspacingf`
-- Requires: `index` (Generated in the main function), `${i}spacing`
-
-#### `laggedspacingf`
-- Requires: `index` (Generated in the main function), `${i}spacing`
-
-### Summary
-
-To effectively use `computeSpacingPredictors` and its dependencies, the input dataset should minimally contain `Anon.Student.Id` and `CF..ansbin.`. Additionally, `CF..reltime.` and `CF..Time.` are beneficial but can be generated. The `Duration..sec.` column is specifically required by the `practiceTime` function.
-
-#### Note on `${i}`
-The placeholder `${i}` denotes that multiple columns could be involved, depending on the KCs specified. For example, `${i}spacing` could translate to columns like `Math.spacing`, `Science.spacing`, etc., based on what is passed in the `KCs` parameter.
-
+To effectively use `computeSpacingPredictors` and its dependencies, the input dataset should minimally first contain `Anon.Student.Id` and `CF..ansbin.`. Additionally, `CF..reltime.` and `CF..Time.` are needed but can be generated if  `Duration..sec.` column is present. Of course, typically you also need a component column like KC or item that you wish to use to compute spacings between repetitions (needed for some features modeling spacing effects).
 
 ## Example Data
 
