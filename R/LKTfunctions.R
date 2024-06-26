@@ -3,6 +3,7 @@
 #' @importFrom stats aggregate deviance as.formula ave binomial coef cor glm lm logLik median nobs optim predict qlogis quantile
 #' @importFrom utils packageVersion
 #' @importFrom graphics axis legend matplot mtext par
+#' @importFrom SparseM as.matrix.csr
 
 #' @title computeSpacingPredictors
 #' @description Compute repetition spacing time based features from input data CF..Time. and/or CF..reltime.
@@ -36,7 +37,6 @@ computeSpacingPredictors <- function(data, KCs) {
 #' @import glmnet
 #' @importFrom glmnetUtils cva.glmnet
 #' @import data.table
-#' @import SparseM
 #' @import LiblineaR
 #' @import Matrix
 #' @import cluster
@@ -966,12 +966,6 @@ right <- function(string, char) {
   substr(string, nchar(string) - (char - 1), nchar(string))
 }
 
-#subsetting sparse matrices from SparseM
-slice <- function(tSparse, index) {
-  the_slice <- tSparse[,index]
-  attr(the_slice, "mapping") <- attr(the_slice, "mapping")
-  return(the_slice)
-}
 #' @title countOutcome
 #' @description Compute the prior sum of the response appearing in the outcome column for the index
 #' @param data the dataset to compute an outcome vector for
