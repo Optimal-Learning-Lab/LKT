@@ -1,6 +1,6 @@
 Package: LKT
 Title: Logistic Knowledge Tracing
-Version: 1.6.0
+Version: 1.7.0
 Authors@R: 
     c(person(given = "Philip I.",
            family = "Pavlik Jr.",
@@ -22,7 +22,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 3.5.0),
-    SparseM (>= 1.78),
+    SparseM (>= 1.83),
     methods,
     Matrix,
     data.table (>= 1.13.2),
