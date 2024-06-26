@@ -911,20 +911,18 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
     ifelse(is.nan(data$cor / (data$cor + data$icor)), .5, data$cor / (data$cor + data$icor))
   }
 }
+# Boot function for LKT_HDI
+boot_fn <- function(dat, n_students, comps, feats, ints = NA, fixeds, conns) {
+  dat_ss = smallSet(dat, n_students)
 
-#boot function for LKT_HDI
-boot_fn <- function(dat,n_students,componentsv,featuresv,interactsv=NA,fixedparsv,connectorsv){
-
-
-  dat_ss = smallSet(dat,n_students)
-
-  mod = LKT(setDT(dat_ss),interc=TRUE,
-            components=componentsv ,interacts = interactsv,
-            features=featuresv,connectors=connectorsv,
-            fixedpars = fixedparsv,
-            seedpars = c(NA),verbose=FALSE)
-  return((mod$coefs))
+  mod = LKT(setDT(dat_ss), interc = TRUE,
+            components = comps, interacts = ints,
+            features = feats, connectors = conns,
+            fixedpars = fixeds,
+            seedpars = c(NA), verbose = FALSE)
+  return(mod$coefs)
 }
+
 
 #Given a par_reps matrix, computes HDI intervals for each column
 get_hdi <- function(par_reps,cred_mass=.95){
@@ -1368,39 +1366,45 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param dat Dataframe
 #' @param n_boot Number of subsamples to fit
 #' @param n_students Number of students per subsample
-#' @param componentsv components in model
-#' @param featuresv features in model
-#' @param interactsv interacts in model
-#' @param fixedparsv fixed pars in model
-#' @param connectorsv r notation for linear equation connectors in model
-#' @param get_hdi boolean to decide if generating HDI per coefficient
-#' @param cred_mass credibility mass parameter to decide width of HDI
+#' @param comps Components in model
+#' @param feats Features in model
+#' @param ints Interacts in model
+#' @param fixeds Fixed parameters in model
+#' @param conns R notation for linear equation connectors in model
+#' @param get_hdi Boolean to decide if generating HDI per coefficient
+#' @param cred_mass Credibility mass parameter to decide width of HDI
 #' @export
-#' @return list of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat,n_boot,n_students,componentsv,featuresv,connectorsv, interactsv=NA,fixedparsv, get_hdi = TRUE, cred_mass = .95){
+#' @return List of values "par_reps", "mod_full", "coef_hdi"
+LKT_HDI <- function(dat, n_boot, n_students, comps, feats, conns, ints = NA, fixeds, get_hdi = TRUE, cred_mass = .95) {
 
-  #first fit full to get all features to get all predictor names
-  mod_full = LKT(setDT(dat),interc=TRUE,
-                 interacts=interactsv,connectors=connectorsv,
-                 components=componentsv,
-                 features=featuresv,
-                 fixedpars = fixedparsv,
-                 seedpars = c(NA),verbose=FALSE)
+  # First fit full to get all features to get all predictor names
+  mod_full = LKT(setDT(dat), interc = TRUE,
+                 interacts = ints, connectors = conns,
+                 components = comps,
+                 features = feats,
+                 fixedpars = fixeds,
+                 seedpars = c(NA), verbose = FALSE)
 
-  par_reps = matrix(nrow=n_boot,ncol=length(mod_full$coefs))
+  par_reps = matrix(nrow = n_boot, ncol = length(mod_full$coefs))
   colnames(par_reps) <- rownames(mod_full$coefs)
 
-  for(i in 1:n_boot){
-    #first trial, return the names and make the matrix
-    temp=boot_fn(dat,n_students,components=componentsv,features=featuresv,connectors=connectorsv,
-                 interacts=interactsv,fixedpars=fixedparsv )
-    idx = match(rownames(temp),colnames(par_reps))
-    par_reps[i,idx] = as.numeric(temp)
-    if(i==1){cat("0%")}else{cat(paste("...",round((i/n_boot)*100),"%",sep=""))}
-    if(i==n_boot){cat("\n")}
+  for(i in 1:n_boot) {
+    # First trial, return the names and make the matrix
+    temp = boot_fn(dat, n_students, comps, feats, ints, fixeds, conns)
+    idx = match(rownames(temp), colnames(par_reps))
+    par_reps[i, idx] = as.numeric(temp)
+    if(i == 1) {
+      cat("0%")
+    } else {
+      cat(paste("...", round((i / n_boot) * 100), "%", sep = ""))
+    }
+    if(i == n_boot) {
+      cat("\n")
+    }
   }
-  return(list("par_reps" = par_reps,"mod_full" = mod_full, coef_hdi = get_hdi(par_reps, cred_mass = .95)))
+  return(list("par_reps" = par_reps, "mod_full" = mod_full, coef_hdi = get_hdi(par_reps, cred_mass = .95)))
 }
+
 
 LKTStartupMessage <- function()
 {
