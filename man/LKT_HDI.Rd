@@ -10,7 +10,7 @@ LKT_HDI(
   n_students,
   comps,
   feats,
-  conns,
+  conns = NULL,
   ints = NA,
   fixeds,
   get_hdi = TRUE,

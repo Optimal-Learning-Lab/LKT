@@ -591,8 +591,7 @@ LKT <- function(data,usefolds = NA,
                   by = list(e$data$Anon.Student.Id), FUN = mean)
         },
       "newdata" = e$data,
-      "predictors" = list(
-        colnames(e$predictset),e$predictset2),
+      "predictors" = e$predictset2,
       "loglike" = e$loglike,
       "automat" = e$df
     )
@@ -1375,7 +1374,7 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param cred_mass Credibility mass parameter to decide width of HDI
 #' @export
 #' @return List of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat, n_boot, n_students, comps, feats, conns, ints = NA, fixeds, get_hdi = TRUE, cred_mass = .95) {
+LKT_HDI <- function(dat, n_boot, n_students, comps, feats, conns = NULL, ints = NA, fixeds, get_hdi = TRUE, cred_mass = .95) {
 
   # First fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat), interc = TRUE,
