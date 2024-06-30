@@ -9,6 +9,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+
+# Packages
 ```{r setup, include = TRUE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -28,7 +30,7 @@ knitr::opts_chunk$set(
 
 
 # Load data (shows modifications to create needed columns)
-```{r, echo=TRUE}
+```{r load_sample, echo=TRUE}
 set.seed(41)
     val<-largerawsample
 
@@ -76,7 +78,7 @@ set.seed(41)
 
 
 # Load MATHia (example how to load a remote dataset)
-```{r, echo=TRUE}
+```{r load_MATHia, echo=TRUE}
 set.seed(41)
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
@@ -116,59 +118,14 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 
 
 # Load Assistments 2012 skillbuilder (example how to load a remote dataset)
-```{r, echo=TRUE}
-# set.seed(41)
-# # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
-# datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
-# val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
-# val3$Anon.Student.Id<-val3$user_id
-#
-# val3<-val3[val3$skill!="",]
-#
-# #Duplicate screening
-# val3 <-  val3 %>%  distinct(user_id,start_time,.keep_all=T)
-#
-# val3$CF..Time.<-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S"))
-# val3<-val3[order(val3$Anon.Student.Id, val3$CF..Time.),]
-# val3$CF..ansbin.<-val3$correct
-# val3<-val3[val3$CF..ansbin.==0 | val3$CF..ansbin.==1,]
-# val3$Duration..sec.<-as.numeric(as.POSIXct(as.character(val3$end_time),format="%Y-%m-%d %H:%M:%S"))-as.numeric(as.POSIXct(as.character(val3$start_time),format="%Y-%m-%d %H:%M:%S")) #allows recency, spacing, forgetting features to run
-# val3$Outcome<-ifelse(val3$correct==1,"CORRECT","INCORRECT")
-#
-# val3 <- val3 %>%
-#   group_by(problem_id) %>%
-#   filter(n() > 4) %>%
-#   ungroup()
-#
-# val3 <- val3 %>%
-#   group_by(user_id) %>%
-#   filter(n() >= 20) %>%
-#   ungroup()
-#
-# # make student stratified folds (for crossvalidation for unseen population)
-# unq = sample(unique(val3$Anon.Student.Id))
-# sfold = rep(1:5,length.out=length(unq))
-# val3$fold = rep(0,length(val3[,1]))
-# for(i in 1:5){val3$fold[which(val3$Anon.Student.Id %in% unq[which(sfold==i)])]=i}
-#
-#
-# val3 <- computeSpacingPredictors(val3, "skill") #allows recency, spacing, forgetting features to run
-# val3 <- computeSpacingPredictors(val3, "Anon.Student.Id") #allows recency, spacing,
-#
-# val3 <- computeSpacingPredictors(val3, "problem_type") #allows recency, spacing, forgetting features to run
-# val3 <- computeSpacingPredictors(val3, "type") #allows recency, spacing,forgetting features to run
-# val3<-setDT(val3)
-
-
-#save(val3,file="..\\Assistments2012fullrev.RData")
-
+```{r load_assist, echo=TRUE}
 set.seed(41)
 # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
 val3$Anon.Student.Id<-val3$user_id
 
-# Identify 10% of the unique users
+# Identify 5% of the unique users
 selected_users <- sample(unique(val3$user_id), size = floor(.05 * length(unique(val3$user_id))))
 # Filter out the selected users
 val3 <- val3[val3$user_id %in% selected_users,]
@@ -214,7 +171,7 @@ val3<-setDT(val3)
 
 
 # Additive Factors Model (AFM) fixed effect version
-```{r, echo=TRUE}
+```{r AFM, echo=TRUE}
     modelob <- LKT(
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -223,7 +180,7 @@ val3<-setDT(val3)
 
 
 # Performance Factors Analysis (PFA) fixed effect version
-```{r, echo=TRUE}
+```{r PFA, echo=TRUE}
 
 
   modelob <- LKT(data = val, interc=FALSE,
@@ -234,7 +191,7 @@ val3<-setDT(val3)
 ```
 
 # PFA using difficulty sensitive predictors (composite model requiring pred from prior model for estimation)
-```{r, echo=TRUE}
+```{r PFA-difficulty, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -250,16 +207,16 @@ val3<-setDT(val3)
 ```
 
 # Recent Performance Factors Analysis (RPFA)
-```{r, echo=TRUE}
+```{r RPFA, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
       features = c("intercept", "intercept", "propdec2","linefail"),
-      fixedpars=c(.9))
+      seedpars=c(.9))
 ```
 
 # Recency tracing with logitdec
-```{r, echo=TRUE}
+```{r logitdec_recency, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -268,17 +225,17 @@ val3<-setDT(val3)
 ```
 
 # Recency tracing with logitdec and transfer from cluster
-```{r, echo=TRUE}
+```{r transfer_example, echo=TRUE}
 
 system.time( modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.","KC..Cluster."),
       features = c("intercept", "intercept", "logitdec","recency","logitdec"),
-      seedpars=c(.9,.5,.5)))
+      fixedpars=c(.9,.5,.5)))
 ```
 
 # Performance Prediction Equation (PPE)
-```{r, echo=TRUE}
+```{r PPE, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -286,8 +243,8 @@ system.time( modelob <- LKT(
       fixedpars=c(0.3491901,0.2045801,1e-05,0.9734477,0.4443027))
 ```
 
-# base4
-```{r, echo=TRUE}
+# base4 example
+```{r base4_feature, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -301,7 +258,7 @@ the main R code for package
 
 
 # Simple interactions
-```{r, echo=TRUE}
+```{r simple_interactions, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -310,7 +267,7 @@ the main R code for package
 ```
 
 # Individualized Additive Factors Model (iAFM) fixed effect version
-```{r, echo=TRUE}
+```{r iAFM, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
@@ -321,7 +278,7 @@ the main R code for package
 
 
 # Connectors (another way to do interactions)
-```{r, echo=TRUE}
+```{r linear_connectors, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       connectors = c("+","*"),
@@ -331,7 +288,7 @@ the main R code for package
 ```
 
 # AutoKC
-```{r}
+```{r KC_search_method, echo=TRUE}
 
 mnames<-c("IRT",
           "Faculty",
@@ -475,16 +432,15 @@ for(i in 1:4){
 
 
 # Credibility intervals
-```{r}
+```{r confidence_intervals, echo=TRUE}
 
-components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
-features = c("intercept", "intercept", "linesuc$","linefail$")
+components = c( "KC..Default.", "KC..Default.", "KC..Default.")
+features = c( "intercept", "linesuc$","linefail$")
 
 # or
 
-components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
-features = c("logit", "logit", "linesuc","linefail")
-fixedpars = c(.03,.03)
+#components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.")
+#features = c("logit", "logit", "linesuc","linefail")
 
 mod1 = LKT(setDT(val),interc=TRUE,
            components=components,
@@ -503,18 +459,12 @@ system.time({
 zero_idx = which(boot_res$coef_hdi$includes_zero==TRUE)
 boot_res$coef_hdi$coef_name[zero_idx]
 
-if(!is.na(unique(boot_res$par_reps[,zero_idx[1]]))){
-  hist(boot_res$par_reps[,zero_idx[1]],breaks=50,main=boot_res$coef_hdi$coef_name[zero_idx][1])
-
-abline(v=boot_res$coef_hdi$lower[zero_idx[1]],col="darkblue",lwd=3)
-abline(v=boot_res$coef_hdi$upper[zero_idx[1]],col="darkblue",lwd=3)
-abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
-#Estimate from full fit to data
-  abline(v=boot_res$mod_full$coefs[which(rownames(boot_res$mod_full$coefs)==colnames(boot_res$par_reps)[zero_idx[1]])],col="firebrick3",lwd=3)} else {print(boot_res$coef_hdi)}
+#10 lines of full report
+print(boot_res$coef_hdi[1:20,])
 ```
 
 # Recency tracing with RPFA propdec2 feature (the one in the original Galyardt and Goldin paper)
-```{r, echo=TRUE}
+```{r feature_examples, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,
       components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default."),
@@ -523,7 +473,7 @@ abline(v=mean(boot_res$par_reps[,zero_idx[1]]),lty=2,col="darkblue",lwd=3)
 ```
 
 # brpropdec (experimental feature)
-```{r, echo=TRUE}
+```{r experimental, echo=TRUE}
     modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,
       components = c("KC..Default.","Anon.Student.Id","KC..Default.","KC..Default."),
@@ -532,7 +482,7 @@ print(modelob$coefs)
 ```
 
 # Simple adaptive model for practice optimization
-```{r, echo=TRUE}
+```{r simple_adaptive, echo=TRUE}
 
 
 modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
@@ -542,7 +492,7 @@ modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
 ```
 
 # Test of new feature to trace KC intercepts across time (not within subjects)
-```{r, echo=TRUE}
+```{r aggregate_parameter_tracing, echo=TRUE}
     val<-val[order(val$CF..Time.),]
 modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
                components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
@@ -551,7 +501,7 @@ modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
 ```
 
 # Astonishing model (theory analysis)
-```{r, echo=TRUE}
+```{r Astonishing, echo=TRUE}
 modelob <- LKT(
       data = val, interc=TRUE,dualfit = TRUE,factrv=1e7,
       components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default."),
@@ -567,19 +517,19 @@ modelob <- LKT(
 ```
 
 # Build LKT with special feature
-```{r, echo=TRUE}
+```{r buildLKT_with_offset, echo=TRUE}
 
 q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency.",specialfeatures = "numer",
       allcomponents = c("Anon.Student.Id", "KC..Default."),
       currentcomponents = c(),forv=100,bacv=80,
-      allfeatures = c("lineafm","logafm","logsuc","logfail","linesuc","linefail","propdec","recencysuc","recencyfail"),
+      allfeatures = c("lineafm","logafm","logsuc","logfail","linesuc","linefail"),
       currentfeatures = c( ),currentfixedpars = c(),forward=TRUE,backward=TRUE,
       maxitv=1,verbose=FALSE)
 ```
 
 
 # AFMstartMATHia
-```{r, echo=TRUE}
+```{r AFMstartMATHia, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -626,7 +576,7 @@ save(savedata,file="AFMMATHia.RData")
 ```
 
 # EmptystartMATHia
-```{r, echo=TRUE}
+```{r EmptystartMATHia, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -672,7 +622,7 @@ save(savedata,file="emptyMATHia.RData")
 
 
 # example of LASSOLKT
-```{r, echo=TRUE}
+```{r LASSOLKT, echo=TRUE}
 LASSO_Model<- LASSOLKTModel(
   data = setDT(val),gridpars=(1:9)/10,
   removecomp = c("Anon.Student.Id","Anon.Student.Id","Anon.Student.Id",
@@ -703,7 +653,7 @@ kept_features
 ```
 
 # example of LASSOLKT with preset
-```{r, echo=TRUE}
+```{r preset_LASSOLKT, echo=TRUE}
     modelob <- LASSOLKTModel(
       data = val, gridpars=(1:9)/10,interc = F,
       allcomponents = c("Anon.Student.Id","KC..Default."),
@@ -714,7 +664,7 @@ str(modelob)
 ```
 
 # example for the nosolve parameter to make it return the model matrix
-```{r, echo=TRUE}
+```{r data_export_no_model_solving, echo=TRUE}
     modelob <- LKT(
       data = val, interc=FALSE,
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
@@ -724,7 +674,7 @@ str(modelob)
 
 
 # Assistments data CV example (True crossvalidation of entire search process)
-```{r, echo=TRUE}
+```{r CV_intercept_cluster_model, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
 R2s <- numeric(0)

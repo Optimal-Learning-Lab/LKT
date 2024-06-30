@@ -910,6 +910,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
     ifelse(is.nan(data$cor / (data$cor + data$icor)), .5, data$cor / (data$cor + data$icor))
   }
 }
+
 # Boot function for LKT_HDI
 boot_fn <- function(dat, n_students, comps, feats, ints = NA, fixeds, conns) {
   dat_ss = smallSet(dat, n_students)
@@ -1374,7 +1375,7 @@ ViewExcel <-function(df = .Last.value, file = tempfile(fileext = ".csv")) {
 #' @param cred_mass Credibility mass parameter to decide width of HDI
 #' @export
 #' @return List of values "par_reps", "mod_full", "coef_hdi"
-LKT_HDI <- function(dat, n_boot, n_students, comps, feats, conns = NULL, ints = NA, fixeds, get_hdi = TRUE, cred_mass = .95) {
+LKT_HDI <- function(dat, n_boot, n_students, comps, feats,conns = rep("+",max(1,length(comps)-1)), ints = NA, fixeds, get_hdi = TRUE, cred_mass = .95) {
 
   # First fit full to get all features to get all predictor names
   mod_full = LKT(setDT(dat), interc = TRUE,
