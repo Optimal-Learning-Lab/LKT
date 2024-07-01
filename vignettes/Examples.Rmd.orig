@@ -119,7 +119,7 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 
 # Load Assistments 2012 skillbuilder (example how to load a remote dataset)
 ```{r load_assist, echo=TRUE}
-set.seed(41)
+set.seed(42)
 # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
 datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
@@ -183,8 +183,8 @@ val3<-setDT(val3)
 ```{r PFA, echo=TRUE}
 
 
-  modelob <- LKT(data = val, interc=FALSE,
-      components = c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
+  modelob <- LKT(data = val3, interc=FALSE,
+      components = c("Anon.Student.Id", "skill", "skill", "skill"),
       features = c("intercept", "intercept", "linesuc$","linefail$"))
 
 
@@ -436,6 +436,7 @@ for(i in 1:4){
 
 components = c( "KC..Default.", "KC..Default.", "KC..Default.")
 features = c( "intercept", "linesuc$","linefail$")
+fixedpars = NA
 
 # or
 
@@ -528,8 +529,8 @@ q<-  buildLKTModel(data = val, interc=TRUE, specialcomponents = "CF..End.Latency
 ```
 
 
-# AFMstartMATHia
-```{r AFMstartMATHia, echo=TRUE}
+# AFMstartMATHia with CV
+```{r AFMstartMATHiaCV, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -552,7 +553,7 @@ for (i in 1:2) {
   modelob <-modelob[[2]]
 
   pred <- as.vector(pmin(pmax(inv.logit(
-    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+    as.matrix(modelob$predictors %*% modelob$coefs)[,]
   ), .00001), .99999)[modelob$newdata$fold %in% i])
   LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
   AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
@@ -575,8 +576,8 @@ save(savedata,file="AFMMATHia.RData")
 
 ```
 
-# EmptystartMATHia
-```{r EmptystartMATHia, echo=TRUE}
+# EmptystartMATHia with CV
+```{r EmptystartMATHiaCV, echo=TRUE}
 LLs <- numeric(0)
 AUCs <- numeric(0)
 RMSEs <- numeric(0)
@@ -597,7 +598,7 @@ for (i in 1:2) {
   modelob <-modelob[[2]]
 
   pred <- as.vector(pmin(pmax(inv.logit(
-    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+    as.matrix(modelob$predictors %*% modelob$coefs)[,]
   ), .00001), .99999)[modelob$newdata$fold %in% i])
   LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
   AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
@@ -670,7 +671,6 @@ str(modelob)
       components = c("Anon.Student.Id","KC..Default.","KC..Default."),
       features = c("intercept", "intercept", "lineafm"),nosolve=TRUE)
 ```
-
 
 
 # Assistments data CV example (True crossvalidation of entire search process)
@@ -747,7 +747,7 @@ val3<-setDT(val3)
   )
 
   pred <- as.vector(pmin(pmax(inv.logit(
-    as.matrix(modelob$predictors[[2]] %*% modelob$coefs)[,]
+    as.matrix(modelob$predictors %*% modelob$coefs)[,]
   ), .00001), .99999)[modelob$newdata$fold %in% i])
   LLs[i] <-(sum(log(ifelse(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i] == 1, pred, 1 - pred))))
   AUCs[i] <-suppressMessages(auc(modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i], pred)[1])
@@ -761,8 +761,5 @@ val3<-setDT(val3)
   print(R2s[i])
   print(RMSEs[i])
 }
-print(AUCs)
-print(R2s)
-
 
 ```
