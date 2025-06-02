@@ -143,8 +143,8 @@ LKT <- function(data,usefolds = NA,
       if (gsub("[$@]", "", i) %in% c(
         "powafm", "recency", "recencystudy", "recencytest","recencysuc", "recencyfail", "errordec", "propdec", "propdec2",
         "logitdec","logitdecevol","baseratepropdec", "base", "expdecafm", "expdecsuc", "expdecfail", "dashafm", "dashsuc", "dashfail",
-        "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe",
-        "base5suc", "base5fail"
+        "base2", "base4", "basesuc", "basefail", "logit", "base2suc", "base2fail", "ppe", "ppes", "ppef",
+        "base5suc", "base5fail","logsucadj"
       )) {
         if (is.na(e$fixedpars[m])) { # if not fixed them optimize it
           para <- seedparameters[optimparcount]
@@ -160,7 +160,7 @@ LKT <- function(data,usefolds = NA,
         } # otherwise just use it
         m <- m + 1
       }
-      if (gsub("[$]", "", i) %in% c("base2", "base4", "base2suc", "base2fail", "ppe", "base5suc", "base5fail")) {
+      if (gsub("[$]", "", i) %in% c("base2", "base4", "base2suc", "base2fail", "ppe", "ppes", "ppef", "base5suc", "base5fail")) {
         if (is.na(e$fixedpars[m])) {
           parb <- seedparameters[optimparcount]
           optimparcount <- optimparcount + 1
@@ -174,7 +174,7 @@ LKT <- function(data,usefolds = NA,
         }
         m <- m + 1
       }
-      if (gsub("[$]", "", i) %in% c("base4", "ppe", "base5suc", "base5fail")) {
+      if (gsub("[$]", "", i) %in% c("base4", "ppe", "ppes", "ppef", "base5suc", "base5fail")) {
         if (is.na(e$fixedpars[m])) {
           parc <- seedparameters[optimparcount]
           optimparcount <- optimparcount + 1
@@ -188,7 +188,7 @@ LKT <- function(data,usefolds = NA,
         }
         m <- m + 1
       }
-      if (gsub("[$]", "", i) %in% c("base4", "ppe", "base5suc", "base5fail")) {
+      if (gsub("[$]", "", i) %in% c("base4", "ppe", "ppes", "ppef", "base5suc", "base5fail")) {
         if (is.na(e$fixedpars[m])) {
           pard <- seedparameters[optimparcount]
           optimparcount <- optimparcount + 1
@@ -280,10 +280,25 @@ LKT <- function(data,usefolds = NA,
         # count an effect only when counted factor level is of specific type
         if (length(grep("%", components[k]))) {
           KCs <- strsplit(components[k], "%")
+
+
           e$data$index <- paste(eval(parse(text = paste("e$data$", KCs[[1]][1], sep = ""))), e$data$Anon.Student.Id, sep = "")
-          e$data$indexcomp <- paste(eval(parse(text = paste("e$data$", KCs[[1]][1], sep = ""))), sep = "")
-          e$data$cor <- as.numeric(paste(eval(parse(text = paste("countOutcomeGen(e$data,e$data$index,\"CORRECT\",e$data$", KCs[[1]][2], ",\"", KCs[[1]][3], "\")", sep = "")))))
-          e$data$icor <- as.numeric(paste(eval(parse(text = paste("countOutcomeGen(e$data,e$data$index,\"INCORRECT\",e$data$", KCs[[1]][2], ",\"", KCs[[1]][3], "\")", sep = "")))))
+         e$data$indexcomp <- paste(eval(parse(text = paste("e$data$", KCs[[1]][1], sep = ""))), sep = "")
+
+
+          #e$data$cor <- as.numeric(paste(eval(parse(text = paste("countOutcomeGen(e$data,e$data$index,\"CORRECT\",e$data$", KCs[[1]][2], ",\"", KCs[[1]][3], "\")", sep = "")))))
+          #e$data$icor <- as.numeric(paste(eval(parse(text = paste("countOutcomeGen(e$data,e$data$index,\"INCORRECT\",e$data$", KCs[[1]][2], ",\"", KCs[[1]][3], "\")", sep = "")))))
+
+          e$data$cor <- as.numeric(eval(parse(text = paste0(
+            "countOutcomeGen(e$data, e$data$index, \"CORRECT\", e$data$", KCs[[1]][2],
+            ", ", shQuote(KCs[[1]][3]), ")"
+
+          ))))
+          e$data$icor <- as.numeric(eval(parse(text = paste0(
+            "countOutcomeGen(e$data, e$data$index, \"INCORRECT\", e$data$", KCs[[1]][2],
+            ", ", shQuote(KCs[[1]][3]), ")"
+          ))))
+
         }
         else # count an effect when both counted factor level and recipient factor level are specified
           if (length(grep("\\?", components[k]))) {
@@ -302,7 +317,7 @@ LKT <- function(data,usefolds = NA,
             e$data$icor <- countOutcome(e$data, e$data$index, "INCORRECT")
           }
         }
-
+        components[k]<-gsub("\\s+", "", components[k])
         e$flag <- FALSE
         if (right(i, 1) == "@") {
           # random effect
@@ -442,21 +457,30 @@ LKT <- function(data,usefolds = NA,
         colnames(modelvs) <- colnames(predictset)
         e$modelvs <- t(modelvs)
         colnames(e$modelvs) <- "coefficient"
-          ####two versions
-          if( is.na(usefolds)[1]){
-            e$data$pred <- pmin(pmax(predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
-                                     .00001),.99999)
+        ####two versions
+        if (is.na(usefolds)[1]) {
+          e$data$pred <- pmin(pmax(
+            predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
+            .00001
+          ), .99999)
 
-        success <- sum(is.nan(e$data$pred)) == 0 & sum(is.na(e$data$pred))==0 }
-          else{
-            e$data$pred[e$data$fold %in% usefolds] <- pmin(pmax(predict(temp, predictset2[e$data$fold %in% usefolds,], proba = TRUE)$probabilities[, 1],
-                                                                 .00001),.99999)
+          success <- sum(is.nan(e$data$pred)) == 0 &
+            sum(is.na(e$data$pred)) == 0
+        }
+        else{
+          e$data$pred[e$data$fold %in% usefolds] <- pmin(pmax(
+            predict(temp, predictset2[e$data$fold %in% usefolds, ], proba = TRUE)$probabilities[, 1],
+            .00001
+          ), .99999)
 
-            success <- sum(is.nan(e$data$pred[e$data$fold %in% usefolds])) == 0 &
-              sum(is.na(e$data$pred[e$data$fold %in% usefolds]))==0
+          success <- sum(is.nan(e$data$pred[e$data$fold %in% usefolds])) == 0 &
+            sum(is.na(e$data$pred[e$data$fold %in% usefolds])) == 0
 
-            if (verbose) { print(summary(e$data$pred[e$data$fold %in% usefolds]))}}}
-          # check for success
+          if (verbose) {
+            print(summary(e$data$pred[e$data$fold %in% usefolds]))
+          }
+        }}
+        # check for success
 
 
         ####two versions
@@ -525,6 +549,7 @@ LKT <- function(data,usefolds = NA,
       sum("propdec" == gsub("[$]", "", features)) +
       sum("propdec2" == gsub("[$]", "", features)) +
       sum("logitdec" == gsub("[$]", "", features)) +
+      sum("logsucadj" == gsub("[$]", "", features)) +
       sum("logitdecevol" == gsub("[$]", "", features)) +
       sum("baseratepropdec" == gsub("[$]", "", features)) +
       sum("base" == gsub("[$]", "", features)) +
@@ -534,6 +559,8 @@ LKT <- function(data,usefolds = NA,
       sum("base2" == gsub("[$]", "", features)) * 2 +
       sum("base4" == gsub("[$]", "", features)) * 4 +
       sum("ppe" == gsub("[$]", "", features)) * 4 +
+      sum("ppes" == gsub("[$]", "", features)) * 4 +
+      sum("ppef" == gsub("[$]", "", features)) * 4 +
       sum("basefail" == gsub("[$]", "", features)) +
       sum("basesuc" == gsub("[$]", "", features)) +
       sum("base2suc" == gsub("[$]", "", features)) * 2 +
@@ -587,15 +614,15 @@ LKT <- function(data,usefolds = NA,
         optimizedpars
       } else NA,
       "studentRMSE" = if ("pred" %in% colnames(e$data)) {
-        aggregate((e$data$pred - e$data$CF..ansbin.)^2,
+        aggregate(sqrt((e$data$pred - e$data$CF..ansbin.)^2),
                   by = list(e$data$Anon.Student.Id), FUN = mean)
         },
       "newdata" = e$data,
       "predictors" = e$predictset2,
       "loglike" = e$loglike,
       "automat" = e$df
-    )
-    results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])}
+    )}
+   # results$studentRMSE[,2]<-sqrt(results$studentRMSE[,2])}
   else{
       results <- list(
         "lassodata"=modelfun(numeric(0)))}
@@ -753,6 +780,28 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
     data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
     return(data$Nc * data$tw^-(par2 + par3 * data$space))
   }
+  if (feat == "ppes") {
+    data$Nc <- (log(1+data$cor))^(2*par1)
+    data$mintime <- ave(data$CF..Time., index, FUN = min)
+    data$Tn <- data$CF..Time. - data$mintime
+    eval(parse(text = paste("data$space <- data$", fcomp, "spacinglagged", sep = "")))
+    data$space <- ifelse(data$space == 0, 0, 1 / log(data$space + exp(1)))
+    data$space <- ave(data$space, index, FUN = function(x) cumsum(x))
+    data$space <- ifelse((data$cor + data$icor) <= 1, 0, data$space / (data$cor + data$icor - 1))
+    data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
+    return(data$Nc * data$tw^-(par2 + par3 * data$space))
+  }
+  if (feat == "ppef") {
+    data$Nc <- (log(1+data$icor))^(2*par1)
+    data$mintime <- ave(data$CF..Time., index, FUN = min)
+    data$Tn <- data$CF..Time. - data$mintime
+    eval(parse(text = paste("data$space <- data$", fcomp, "spacinglagged", sep = "")))
+    data$space <- ifelse(data$space == 0, 0, 1 / log(data$space + exp(1)))
+    data$space <- ave(data$space, index, FUN = function(x) cumsum(x))
+    data$space <- ifelse((data$cor + data$icor) <= 1, 0, data$space / (data$cor + data$icor - 1))
+    data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
+    return(data$Nc * data$tw^-(par2 + par3 * data$space))
+  }
   if (feat == "base5suc") {
     data$mintime <- ave(data$CF..Time., index, FUN = min)
     data$minreltime <- ave(data$CF..reltime., index, FUN = min)
@@ -827,6 +876,9 @@ computefeatures <- function(data, feat, par1, par2, index, index2, par3, par4, p
   }
   if (feat == "logsuc") {
     return(log(1 + data$cor))
+  }
+  if (feat == "logsucadj") {
+    return(log(1 + data$cor)/(par1*20+log(1 + data$cor)))
   }
   if (feat == "linesuc") {
     return(data$cor)

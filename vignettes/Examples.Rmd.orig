@@ -37,7 +37,7 @@ set.seed(41)
     #clean it up
     val$KC..Default.<-val$Problem.Name
     # make it a data table
-    val= setDT(val)
+   # val= setDT(val)
 
     #make unstratified folds for crossvaldiations
     val$fold<-sample(1:5,length(val$Anon.Student.Id),replace=T)
@@ -80,7 +80,7 @@ set.seed(41)
 # Load MATHia (example how to load a remote dataset)
 ```{r load_MATHia, echo=TRUE}
 set.seed(41)
-datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+datafile<-"C:/Users/ppavl/OneDrive/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
 val2=as.data.table(val2)
 val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$Time),format="%Y-%m-%d %H:%M:%S"))
@@ -495,10 +495,39 @@ modelob <- LKT(data = val, interc=FALSE,dualfit = FALSE,factrv = 1e11,
 # Test of new feature to trace KC intercepts across time (not within subjects)
 ```{r aggregate_parameter_tracing, echo=TRUE}
     val<-val[order(val$CF..Time.),]
-modelob <- LKT(data = val, interc=TRUE,dualfit = FALSE,factrv = 1e11,
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
                components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
                ,features = c("logitdec", "logsuc","recency","logitdecevol"),fixedpars =c(0.98, 0.24,.99))
+modelob$coefs
 
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default.","KC..Default.")
+               ,features = c("logitdec", "logsuc","recency","intercept"),fixedpars =c(0.98, 0.24,.99))
+
+
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..Default.","KC..Default.")
+               ,features = c("logitdec", "logsuc","recency"),fixedpars =c(0.98, 0.24,.99))
+modelob$coefs
+
+
+
+
+    val<-val2[order(val2$CF..Time.),]
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..MATHia.","KC..MATHia.","KC..MATHia.")
+               ,features = c("logitdec", "logsuc","recency","logitdecevol"),fixedpars =c(0.98, 0.24,.99))
+modelob$coefs
+
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..MATHia.","KC..MATHia.","KC..MATHia.")
+               ,features = c("logitdec", "logsuc","recency","intercept"),fixedpars =c(0.98, 0.24,.99))
+
+
+modelob <- LKT(data = setDT(val), interc=TRUE,dualfit = FALSE,factrv = 1e11,
+               components = c("Anon.Student.Id","KC..MATHia.","KC..MATHia.")
+               ,features = c("logitdec", "logsuc","recency"),fixedpars =c(0.98, 0.24,.99))
+modelob$coefs
 ```
 
 # Astonishing model (theory analysis)
