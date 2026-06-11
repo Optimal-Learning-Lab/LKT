@@ -1,0 +1,168 @@
+---
+title: "Examples: Special Features"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Special Features}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# brpropdec
+
+```{r brpropdec}
+model_brpropdec <- LKT(
+  data = val,
+  interc = TRUE,
+  dualfit = TRUE,
+  components = c("KC..Default.", "Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("baseratepropdec", "logitdec", "logitdec", "recency"),
+  fixedpars = c(0.988209, 0.9690458, 0.9004974, 0.2603806)
+)
+
+print(model_brpropdec$coefs)
+check_lkt_fit(model_brpropdec, expected_r2 = 0.240340, expected_loglike = -28854.5108157355)
+check_true("brpropdec latency model returned", !is.null(model_brpropdec$latencymodel))
+check_has_coefficients(model_brpropdec, c("baseratepropdecKC..Default."))
+
+brpropdec_spec <- model_brpropdec$model_specification[[1]]
+check_true("duplicate logitdec specs are retained", all(c(
+  "Anon.Student.Id",
+  "KC..Default."
+) %in% brpropdec_spec$component[brpropdec_spec$feature == "logitdec"]))
+check_true("duplicate logitdec parameters stay component-specific", all(c(
+  0.9690458,
+  0.9004974
+) %in% brpropdec_spec$para[brpropdec_spec$feature == "logitdec"]))
+```
+
+# Simple adaptive model for practice optimization
+
+```{r adaptive-practice-optimization}
+model_adaptive <- LKT(
+  data = val,
+  interc = FALSE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency", "intercept"),
+  fixedpars = c(0.98, 0.24)
+)
+check_lkt_fit(model_adaptive, expected_r2 = 0.317237, expected_loglike = -25933.7244347462)
+check_has_coefficients(model_adaptive, c("recencyKC..Default.", "logsucKC..Default."))
+
+adaptive_spec <- model_adaptive$model_specification[[1]]
+check_true("adaptive model specification is tabular", data.table::is.data.table(adaptive_spec))
+check_true("adaptive model specification has coefficient names", all(!is.na(adaptive_spec$coefficient_name)))
+check_true("adaptive model specification matches coefficient rows", nrow(adaptive_spec) == nrow(model_adaptive$coefs))
+check_true("adaptive model specification exposes PolicyFactory columns", all(c(
+  "coefficient_name",
+  "feature",
+  "component",
+  "component_level",
+  "coefficient",
+  "para",
+  "parb",
+  "parc",
+  "pard",
+  "pare"
+) %in% names(adaptive_spec)))
+adaptive_spec_filtered <- adaptive_spec[
+  !(feature == "intercept" & component == "KC..Default.")
+]
+check_true("adaptive model specification supports KC intercept filtering", nrow(adaptive_spec_filtered) < nrow(adaptive_spec))
+check_true("adaptive model specification stores logitdec parameter", any(
+  adaptive_spec$feature == "logitdec" &
+    adaptive_spec$component == "Anon.Student.Id" &
+    adaptive_spec$para == 0.98
+))
+check_true("adaptive model specification stores recency parameter", any(
+  adaptive_spec$feature == "recency" &
+    adaptive_spec$component == "KC..Default." &
+    adaptive_spec$para == 0.24
+))
+```
+
+# KC intercepts across time
+
+```{r kc-intercepts-time}
+val_time <- val[order(val$CF..Time.), ]
+model_kc_time <- LKT(
+  data = val_time,
+  interc = TRUE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency", "logitdecevol"),
+  fixedpars = c(0.98, 0.24, .99)
+)
+check_lkt_fit(model_kc_time, expected_r2 = 0.305281, expected_loglike = -26387.8587874768)
+check_has_coefficients(model_kc_time, c("logitdecevolKC..Default."))
+```
+
+# Astonishing model
+
+```{r astonishing-model}
+model_astonishing <- LKT(
+  data = val,
+  interc = TRUE,
+  dualfit = TRUE,
+  factrv = 1e7,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "lineafm$", "lineafm"),
+  interacts = c(NA, NA, NA, "Anon.Student.Id")
+)
+check_lkt_fit(model_astonishing, expected_r2 = 0.309291, expected_loglike = -26235.522445)
+check_true("astonishing latency model returned", !is.null(model_astonishing$latencymodel))
+check_has_coefficient_matching(model_astonishing, "^lineafmKC[.][.]Default[.]:Anon[.]Student[.]Id")
+```
+
+# Build LKT with special feature
+
+```{r build-lkt-special-feature}
+model_search_special <- buildLKTModel(
+  data = val,
+  interc = TRUE,
+  specialcomponents = "CF..End.Latency.",
+  specialfeatures = "numer",
+  allcomponents = c("Anon.Student.Id", "KC..Default."),
+  currentcomponents = c(),
+  forv = 100,
+  bacv = 80,
+  allfeatures = c("lineafm", "logafm", "logsuc", "logfail", "linesuc", "linefail"),
+  currentfeatures = c(),
+  currentfixedpars = c(),
+  forward = TRUE,
+  backward = TRUE,
+  maxitv = 1,
+  verbose = FALSE
+)
+check_true("special feature search returns table and model", length(model_search_special) == 2)
+check_true("special feature search has selected model", !is.null(model_search_special[[2]]$coefs))
+```

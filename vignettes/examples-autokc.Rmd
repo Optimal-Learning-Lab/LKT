@@ -1,0 +1,169 @@
+---
+title: "Examples: AutoKC"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: AutoKC}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# AutoKC model search
+
+```{r autokc-search}
+mnames <- c(
+  "IRT",
+  "Faculty",
+  "Log Full autoKC",
+  "Log Simple PFA",
+  "Log Full PFA",
+  "Log Full PFA full autoKC additive",
+  "Log Full PFA Faculty additive ",
+  "Log Simple PFA Faculty interactive ",
+  "Log Simple PFA full autoKC interactive",
+  "Log Full PFA simple autoKC interactive",
+  "Log Simple PFA simple autoKC interactive"
+)
+r2s <- data.frame(name = mnames, r2s = NA)
+compl <- list(
+  c("Anon.Student.Id", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "Anon.Student.Id", "Anon.Student.Id"),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "Anon.Student.Id",
+    "KC..Default.", "Anon.Student.Id"),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "Anon.Student.Id",
+    "KC..Default.", "Anon.Student.Id"),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default.")
+)
+featl <- list(
+  c("intercept", "intercept"),
+  c("intercept", "intercept", "logfail", "logsuc"),
+  c("intercept", "intercept", "logfail$", "logsuc$"),
+  c("intercept", "intercept", "logfail", "logsuc"),
+  c("intercept", "intercept", "logfail$", "logsuc$"),
+  c("intercept", "intercept", "logfail$", "logfail$", "logsuc$", "logsuc$"),
+  c("intercept", "intercept", "logfail$", "logfail", "logsuc$", "logsuc"),
+  c("intercept", "intercept", "logfail", "logfail", "logsuc", "logsuc"),
+  c("intercept", "intercept", "logfail", "logfail$", "logsuc", "logsuc$"),
+  c("intercept", "intercept", "logfail$", "logfail", "logsuc$", "logsuc"),
+  c("intercept", "intercept", "logfail", "logfail", "logsuc", "logsuc")
+)
+connl <- list(
+  c("+"),
+  c("+", "+", "+"),
+  c("+", "+", "+"),
+  c("+", "+", "+"),
+  c("+", "+", "+"),
+  c("+", "+", "+", "+", "+"),
+  c("+", "+", "+", "+", "+"),
+  c("+", "+", "*", "+", "*"),
+  c("+", "+", "*", "+", "*"),
+  c("+", "+", "*", "+", "*"),
+  c("+", "+", "*", "+", "*")
+)
+autol <- list(
+  c(0, 0),
+  c(0, 0, 0, 0),
+  c(0, 0, 40, 40),
+  c(0, 0, 0, 0),
+  c(0, 0, 0, 0),
+  c(0, 0, 0, 40, 0, 40),
+  c(0, 0, 0, 0, 0, 0),
+  c(0, 0, 0, 0, 0, 0),
+  c(0, 0, 0, 40, 0, 40),
+  c(0, 0, 0, 40, 0, 40),
+  c(0, 0, 0, 40, 0, 40)
+)
+
+for (i in seq_along(compl)) {
+  modelob <- LKT(
+    data = val,
+    components = compl[[i]],
+    features = featl[[i]],
+    connectors = connl[[i]],
+    autoKC = autol[[i]],
+    verbose = TRUE
+  )
+  cat(" R2 =  ", modelob$r2, "\n")
+  r2s$r2s[i] <- modelob$r2
+}
+check_true("AutoKC model count", nrow(r2s) == 11)
+check_close("AutoKC first model R2", r2s$r2s[1], 0.17526, tolerance = 1e-4)
+check_close("AutoKC best listed R2", max(r2s$r2s, na.rm = TRUE), 0.336243, tolerance = 1e-3)
+```
+
+```{r autokc-plot}
+r2s$name <- factor(r2s$name, levels = rev(mnames))
+ggplot(r2s, aes(name, r2s)) +
+  geom_bar(stat = "identity") +
+  xlab("Model Version") +
+  ylab("R-squared Gain") +
+  coord_flip() +
+  theme(text = element_text(size = 12))
+```
+
+```{r autokc-cluster-sensitivity}
+mnames <- seq(2, 71, 10)
+for (i in c(3, 6)) {
+  r2s <- data.frame(name = mnames, r2s = NA, r2sr = NA)
+  j <- 1
+  for (k in mnames) {
+    j <- j + 1
+    modelob <- LKT(
+      data = val,
+      components = compl[[i]],
+      features = featl[[i]],
+      connectors = connl[[i]],
+      autoKC = k * (autol[[i]] > 0),
+      verbose = FALSE
+    )
+    cat(" R2 =  ", modelob$r2, "\n")
+    r2s$r2s[j - 1] <- modelob$r2
+
+    modelob <- LKT(
+      data = val,
+      components = compl[[i]],
+      features = featl[[i]],
+      connectors = connl[[i]],
+      autoKC = k * (autol[[i]] > 0),
+      verbose = FALSE,
+      autoKCcont = rep("rand", length(featl[[i]]))
+    )
+    cat(" R2 =  ", modelob$r2, "\n")
+    r2s$r2sr[j - 1] <- modelob$r2
+  }
+
+  r2s$name <- factor(r2s$name, levels = mnames)
+  ggplot(r2s, aes(name, group = 1)) +
+    geom_line(aes(y = r2s)) +
+    geom_line(aes(y = r2sr), linetype = "twodash") +
+    scale_x_discrete(breaks = seq(from = 2, to = 71, by = 5)) +
+    xlab("autoKC Clusters") +
+    ylab("McFadden's R-squared Gain") +
+    theme(text = element_text(size = 16)) +
+    geom_point(aes(y = r2s)) +
+    geom_point(aes(y = r2sr))
+}
+check_true("AutoKC cluster sensitivity completed", exists("r2s") && nrow(r2s) == length(mnames))
+check_true("AutoKC cluster sensitivity finite R2", all(is.finite(r2s$r2s)))
+```

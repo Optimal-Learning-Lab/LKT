@@ -2,15 +2,23 @@
 % Please edit documentation in R/LKTfunctions.R
 \name{ViewExcel}
 \alias{ViewExcel}
-\title{ViewExcel}
+\title{Open a data frame in the system spreadsheet viewer}
 \usage{
 ViewExcel(df = .Last.value, file = tempfile(fileext = ".csv"))
 }
 \arguments{
-\item{df}{Dataframe}
+\item{df}{Data frame to write. Defaults to \code{.Last.value}.}
 
-\item{file}{name of the Excel file}
+\item{file}{File path for the temporary CSV output.}
+}
+\value{
+The value returned by the operating-system file opener.
 }
 \description{
-ViewExcel
+Legacy exported convenience helper that writes a data frame to a temporary CSV file and opens it with the operating system's default application where supported. It is intended for interactive use, not package automation.
+}
+\examples{
+\dontrun{
+ViewExcel(head(samplelkt))
+}
 }

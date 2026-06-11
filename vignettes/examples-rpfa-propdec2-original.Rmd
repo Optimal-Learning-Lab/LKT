@@ -1,0 +1,47 @@
+---
+title: "Examples: RPFA propdec2 Original"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: RPFA propdec2 Original}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Recency tracing with RPFA propdec2
+
+```{r rpfa-propdec2-original}
+model_rpfa_propdec2 <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "intercept", "propdec2", "recency"),
+  fixedpars = c(NA, NA)
+)
+check_lkt_fit(
+  model_rpfa_propdec2,
+  expected_r2 = 0.351435,
+  expected_loglike = -24634.74277483,
+  r2_tolerance = 1e-3,
+  loglike_tolerance = 2
+)
+check_true("two optimized RPFA parameters", length(model_rpfa_propdec2$optimizedpars$par) == 2)
+check_has_coefficients(model_rpfa_propdec2, c("propdec2KC..Default.", "recencyKC..Default."))
+```

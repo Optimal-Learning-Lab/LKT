@@ -19,7 +19,21 @@ Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
+Collate:
+    'LKT-package.R'
+    'data.R'
+    'lkt-feature-input.R'
+    'lkt-feature-computation.R'
+    'lkt-model-interface.R'
+    'lkt-model-liblinear.R'
+    'lkt-model-online-calibration.R'
+    'lkt-fast-online-simple-adaptive.R'
+    'lkt-latency.R'
+    'lkt-prediction.R'
+    'LKTfunctions.R'
+    'lkt-hdi.R'
+    'lkt-search.R'
 Depends: 
     R (>= 3.5.0),
     SparseM (>= 1.83),
@@ -29,7 +43,6 @@ Depends:
     LiblineaR (>= 2.10-8)
 Imports:
     glmnet (>= 4.0-2),
-    glmnetUtils (>= 1.1.8),
     lme4 (>= 1.1-23),
     cluster (>= 2.1.3),
     pROC (>= 1.16.2),

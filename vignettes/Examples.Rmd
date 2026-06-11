@@ -80,7 +80,7 @@ set.seed(41)
 
 ``` r
 set.seed(41)
-datafile<-"C:/Users/ppavl/Dropbox/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+datafile<-"C:/Users/ppavl/OneDrive/Active projects/ds4845_tx_All_Data_6977_2021_0723_141809.txt" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val2<-read.delim(colClasses = c("Anon.Student.Id"="character"),datafile,sep="\t", header=TRUE,quote="")
 val2=as.data.table(val2)
 val2$CF..Time.<-as.numeric(as.POSIXct(as.character(val2$Time),format="%Y-%m-%d %H:%M:%S"))
@@ -121,7 +121,7 @@ for(i in 1:5){val2$fold[which(val2$Anon.Student.Id %in% unq[which(sfold==i)])]=i
 ``` r
 set.seed(42)
 # From Assistments https://sites.google.com/site/assistmentsdata/datasets/2012-13-school-data-with-affect dataset https://drive.google.com/file/d/1cU6Ft4R3hLqA7G1rIGArVfelSZvc6RxY/view
-datafile<-"C:/Users/ppavl/Dropbox/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
+datafile<-"C:/Users/ppavl/OneDrive/Active projects/2012-2013-data-with-predictions-4-final.csv" # CHANGE THIS VALUE TO THE DataShop export file IN YOUR R WORKING DIRECTORY
 val3<-fread(colClasses = c("user_id"="character"),datafile, header=TRUE)
 val3$Anon.Student.Id<-val3$user_id
 

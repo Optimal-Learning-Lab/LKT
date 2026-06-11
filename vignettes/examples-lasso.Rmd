@@ -1,0 +1,54 @@
+---
+title: "Examples: LASSOLKT"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: LASSOLKT}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# LASSOLKT
+
+```{r lassolkt}
+LASSO_Model <- LASSOLKTModel(
+  data = data.table::setDT(val),
+  gridpars = (1:9) / 10,
+  removecomp = c(
+    "Anon.Student.Id", "Anon.Student.Id", "Anon.Student.Id",
+    "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default.", "KC..Default.", "KC..Default.", "KC..Default.",
+    "KC..Default."
+  ),
+  removefeat = c(
+    "intercept", "logsuc$", "logfail$",
+    "lineafm", "logafm", "logsuc", "logfail", "logsuc", "logfail",
+    "linesuc", "linefail", "logitdec", "propdec", "recency",
+    "logsuc$", "logfail$"
+  ),
+  allcomponents = c("Anon.Student.Id", "KC..Cluster.", "KC..Default."),
+  allfeatures = c(
+    "intercept", "lineafm", "logafm", "logsuc", "logfail",
+    "logsuc", "logfail", "linesuc", "linefail", "logitdec",
+    "propdec", "recency", "logsuc$", "logfail$"
+  ),
+  target_n = 100,
+  test_fold = 1
+)
+check_true("LASSOLKT returned a list", is.list(LASSO_Model))
+check_true("LASSOLKT has glmnet fit", inherits(LASSO_Model$fit, "glmnet"))
+check_true("LASSOLKT target AUC finite", is.finite(as.numeric(LASSO_Model$target_auc)))
+check_true("LASSOLKT target coefficients present", nrow(LASSO_Model$target_coefs) > 0)
+```

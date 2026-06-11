@@ -1,0 +1,165 @@
+---
+title: "Examples: Model Interface"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-08"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Model Interface}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+small_val <- val[seq_len(600), ]
+```
+
+# Custom model using shared feature input
+
+```{r model-feature-input}
+model_seen <- list()
+feature_input_model_adapter <- LKTCustomModel(
+  name = "feature-input-smoke",
+  fit = function(request, verbose = FALSE) {
+    model_seen$request_names <<- names(request)
+    model_seen$feature_input_names <<- names(request$feature_input)
+    model_seen$feature_input_class <<- class(request$feature_input)
+    model_seen$column_names <<- request$feature_input$column_names
+    model_seen$response_length <<- length(request$feature_input$response)
+    model_seen$feature_count <<- length(request$feature_input$feature_spec)
+
+    lkt_fit_liblinear(
+      design_matrix = request$feature_input$design_matrix,
+      data = request$feature_input$data,
+      usefolds = request$usefolds,
+      bias = request$options$bias,
+      cost = request$options$cost,
+      epsilon = request$options$epsilon,
+      type = request$options$type,
+      verbose = verbose
+    )
+  }
+)
+
+feature_input_model <- LKT(
+  data = small_val,
+  interc = FALSE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("intercept", "intercept", "lineafm"),
+  model = feature_input_model_adapter,
+  verbose = FALSE
+)
+
+check_true("model request includes feature_input", "feature_input" %in% model_seen$request_names)
+check_true("feature_input has LKTFeatureInput class", "LKTFeatureInput" %in% model_seen$feature_input_class)
+check_true("feature_input exposes formula", "formula" %in% model_seen$feature_input_names)
+check_true("feature_input exposes design matrix", "design_matrix" %in% model_seen$feature_input_names)
+check_true("feature_input exposes column names", length(model_seen$column_names) > 0)
+check_true("feature_input response length matches data", model_seen$response_length == nrow(small_val))
+check_true("feature_input feature spec length", model_seen$feature_count == 3)
+check_true("custom model preserves common outputs", all(c(
+  "model",
+  "coefs",
+  "model_specification",
+  "r2",
+  "prediction",
+  "loglike",
+  "model_name"
+) %in% names(feature_input_model)))
+check_true("custom model reports its name", feature_input_model$model_name == "feature-input-smoke")
+check_true("custom model predictions align", length(feature_input_model$prediction) == nrow(small_val))
+```
+
+# Prediction-only model
+
+```{r prediction-only-model}
+prediction_only_model_adapter <- LKTCustomModel(
+  name = "prediction-only",
+  fit = function(request, verbose = FALSE) {
+    p <- mean(request$response, na.rm = TRUE)
+    p <- pmin(pmax(p, .00001), .99999)
+    LKTModelFit(
+      model = list(kind = "constant-probability", probability = p),
+      pred = rep(p, length(request$response))
+    )
+  }
+)
+
+prediction_only_model <- LKT(
+  data = small_val,
+  interc = FALSE,
+  components = c("KC..Default."),
+  features = c("intercept"),
+  model = prediction_only_model_adapter,
+  verbose = FALSE
+)
+
+check_true("prediction-only model returns model", !is.null(prediction_only_model$model))
+check_true("prediction-only model has finite loglike", is.finite(prediction_only_model$loglike))
+check_true("prediction-only model has finite r2", is.finite(prediction_only_model$r2))
+check_true("prediction-only model reports its name", prediction_only_model$model_name == "prediction-only")
+check_true("prediction-only model can omit coefficients", nrow(prediction_only_model$model_specification[[1]]) == 0)
+check_true("prediction-only model uses helper constructor", inherits(prediction_only_model_adapter, "LKTModel"))
+```
+
+# Model contract failures
+
+```{r model-contract-failures}
+wrong_length_model <- LKTCustomModel(
+  name = "wrong-length",
+  fit = function(request, verbose = FALSE) {
+    list(
+      model = list(kind = "bad-model"),
+      pred = rep(.5, max(0, length(request$response) - 1))
+    )
+  }
+)
+
+wrong_length_error <- tryCatch(
+  {
+    LKT(
+      data = small_val,
+      interc = FALSE,
+      components = c("KC..Default."),
+      features = c("intercept"),
+      model = wrong_length_model,
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("returned predictions with length", conditionMessage(err), fixed = TRUE)
+)
+check_true("wrong-length model fails clearly", wrong_length_error)
+
+bad_probability_model <- LKTCustomModel(
+  name = "bad-probability",
+  fit = function(request, verbose = FALSE) {
+    list(
+      model = list(kind = "bad-model"),
+      pred = rep(1, length(request$response))
+    )
+  }
+)
+
+bad_probability_error <- tryCatch(
+  {
+    LKT(
+      data = small_val,
+      interc = FALSE,
+      components = c("KC..Default."),
+      features = c("intercept"),
+      model = bad_probability_model,
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("finite probabilities", conditionMessage(err), fixed = TRUE)
+)
+check_true("non-probability model predictions fail clearly", bad_probability_error)
+```

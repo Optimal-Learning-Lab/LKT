@@ -1,0 +1,169 @@
+---
+title: "Examples: Simple Adaptive with Global Intercept"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-08"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Simple Adaptive with Global Intercept}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+
+online_beta_update_options <- list(maxit = 10, factr = 1e7)
+
+simple_adaptive_args <- function(model = NULL, model_options = list()) {
+  args <- list(
+    data = val,
+    interc = TRUE,
+    dualfit = FALSE,
+    factrv = 1e11,
+    components = c(
+      "Anon.Student.Id",
+      "KC..Default.",
+      "KC..Default."
+    ),
+    features = c("logitdec", "logsuc", "recency"),
+    fixedpars = c(0.98, 0.24)
+  )
+  if (!is.null(model)) {
+    args$model <- model
+    args$model_options <- model_options
+  }
+  args
+}
+
+check_global_intercept_without_kc_intercept <- function(model) {
+  coef_names <- rownames(model$coefs)
+  check_true("global intercept present", "(Intercept)" %in% coef_names)
+  check_true(
+    "KC default intercept absent",
+    !any(grepl("^interceptKC\\.\\.Default\\.", coef_names))
+  )
+  check_has_coefficients(model, c("logsucKC..Default.", "recencyKC..Default."))
+  invisible(TRUE)
+}
+
+print_model_parameters <- function(label, model) {
+  cat("\nPARAMETERS:", label, "\n")
+  cat("model name:", model$model_name, "\n")
+  cat("r2:", model$r2, "\n")
+  cat("loglike:", model$loglike, "\n")
+  cat("coefficient rows:", nrow(model$coefs), "\n")
+  if (identical(model$model_name, "OnlineCalibration")) {
+    cat("online alpha:", model$model$alpha, "\n")
+    cat(
+      "online fixed coefficients:",
+      paste(model$model$fixed_online_coefficients, collapse = ", "),
+      "\n"
+    )
+    cat(
+      "online updates global intercept:",
+      "(Intercept)" %in% model$model$online_update_coefficients,
+      "\n"
+    )
+    if (!is.null(model$model$optimizer)) {
+      cat("online optimizer convergence:", model$model$optimizer$convergence, "\n")
+      cat("online optimizer value:", model$model$optimizer$value, "\n")
+    }
+  }
+  print(model$coefs)
+  invisible(TRUE)
+}
+
+print_fit_comparison <- function(liblinear_model, online_model) {
+  comparison <- data.frame(
+    model = c("LibLinear", "Online beta update"),
+    alpha = c(NA_real_, online_model$model$alpha),
+    r2 = c(liblinear_model$r2, online_model$r2),
+    loglike = c(liblinear_model$loglike, online_model$loglike),
+    updates_global_intercept = c(
+      NA,
+      "(Intercept)" %in% online_model$model$online_update_coefficients
+    )
+  )
+  cat("\nLIBLINEAR VS ONLINE BETA UPDATE FIT COMPARISON\n")
+  print(comparison)
+  invisible(comparison)
+}
+
+print_online_intercept_update_check <- function(fixed_model, free_model) {
+  cat("\nDIAGNOSTIC ONLY: INTERCEPT UPDATE CONTRAST\n")
+  cat("fixed model updates global intercept:",
+      "(Intercept)" %in% fixed_model$model$online_update_coefficients, "\n")
+  cat("free model updates global intercept:",
+      "(Intercept)" %in% free_model$model$online_update_coefficients, "\n")
+  cat("fixed model alpha:", fixed_model$model$alpha, "\n")
+  cat("free model alpha:", free_model$model$alpha, "\n")
+  cat("fixed model loglike:", fixed_model$loglike, "\n")
+  cat("free model loglike:", free_model$loglike, "\n")
+  cat(
+    "max prediction difference:",
+    max(abs(fixed_model$prediction - free_model$prediction)),
+    "\n"
+  )
+  check_true(
+    "fixed and free intercept online models differ",
+    max(abs(fixed_model$prediction - free_model$prediction)) > 1e-8
+  )
+  invisible(TRUE)
+}
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Logistic Simple Adaptive Model
+
+```{r simple-adaptive-logistic}
+model_simple_adaptive_logistic <- do.call(LKT, simple_adaptive_args())
+check_global_intercept_without_kc_intercept(model_simple_adaptive_logistic)
+print_model_parameters("Logistic simple adaptive with global intercept", model_simple_adaptive_logistic)
+```
+
+# Online Beta Update Simple Adaptive Model
+
+```{r simple-adaptive-online-calibration}
+model_simple_adaptive_online <- do.call(
+  LKT,
+  simple_adaptive_args(
+    model = "online_calibration",
+    model_options = online_beta_update_options
+  )
+)
+check_global_intercept_without_kc_intercept(model_simple_adaptive_online)
+print_model_parameters("Online beta update simple adaptive with global intercept", model_simple_adaptive_online)
+```
+
+# LibLinear vs Online Beta Update Comparison
+
+```{r simple-adaptive-fit-comparison}
+print_fit_comparison(
+  model_simple_adaptive_logistic,
+  model_simple_adaptive_online
+)
+```
+
+# Diagnostic: Confirm the Global Intercept Exclusion Changes the Online Model
+
+```{r simple-adaptive-online-intercept-check}
+model_simple_adaptive_online_free_intercept <- do.call(
+  LKT,
+  simple_adaptive_args(
+    model = "online_calibration",
+    model_options = modifyList(
+      online_beta_update_options,
+      list(fixed_online_coefficients = character(0))
+    )
+  )
+)
+print_online_intercept_update_check(
+  model_simple_adaptive_online,
+  model_simple_adaptive_online_free_intercept
+)
+```

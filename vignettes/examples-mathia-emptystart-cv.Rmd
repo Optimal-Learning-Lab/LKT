@@ -1,0 +1,74 @@
+---
+title: "Examples: Emptystart MATHia CV"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Emptystart MATHia CV}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load MATHia
+
+```{r load-mathia}
+val2 <- prepare_mathia_sample()
+```
+
+# Emptystart MATHia with CV
+
+```{r emptystart-mathia-cv}
+LLs <- numeric(0)
+AUCs <- numeric(0)
+RMSEs <- numeric(0)
+R2s <- numeric(0)
+
+for (i in 1:2) {
+  print((1:2)[-i])
+
+  modelob <- buildLKTModel(
+    usefolds = (1:2)[-i],
+    data = val2,
+    interc = TRUE,
+    verbose = FALSE,
+    removecomp = c("Anon.Student.Id", "Anon.Student.Id", "Anon.Student.Id"),
+    removefeat = c("intercept", "logsuc$", "logfail$"),
+    allcomponents = c("Anon.Student.Id", "KC..MATHia.", "Problem.Name"),
+    forv = 1200,
+    bacv = 1200,
+    allfeatures = c(
+      "intercept", "lineafm", "logafm", "logsuc", "logfail",
+      "linesuc", "linefail", "logitdec", "propdec", "recency",
+      "logsuc$", "logfail$"
+    ),
+    maxitv = 8
+  )
+
+  modelobtable <- modelob[[1]]
+  modelob <- modelob[[2]]
+
+  pred <- as.vector(pmin(pmax(inv.logit(
+    as.matrix(modelob$predictors %*% modelob$coefs)[, ]
+  ), .00001), .99999)[modelob$newdata$fold %in% i])
+  actual <- modelob$newdata$CF..ansbin.[modelob$newdata$fold %in% i]
+  LLs[i] <- sum(log(ifelse(actual == 1, pred, 1 - pred)))
+  AUCs[i] <- suppressMessages(pROC::auc(actual, pred)[1])
+  print(AUCs[i])
+  nullmodel <- glm(
+    actual ~ 1,
+    data = as.data.frame(rep(1, length(actual))),
+    family = binomial(logit)
+  )
+  R2s[i] <- round(1 - LLs[i] / logLik(nullmodel)[1], 6)
+  RMSEs[i] <- sqrt(mean((actual - pred)^2))
+  print(R2s[i])
+}
+
+check_true("Emptystart has two folds", length(AUCs) == 2 && length(R2s) == 2)
+check_close("Emptystart first AUC", AUCs[1], 0.7651378, tolerance = 5e-3)
+check_close("Emptystart first R2", R2s[1], 0.156892, tolerance = 5e-3)
+```

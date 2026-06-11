@@ -3,3 +3,8 @@
 Meta
 /Meta/
 /doc/
+vignettes/_example-reports/
+vignettes/vigfig-*.png
+vignettes/Rplots.pdf
+src/*.dll
+src/*.o

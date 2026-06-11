@@ -1,0 +1,49 @@
+---
+title: "Examples: Assistments Load and PFA"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Assistments Load and PFA}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load Assistments 2012 skillbuilder
+
+```{r load-assistments-2012}
+val3 <- prepare_assistments_sample()
+
+check_true("Assistments has rows", nrow(val3) > 0)
+check_true("Assistments folds", setequal(as.integer(unique(val3$fold)), 1:5))
+check_true("Assistments spacing columns", all(c(
+  "skillspacing",
+  "Anon.Student.Idspacing",
+  "problem_typespacing",
+  "typespacing"
+) %in% names(val3)))
+```
+
+# Performance Factors Analysis
+
+```{r pfa-fixed-effect}
+model_pfa_assistments <- LKT(
+  data = val3,
+  interc = FALSE,
+  components = c("Anon.Student.Id", "skill", "skill", "skill"),
+  features = c("intercept", "intercept", "linesuc$", "linefail$")
+)
+
+check_lkt_fit(
+  model_pfa_assistments,
+  expected_r2 = 0.109656,
+  expected_loglike = -67203.35361882,
+  r2_tolerance = 5e-3,
+  loglike_tolerance = 500
+)
+check_has_coefficient_containing(model_pfa_assistments, ":linesucskill")
+```

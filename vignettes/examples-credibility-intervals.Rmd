@@ -1,0 +1,58 @@
+---
+title: "Examples: Credibility Intervals"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Credibility Intervals}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Credibility intervals
+
+```{r credibility-model}
+components <- c("KC..Default.", "KC..Default.", "KC..Default.")
+features <- c("intercept", "linesuc$", "linefail$")
+fixedpars <- NA
+
+mod1 <- LKT(
+  data.table::setDT(val),
+  interc = TRUE,
+  components = components,
+  features = features,
+  fixedpars = fixedpars,
+  seedpars = c(NA)
+)
+
+check_lkt_fit(mod1, expected_r2 = 0.21369, expected_loglike = -29866.78674638)
+check_has_coefficient_containing(mod1, ":linesucKC..Default.")
+```
+
+```{r credibility-bootstrap}
+n_students <- 400
+n_boot <- 100
+boot_res <- LKT_HDI(
+  val,
+  n_boot,
+  n_students,
+  comps = components,
+  feats = features,
+  fixeds = fixedpars,
+  cred_mass = 0.99
+)
+
+check_true("HDI bootstrap count", nrow(boot_res$par_reps) == n_boot)
+check_true("HDI result rows", nrow(boot_res$coef_hdi) >= 20)
+check_close("HDI credibility mass", boot_res$coef_hdi$credMass[1], 0.99)
+```

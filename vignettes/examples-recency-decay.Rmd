@@ -1,0 +1,122 @@
+---
+title: "Examples: Recency and Decay"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Recency and Decay}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Recent Performance Factors Analysis
+
+```{r rpfa-propdec2}
+model_rpfa <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "propdec2", "linefail"),
+  fixedpars = c(0.372666739924378)
+)
+check_lkt_fit(
+  model_rpfa,
+  expected_r2 = 0.309396,
+  expected_loglike = -26231.52875846,
+  r2_tolerance = 1e-3,
+  loglike_tolerance = 1
+)
+check_true("fixed propdec2 parameter used", is.na(model_rpfa$optimizedpars)[1])
+```
+
+# Recency tracing with logitdec
+
+```{r logitdec-recency}
+model_logitdec_recency <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "logitdec", "recency"),
+  fixedpars = c(.9, .5)
+)
+check_lkt_fit(model_logitdec_recency, expected_r2 = 0.329326, expected_loglike = -25474.53126101)
+check_has_coefficients(model_logitdec_recency, c("logitdecKC..Default.", "recencyKC..Default."))
+```
+
+# Recency tracing with transfer from cluster
+
+```{r logitdec-recency-transfer}
+model_logitdec_transfer <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Cluster."
+  ),
+  features = c("intercept", "intercept", "logitdec", "recency", "logitdec"),
+  fixedpars = c(.9, .5, .5)
+)
+check_lkt_fit(model_logitdec_transfer, expected_r2 = 0.329987, expected_loglike = -25449.41953482)
+check_has_coefficients(model_logitdec_transfer, c("logitdecKC..Cluster."))
+```
+
+# Performance Prediction Equation
+
+```{r ppe}
+model_ppe <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "ppe", "logitdec"),
+  fixedpars = c(0.3491901, 0.2045801, 1e-05, 0.9734477, 0.4443027)
+)
+check_lkt_fit(model_ppe, expected_r2 = 0.349833, expected_loglike = -24695.58586712)
+check_has_coefficients(model_ppe, c("ppeKC..Default.", "logitdecKC..Default."))
+```
+
+# base4
+
+```{r base4}
+model_base4 <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "base4", "logitdec"),
+  fixedpars = c(0.1890747, 0.6309054, 0.05471752, .5, 0.2160748)
+)
+check_lkt_fit(model_base4, expected_r2 = 0.316284, expected_loglike = -25969.92489408)
+check_has_coefficients(model_base4, c("base4KC..Default.", "logitdecKC..Default."))
+```

@@ -1,0 +1,72 @@
+---
+title: "Examples: Synthetic Discrimination"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Synthetic Discrimination}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Synthetic discrimination parameter testing
+
+```{r synthetic-discrimination}
+mnames <- c(
+  "IRT",
+  "IRT ad inter",
+  "AFM",
+  "IRT ad inter with AFM",
+  "IRT ad"
+)
+r2s <- data.frame(name = mnames, r2s = NA)
+compl <- list(
+  c("Anon.Student.Id", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  c("Anon.Student.Id", "KC..Default.")
+)
+featl <- list(
+  c("intercept", "intercept"),
+  c("logitdec", "intercept"),
+  c("logitdec", "intercept", "lineafm"),
+  c("logitdec", "intercept", "lineafm"),
+  c("logitdec", "intercept")
+)
+connl <- list(
+  c("+"),
+  c("*"),
+  c("+", "+"),
+  c("*", "+"),
+  c("+")
+)
+
+for (i in 1:4) {
+  modelob <- LKT(
+    data = val,
+    components = compl[[i]],
+    features = featl[[i]],
+    connectors = connl[[i]],
+    fixedpars = c(.925),
+    interc = TRUE,
+    verbose = FALSE
+  )
+  cat("coefs", length(modelob$coefs))
+  cat(" R2 =  ", modelob$r2, "\n")
+  r2s$r2s[i] <- modelob$r2
+}
+check_true("synthetic discrimination model count", sum(is.finite(r2s$r2s)) == 4)
+check_close("synthetic discrimination IRT R2", r2s$r2s[1], 0.17526, tolerance = 1e-4)
+check_close("synthetic discrimination best R2", max(r2s$r2s, na.rm = TRUE), 0.249731, tolerance = 1e-3)
+```

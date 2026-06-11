@@ -2,7 +2,7 @@
 % Please edit documentation in R/LKTfunctions.R
 \name{LKT}
 \alias{LKT}
-\title{LKT}
+\title{Fit a logistic knowledge tracing model}
 \usage{
 LKT(
   data,
@@ -28,61 +28,89 @@ LKT(
   nosolve = FALSE,
   autoKC = rep(0, length(components)),
   autoKCcont = rep("NA", length(components)),
-  connectors = rep("+", max(1, length(components) - 1))
+  connectors = rep("+", max(1, length(components) - 1)),
+  distribution = "exp",
+  weibull_mse_weight = 0,
+  weibull_t0_fixed = NULL,
+  model = LibLinearModel(),
+  model_options = list()
 )
 }
 \arguments{
-\item{data}{A dataset with Anon.Student.Id and CF..ansbin.}
+\item{data}{Data frame or data table containing one row per trial. Must include \code{Anon.Student.Id}, \code{CF..ansbin.}, and every component column named in \code{components}. Some features also require timing columns such as \code{CF..Time.}, \code{CF..reltime.}, or \code{Duration..sec.}.}
 
-\item{usefolds}{Numeric Vector | Specifies the folds for model fitting in LKT; the features are still calculated across all folds to compute test fold fit externally}
+\item{usefolds}{Numeric vector of fold values to use for fitting. Features are still computed over all rows so held-out rows can be evaluated later. \code{NA} fits on all rows.}
 
-\item{components}{A vector of factors that can be used to compute each features for each subject.}
+\item{components}{Character vector naming component columns or component specifications used to build feature histories.}
 
-\item{features}{a vector methods to use to compute a feature for the component.}
+\item{features}{Character vector of LKT feature names, parallel to \code{components}.}
 
-\item{fixedpars}{a vector of parameters for all features+components.}
+\item{fixedpars}{Numeric vector of nonlinear feature parameters. Use \code{NA} entries to optimize corresponding parameters.}
 
-\item{seedpars}{a vector of parameters for all features+components to seed non-linear parameter search.}
+\item{seedpars}{Numeric vector of starting values for nonlinear parameter optimization. \code{NA} uses default starts.}
 
-\item{interacts}{A list of components that interacts with component by feature in the main specification.}
+\item{interacts}{Optional vector of interaction terms added to component feature terms. Use \code{NA} for no interaction.}
 
-\item{curvefeats}{vector of columns to use with "diff" functions}
+\item{curvefeats}{Optional vector of columns used by legacy difficulty curve features.}
 
-\item{dualfit}{TRUE or FALSE, fit a simple latency using logit. Requires Duration..sec. column in data.}
+\item{dualfit}{Logical; if \code{TRUE}, also fit a response-time model. Requires \code{Duration..sec.}.}
 
-\item{interc}{TRUE or FALSE, include a global intercept.}
+\item{interc}{Logical; if \code{TRUE}, include a global intercept.}
 
-\item{verbose}{provides more output in some cases.}
+\item{verbose}{Logical; if \code{TRUE}, print progress and fit diagnostics.}
 
-\item{epsilon}{passed to LiblineaR}
+\item{epsilon}{Numeric stopping tolerance passed to \code{LiblineaR}.}
 
-\item{cost}{passed to LiblineaR}
+\item{cost}{Numeric regularization cost passed to \code{LiblineaR}.}
 
-\item{lowb}{lower bound for non-linear optimizations}
+\item{lowb}{Lower bound for nonlinear parameter optimization.}
 
-\item{highb}{upper bound for non-linear optimizations}
+\item{highb}{Upper bound for nonlinear parameter optimization.}
 
-\item{type}{passed to LiblineaR}
+\item{type}{Integer LiblineaR solver type.}
 
-\item{maketimes}{Boolean indicating whether to create time based features (or may be precomputed)}
+\item{maketimes}{Logical; if \code{TRUE}, create missing time columns from \code{Duration..sec.} where possible.}
 
-\item{bias}{passed to LiblineaR}
+\item{bias}{Numeric bias term passed to \code{LiblineaR}.}
 
-\item{maxitv}{passed to nonlinear optimization a maxit control}
+\item{maxitv}{Maximum iteration count for nonlinear optimization.}
 
-\item{factrv}{controls the optim() function}
+\item{factrv}{Factr control value passed to \code{optim()} for nonlinear optimization.}
 
-\item{nosolve}{causes the function to return a sparse data matrix of the features, rather than a solution}
+\item{nosolve}{Logical; if \code{TRUE}, return the constructed sparse design data instead of fitting a model. This is a legacy public interface used by LASSO search helpers.}
 
-\item{autoKC}{a vector to indicate whether to use autoKC for the component (0) or the k for the numebr of clusters}
+\item{autoKC}{Integer vector controlling automatic KC clustering. \code{0} disables clustering for the corresponding component; positive values are cluster counts.}
 
-\item{autoKCcont}{a vector of text strings set to "rand" for component to make autoKC assignment to cluster is randomized (for comaprison)}
+\item{autoKCcont}{Character vector controlling automatic KC randomization. Use \code{"rand"} to randomize cluster assignment for comparison runs.}
 
-\item{connectors}{a vector if linear equation R operators including +, * and :}
+\item{connectors}{Character vector of formula operators (\code{"+"}, \code{":"}, or \code{"*"}) between model terms. Defaults to additive terms.}
+
+\item{distribution}{Latency model distribution. Supported values are \code{"exp"} and \code{"Weibull"} when \code{dualfit = TRUE}.}
+
+\item{weibull_mse_weight}{Numeric weight in \verb{[0, 1]} for the point-prediction component of Weibull latency fitting.}
+
+\item{weibull_t0_fixed}{Optional fixed minimum response time, in seconds, for Weibull latency fitting.}
+
+\item{model}{LKT model adapter. Defaults to \code{LibLinearModel()}.}
+
+\item{model_options}{Optional list of adapter-specific model options.}
 }
 \value{
-list of values "model", "coefs", "r2", "prediction", "nullmodel", "latencymodel", "optimizedpars","subjectrmse", "newdata", and "automat"
+A list containing the fitted model, coefficients, predictions, fit statistics, processed data, feature metadata, and optional latency-model results. With \code{nosolve = TRUE}, returns the constructed sparse matrices and feature names for downstream legacy model-selection helpers.
 }
 \description{
-Compute a logistic regression model of learning for input data.
+Computes LKT features from trial-level learning data and fits a logistic model that predicts \code{CF..ansbin.}. The default model adapter uses \code{LiblineaR}; custom adapters can be supplied with \code{LKTCustomModel()}.
+}
+\examples{
+\donttest{
+data(samplelkt)
+fit <- LKT(
+  data = samplelkt,
+  components = "KC..Default.",
+  features = "intercept",
+  interc = TRUE,
+  verbose = FALSE
+)
+head(fit$prediction)
+}
 }

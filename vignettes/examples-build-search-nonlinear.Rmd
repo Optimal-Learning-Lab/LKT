@@ -1,0 +1,55 @@
+---
+title: "Examples: buildLKTModel Nonlinear Search"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: buildLKTModel Nonlinear Search}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Nonlinear search parameter retention
+
+```{r build-lkt-nonlinear-search}
+val_small <- val[seq_len(3000), ]
+
+model_search_nonlinear <- buildLKTModel(
+  data = val_small,
+  allcomponents = "KC..Default.",
+  allfeatures = c("logitdec", "recency"),
+  forv = 0,
+  bacv = 0,
+  forward = TRUE,
+  backward = FALSE,
+  maxitv = 2,
+  verbose = FALSE
+)
+
+trace_nonlinear <- model_search_nonlinear[[1]]
+fit_nonlinear <- model_search_nonlinear[[2]]
+last_trace <- trace_nonlinear[nrow(trace_nonlinear), ]
+
+final_bic <- last_trace$params * log(length(fit_nonlinear$prediction)) -
+  2 * fit_nonlinear$loglike
+final_aic <- last_trace$params * 2 - 2 * fit_nonlinear$loglike
+
+check_true("nonlinear search accepted at least one feature", nrow(trace_nonlinear) > 1)
+check_true("nonlinear search returned final model", !is.null(fit_nonlinear$coefs))
+check_true(
+  "nonlinear final model uses fixed selected parameters",
+  is.atomic(fit_nonlinear$optimizedpars)
+)
+check_close("nonlinear final BIC matches trace", final_bic, last_trace$BIC, tolerance = 5e-2)
+check_close("nonlinear final AIC matches trace", final_aic, last_trace$AIC, tolerance = 5e-2)
+```

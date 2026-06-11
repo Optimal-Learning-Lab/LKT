@@ -6,3 +6,7 @@ cran-comments.md
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
 ^\.github$
+^scripts$
+^vignettes/_example-reports$
+^vignettes/Rplots\.pdf$
+^src/.*\.(dll|o)$

@@ -1,0 +1,37 @@
+---
+title: "Examples: LASSOLKT Preset"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: LASSOLKT Preset}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# LASSOLKT with preset
+
+```{r lassolkt-preset}
+modelob <- LASSOLKTModel(
+  data = val,
+  gridpars = (1:9) / 10,
+  allcomponents = c("Anon.Student.Id", "KC..Default."),
+  preset = "PFA",
+  target_n = 5
+)
+
+check_true("LASSOLKT preset returned a list", is.list(modelob))
+check_true("LASSOLKT preset has glmnet fit", inherits(modelob$fit, "glmnet"))
+check_true("LASSOLKT preset target AUC finite", is.finite(as.numeric(modelob$target_auc)))
+check_true("LASSOLKT preset target coefficients present", nrow(modelob$target_coefs) > 0)
+```

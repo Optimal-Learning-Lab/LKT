@@ -1,0 +1,35 @@
+---
+title: "Examples: nosolve Model Matrix"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: nosolve Model Matrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Return the model matrix
+
+```{r nosolve-model-matrix}
+model_nosolve <- LKT(
+  data = val,
+  interc = FALSE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("intercept", "intercept", "lineafm"),
+  nosolve = TRUE
+)
+check_true("nosolve returns lassodata list", is.list(model_nosolve) && "lassodata" %in% names(model_nosolve))
+check_true("nosolve returns sparse matrix", inherits(model_nosolve$lassodata[[2]], "matrix.csr"))
+check_true("nosolve row count", model_nosolve$lassodata[[2]]@dimension[1] == nrow(val))
+```

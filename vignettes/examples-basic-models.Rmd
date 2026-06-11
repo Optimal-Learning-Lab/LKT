@@ -1,0 +1,305 @@
+---
+title: "Examples: Basic LKT Models"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Basic LKT Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+check_true("LKT namespace available", requireNamespace("LKT", quietly = TRUE))
+check_true("data.table namespace available", requireNamespace("data.table", quietly = TRUE))
+check_true("pROC namespace available", requireNamespace("pROC", quietly = TRUE))
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+check_true("bundled data row count", nrow(val) == 55122)
+check_true("bundled data folds", identical(sort(unique(val$fold)), 1:5))
+check_true("bundled data spacing columns", all(c(
+  "KC..Default.spacing",
+  "KC..Cluster.spacing",
+  "Anon.Student.Idspacing",
+  "CF..Correct.Answer.spacing"
+) %in% names(val)))
+```
+
+# Spacing predictor fixture
+
+```{r spacing-predictor-fixture}
+spacing_fixture <- data.frame(
+  Anon.Student.Id = c("s1", "s1", "s1", "s1", "s2", "s2"),
+  CF..ansbin. = c(1, 0, 1, 1, 0, 1),
+  KC = c("a", "a", "a", "b", "a", "a"),
+  CF..Time. = c(0, 10, 25, 30, 0, 12),
+  CF..reltime. = c(0, 10, 25, 30, 0, 12)
+)
+spacing_fixture <- computeSpacingPredictors(spacing_fixture, "KC")
+
+check_true("spacing fixture columns", all(c(
+  "KCspacing",
+  "KCrelspacing",
+  "KCprev",
+  "KCmeanspacing",
+  "KCrelmeanspacing",
+  "KCspacinglagged"
+) %in% names(spacing_fixture)))
+check_true("spacing fixture spacing values", identical(
+  as.numeric(spacing_fixture$KCspacing),
+  c(0, 10, 15, 0, 0, 12)
+))
+check_true("spacing fixture previous responses", identical(
+  as.numeric(spacing_fixture$KCprev),
+  c(0, 1, 0, 0, 0, 0)
+))
+check_true("spacing fixture lagged spacing", identical(
+  as.numeric(spacing_fixture$KCspacinglagged),
+  c(0, 0, 10, 0, 0, 0)
+))
+
+missing_component_error <- tryCatch(
+  {
+    computeSpacingPredictors(spacing_fixture, "MissingKC")
+    FALSE
+  },
+  error = function(err) grepl("missing component column", conditionMessage(err), fixed = TRUE)
+)
+check_true("spacing fixture missing component fails clearly", missing_component_error)
+```
+
+# API boundary checks
+
+```{r api-boundary-checks}
+unknown_feature_error <- tryCatch(
+  {
+    LKT(
+      data = val,
+      interc = FALSE,
+      components = "KC..Default.",
+      features = "notafeature",
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("Unknown LKT feature", conditionMessage(err), fixed = TRUE)
+)
+check_true("unknown feature fails clearly", unknown_feature_error)
+
+component_feature_length_error <- tryCatch(
+  {
+    LKT(
+      data = val,
+      interc = FALSE,
+      components = c("KC..Default.", "Anon.Student.Id"),
+      features = "intercept",
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("same length", conditionMessage(err), fixed = TRUE)
+)
+check_true("component/feature length mismatch fails clearly", component_feature_length_error)
+
+fixedpars_length_error <- tryCatch(
+  {
+    LKT(
+      data = val,
+      interc = FALSE,
+      components = c("KC..Default.", "KC..Default."),
+      features = c("logitdec", "recency"),
+      fixedpars = 0.5,
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("fixedpars must have length 2", conditionMessage(err), fixed = TRUE)
+)
+check_true("fixedpars length mismatch fails clearly", fixedpars_length_error)
+
+seedpars_length_error <- tryCatch(
+  {
+    LKT(
+      data = val,
+      interc = FALSE,
+      components = c("KC..Default.", "KC..Default."),
+      features = c("logitdec", "recency"),
+      fixedpars = NA,
+      seedpars = 0.5,
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("seedpars must have length 2", conditionMessage(err), fixed = TRUE)
+)
+check_true("seedpars length mismatch fails clearly", seedpars_length_error)
+
+no_duration <- as.data.frame(val)
+no_duration$Duration..sec. <- NULL
+dualfit_duration_error <- tryCatch(
+  {
+    LKT(
+      data = no_duration,
+      interc = FALSE,
+      dualfit = TRUE,
+      components = "KC..Default.",
+      features = "intercept",
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("dualfit requires a Duration..sec.", conditionMessage(err), fixed = TRUE)
+)
+check_true("dualfit duration requirement fails clearly", dualfit_duration_error)
+
+weibull_empty_error <- tryCatch(
+  {
+    fit_weibull_activation(rt = c(NA_real_, -1), p = c(NA_real_, 1))
+    FALSE
+  },
+  error = function(err) grepl("no usable observations", conditionMessage(err), fixed = TRUE)
+)
+check_true("Weibull empty clean data fails clearly", weibull_empty_error)
+
+model_called <- FALSE
+model_saw_request <- FALSE
+custom_model <- LKTCustomModel(
+  name = "custom-liblinear",
+  fit = function(request, verbose = FALSE) {
+    model_called <<- TRUE
+    model_saw_request <<- all(c(
+      "feature_input",
+      "design_matrix",
+      "data",
+      "response",
+      "usefolds",
+      "options",
+      "formula",
+      "feature_spec"
+    ) %in% names(request))
+    model_saw_request <<- model_saw_request &&
+      all(c("formula", "data", "response", "feature_spec", "design_matrix", "column_names") %in%
+            names(request$feature_input))
+    lkt_fit_liblinear(
+      design_matrix = request$design_matrix,
+      data = request$data,
+      usefolds = request$usefolds,
+      bias = request$options$bias,
+      cost = request$options$cost,
+      epsilon = request$options$epsilon,
+      type = request$options$type,
+      verbose = verbose
+    )
+  }
+)
+custom_model_fit <- LKT(
+  data = val[seq_len(500), ],
+  interc = FALSE,
+  components = "KC..Default.",
+  features = "intercept",
+  model = custom_model,
+  verbose = FALSE
+)
+check_true("custom model was called", model_called)
+check_true("custom model received fit request", model_saw_request)
+check_true("custom model name is reported", custom_model_fit$model_name == "custom-liblinear")
+
+prediction_only_model_adapter <- LKTCustomModel(
+  name = "prediction-only",
+  fit = function(request, verbose = FALSE) {
+    LKTModelFit(
+      model = list(kind = "constant-probability"),
+      pred = rep(mean(request$response), length(request$response))
+    )
+  }
+)
+prediction_only_model <- LKT(
+  data = val[seq_len(500), ],
+  interc = FALSE,
+  components = "KC..Default.",
+  features = "intercept",
+  model = prediction_only_model_adapter,
+  verbose = FALSE
+)
+check_true("prediction-only model gets log likelihood", is.finite(prediction_only_model$loglike))
+check_true("prediction-only model name is reported", prediction_only_model$model_name == "prediction-only")
+
+unknown_model_error <- tryCatch(
+  {
+    LKT(
+      data = val,
+      interc = FALSE,
+      components = "KC..Default.",
+      features = "intercept",
+      model = "notamodel",
+      verbose = FALSE
+    )
+    FALSE
+  },
+  error = function(err) grepl("Unknown LKT model", conditionMessage(err), fixed = TRUE)
+)
+check_true("unknown model fails clearly", unknown_model_error)
+```
+
+# Additive Factors Model
+
+```{r afm-fixed-effect}
+model_afm <- LKT(
+  data = val,
+  interc = FALSE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("intercept", "intercept", "lineafm")
+)
+check_lkt_fit(model_afm, expected_r2 = 0.280024, expected_loglike = -27347.20717315)
+check_has_coefficient_matching(model_afm, "^interceptAnon[.]Student[.]Id")
+check_has_coefficients(model_afm, c("lineafmKC..Default."))
+check_true("default model is LibLinear", model_afm$model_name == "LibLinear")
+
+pred_stats <- predict_lkt(model_afm, val, return_stats = TRUE)
+check_true("predict_lkt returns predictions", length(pred_stats$predictions) == nrow(val))
+check_true("predict_lkt returns finite log likelihood", is.finite(pred_stats$LL))
+check_true("predict_lkt returns finite RMSE", is.finite(pred_stats$RMSE))
+```
+
+# Performance Factors Analysis
+
+```{r pfa-fixed-effect}
+model_pfa <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "linesuc$", "linefail$")
+)
+check_lkt_fit(model_pfa, expected_r2 = 0.295228, expected_loglike = -26769.69416527)
+check_has_coefficient_containing(model_pfa, ":linesucKC..Default.")
+```
+
+# Difficulty-sensitive PFA
+
+```{r pfa-difficulty-sensitive}
+val$pred <- model_pfa$prediction
+
+model_diffcor <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "diffcorComp", "linefail")
+)
+check_lkt_fit(model_diffcor, expected_r2 = 0.283896, expected_loglike = -27200.10757759)
+check_has_coefficients(model_diffcor, c("diffcorCompKC..Default."))
+```

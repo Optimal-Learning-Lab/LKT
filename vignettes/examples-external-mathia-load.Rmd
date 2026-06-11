@@ -1,0 +1,28 @@
+---
+title: "Examples: Load MATHia"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Load MATHia}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load MATHia
+
+```{r load-mathia}
+val2 <- prepare_mathia_sample()
+
+check_true("MATHia row count", nrow(val2) == 49521)
+check_true("MATHia folds", setequal(as.integer(unique(val2$fold)), 1:5))
+check_true("MATHia spacing columns", all(c(
+  "KC..MATHia.spacing",
+  "Problem.Namespacing",
+  "Anon.Student.Idspacing"
+) %in% names(val2)))
+```

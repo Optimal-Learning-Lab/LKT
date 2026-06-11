@@ -1,0 +1,192 @@
+---
+title: "Examples: Online Adaptive Search"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-08"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Online Adaptive Search}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+
+print_fast_fit_table <- function(base, grid, optimized = NULL) {
+  null_loglike <- base$loglike / (1 - base$r2)
+  rows <- list(
+    data.frame(
+      model = "LibLinear",
+      loglike = base$loglike,
+      delta_loglike = 0,
+      r2 = base$r2,
+      delta_r2 = 0,
+      stringsAsFactors = FALSE
+    ),
+    data.frame(
+      model = "Online grid start",
+      loglike = grid$loglike,
+      delta_loglike = grid$loglike - base$loglike,
+      r2 = 1 - grid$loglike / null_loglike,
+      delta_r2 = (1 - grid$loglike / null_loglike) - base$r2,
+      stringsAsFactors = FALSE
+    )
+  )
+  if (!is.null(optimized)) {
+    rows[[length(rows) + 1L]] <- data.frame(
+      model = "Online six-parameter search",
+      loglike = optimized$loglike,
+      delta_loglike = optimized$delta_loglike,
+      r2 = optimized$r2,
+      delta_r2 = optimized$delta_r2,
+      stringsAsFactors = FALSE
+    )
+  }
+  print(do.call(rbind, rows))
+}
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Static LKT Baseline
+
+```{r static-lkt-baseline}
+model_static_logistic <- LKT(
+  data = val,
+  interc = TRUE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency"),
+  fixedpars = c(0.98, 0.24)
+)
+print(model_static_logistic$coefs)
+```
+
+# Legacy Fast Objective Check
+
+```{r fast-online-input}
+fast_input <- LKTOnlineSimpleAdaptiveInput(
+  model_static_logistic,
+  val
+)
+cat("native compiled evaluator available:", fast_input$native_available, "\n")
+
+par_zero <- c(fast_input$beta_start, alpha_recency = 0, alpha_logsuc = 0)
+fit_zero <- LKTOnlineSimpleAdaptiveEval(par_zero, fast_input, return_details = TRUE)
+check_close(
+  "alpha-zero loglike matches LibLinear",
+  fit_zero$loglike,
+  model_static_logistic$loglike,
+  tolerance = 1e-6
+)
+check_close(
+  "alpha-zero max prediction difference",
+  max(abs(fit_zero$pred - model_static_logistic$prediction)),
+  0,
+  tolerance = 1e-12
+)
+```
+
+# General Online Adaptive Adapter
+
+```{r fast-online-model-adapter}
+val_short <- val #[seq_len(min(220, nrow(val))), ]
+model_static_short <- LKT(
+  data = val_short,
+  interc = TRUE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency"),
+  fixedpars = c(0.98, 0.24)
+)
+model_fast_online_adapter <- LKT(
+  data = val_short,
+  interc = TRUE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency"),
+  fixedpars = c(0.98, 0.24),
+  model = "online_adaptive",
+  model_options = list(
+    online_mode = "alpha_only",
+    beta_alpha_terms = c(
+      "recencyKC..Default.",
+      "logsucKC..Default."
+    ),
+    nonlinear_alpha_terms = c(
+      "recency|KC..Default.|para",
+      "logitdec|Anon.Student.Id|para"
+    ),
+    alpha_lower = -1,
+    alpha_upper = 1,
+    require_native = FALSE,
+    maxit = 12,
+    factr = 1e7
+  )
+)
+cat("adapter model name:", model_fast_online_adapter$model_name, "\n")
+cat("adapter loglike:", model_fast_online_adapter$loglike, "\n")
+cat(
+  "adapter delta loglike:",
+  model_fast_online_adapter$loglike - model_static_short$loglike,
+  "\n"
+)
+cat("adapter parameters:\n")
+print(model_fast_online_adapter$model$par)
+cat("adaptive beta terms:\n")
+print(model_fast_online_adapter$model$adaptive_beta_terms)
+cat("adaptive nonlinear terms:\n")
+print(model_fast_online_adapter$model$adaptive_nonlinear_terms)
+print(model_fast_online_adapter$coefs)
+```
+
+# General Native Beta Adapter
+
+```{r native-beta-adapter}
+model_native_beta_adapter <- LKT(
+  data = val_short,
+  interc = TRUE,
+  dualfit = FALSE,
+  factrv = 1e11,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("logitdec", "logsuc", "recency"),
+  fixedpars = c(0.98, 0.24),
+  model = "online_adaptive",
+  model_options = list(
+    online_mode = "alpha_only",
+    beta_alpha_terms = c("logitdecAnon.Student.Id"),
+    alpha_lower = -1,
+    alpha_upper = 1,
+    require_native = TRUE,
+    maxit = 2,
+    factr = 1e7
+  )
+)
+cat("native beta evaluator available:",
+    model_native_beta_adapter$model$native_available, "\n")
+cat("native beta alpha:\n")
+print(model_native_beta_adapter$model$alpha)
+```

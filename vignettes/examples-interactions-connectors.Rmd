@@ -1,0 +1,81 @@
+---
+title: "Examples: Interactions and Connectors"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-07"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Interactions and Connectors}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Simple interactions
+
+```{r simple-interactions}
+model_simple_interactions <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("logitdec", "logitdec", "lineafm"),
+  fixedpars = c(.9, .8),
+  interacts = c(NA, NA, "Level..Unitname.")
+)
+check_lkt_fit(
+  model_simple_interactions,
+  expected_r2 = 0.187931,
+  expected_loglike = -30845.19646772,
+  r2_tolerance = 1e-3,
+  loglike_tolerance = 1
+)
+check_has_coefficient_matching(model_simple_interactions, "^lineafmKC[.][.]Default[.]:Level[.][.]Unitname[.]")
+```
+
+# Individualized Additive Factors Model
+
+```{r individualized-afm}
+model_iafm <- LKT(
+  data = val,
+  interc = TRUE,
+  components = c(
+    "Anon.Student.Id",
+    "KC..Default.",
+    "KC..Default.",
+    "KC..Default."
+  ),
+  features = c("intercept", "intercept", "lineafm$", "lineafm"),
+  interacts = c(NA, NA, NA, "Anon.Student.Id")
+)
+check_lkt_fit(model_iafm, expected_r2 = 0.309291, expected_loglike = -26235.52237198)
+check_has_coefficient_matching(model_iafm, "^lineafmKC[.][.]Default[.]:Anon[.]Student[.]Id")
+```
+
+# Connectors
+
+```{r connectors}
+model_connectors <- LKT(
+  data = val,
+  interc = TRUE,
+  connectors = c("+", "*"),
+  components = c("Anon.Student.Id", "KC..Default.", "KC..Default."),
+  features = c("logitdec", "logitdec$", "lineafm$"),
+  fixedpars = c(.9, .85)
+)
+check_lkt_fit(
+  model_connectors,
+  expected_r2 = 0.214132,
+  expected_loglike = -29849.99089373,
+  r2_tolerance = 1e-3,
+  loglike_tolerance = 1
+)
+check_has_coefficient_matching(model_connectors, "^lineafmKC[.][.]Default[.]")
+```

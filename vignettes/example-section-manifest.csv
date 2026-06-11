@@ -1,0 +1,33 @@
+section_id,original_line,title,vignette
+packages,13,Packages,examples-basic-models.Rmd
+load-bundled-data,33,Load data (shows modifications to create needed columns),examples-basic-models.Rmd
+load-mathia,79,Load MATHia (example how to load a remote dataset),examples-external-mathia-load.Rmd
+load-assistments-2012,119,Load Assistments 2012 skillbuilder (example how to load a remote dataset),examples-external-assistments-basic.Rmd
+afm-fixed-effect,171,Additive Factors Model (AFM) fixed effect version,examples-basic-models.Rmd
+pfa-fixed-effect,187,Performance Factors Analysis (PFA) fixed effect version,examples-external-assistments-basic.Rmd
+pfa-difficulty-sensitive,204,PFA using difficulty sensitive predictors (composite model requiring pred from prior model for estimation),examples-basic-models.Rmd
+rpfa,238,Recent Performance Factors Analysis (RPFA),examples-recency-decay.Rmd
+logitdec-recency,409,Recency tracing with logitdec,examples-recency-decay.Rmd
+logitdec-recency-transfer,426,Recency tracing with logitdec and transfer from cluster,examples-recency-decay.Rmd
+ppe,447,Performance Prediction Equation (PPE),examples-recency-decay.Rmd
+base4,464,base4 example,examples-recency-decay.Rmd
+simple-interactions,486,Simple interactions,examples-interactions-connectors.Rmd
+iafm,502,Individualized Additive Factors Model (iAFM) fixed effect version,examples-interactions-connectors.Rmd
+connectors,521,Connectors (another way to do interactions),examples-interactions-connectors.Rmd
+autokc,538,AutoKC,examples-autokc.Rmd
+synthetic-discrimination,785,Synthetic discrimination parameter testing (experimental),examples-synthetic-discrimination.Rmd
+credibility-intervals,829,Credibility intervals,examples-credibility-intervals.Rmd
+rpfa-propdec2-original,949,Recency tracing with RPFA propdec2 feature (the one in the original Galyardt and Goldin paper),examples-rpfa-propdec2-original.Rmd
+brpropdec,1208,brpropdec (experimental feature),examples-special-features.Rmd
+adaptive-practice-optimization,1238,Simple adaptive model for practice optimization,examples-special-features.Rmd
+kc-intercepts-time,1255,Test of new feature to trace KC intercepts across time (not within subjects),examples-special-features.Rmd
+astonishing-model,1271,Astonishing model (theory analysis),examples-special-features.Rmd
+build-lkt-special-feature,1311,Build LKT with special feature,examples-special-features.Rmd
+build-lkt-nonlinear-search,1312,Build LKT nonlinear search parameter retention,examples-build-search-nonlinear.Rmd
+afmstart-mathia-cv,1532,AFMstartMATHia with CV,examples-mathia-afmstart-cv.Rmd
+emptystart-mathia-cv,1884,EmptystartMATHia with CV,examples-mathia-emptystart-cv.Rmd
+lassolkt,2131,example of LASSOLKT,examples-lasso.Rmd
+lassolkt-preset,2864,example of LASSOLKT with preset,examples-lasso-preset.Rmd
+nosolve-model-matrix,3157,example for the nosolve parameter to make it return the model matrix,examples-nosolve.Rmd
+model-interface,3158,Custom LKT model interface,examples-model-interface.Rmd
+assistments-cv,3171,Assistments data CV example (True crossvalidation of entire search process),examples-assistments-cv.Rmd

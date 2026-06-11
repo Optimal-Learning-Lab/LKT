@@ -3,12 +3,9 @@
 \docType{data}
 \name{largerawsample}
 \alias{largerawsample}
-\title{Trial sequences for practice participants.}
+\title{Raw Memphis DataShop sample}
 \format{
-A data frame please see the DataShop for more info.
-\describe{
-It has many columns.
-}
+A data frame with the original exported DataShop columns.
 }
 \source{
 \url{https://pslcdatashop.web.cmu.edu/Export?datasetId=5513}
@@ -17,6 +14,6 @@ It has many columns.
 largerawsample
 }
 \description{
-A dataset containing a raw sample from the Memphis Datashop.
+A raw trial-level sample from the Memphis DataShop export used in examples.
 }
 \keyword{datasets}
