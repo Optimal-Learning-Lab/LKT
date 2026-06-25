@@ -1155,6 +1155,13 @@ lkt_online_adaptive_eval_dispatch <- function(alpha, registry,
       return_details = return_details,
       require_native = require_native))
   }
+  feature_group_spec <- lkt_online_adaptive_feature_group_native_spec(registry)
+  if (!is.null(feature_group_spec)) {
+    return(lkt_online_adaptive_eval_feature_group_native(
+      alpha, registry,
+      return_details = return_details,
+      require_native = require_native))
+  }
   feature_decay_spec <- lkt_online_adaptive_feature_decay_native_spec(registry)
   if (!is.null(feature_decay_spec)) {
     return(lkt_online_adaptive_eval_feature_decay_native(
@@ -1229,6 +1236,154 @@ lkt_online_adaptive_eval_recency_decay_native <- function(alpha, registry,
   }
   final_states[["final_nonlinear:recency|KC..Default.|para"]] <-
     result$final_decay
+  list(
+    nll = result$nll,
+    loglike = -result$nll,
+    pred = result$pred,
+    final_states = final_states
+  )
+}
+
+lkt_online_adaptive_feature_group_native_spec <- function(registry) {
+  if (length(registry$nonlinear_terms) == 0L) {
+    return(NULL)
+  }
+  valid_slots <- c("para", "parb", "parc", "pard", "pare")
+  types <- integer(length(registry$nonlinear_terms))
+  aux <- matrix(0, nrow = length(registry$y),
+                ncol = length(registry$nonlinear_terms) * 3L)
+  original <- matrix(0, nrow = length(registry$y),
+                     ncol = length(registry$nonlinear_terms))
+  coefficient <- numeric(length(registry$nonlinear_terms))
+  start <- matrix(NA_real_, nrow = length(valid_slots),
+                  ncol = length(registry$nonlinear_terms))
+  active <- matrix(0L, nrow = length(valid_slots),
+                   ncol = length(registry$nonlinear_terms))
+  keys <- character(0)
+
+  for (j in seq_along(registry$nonlinear_terms)) {
+    term <- registry$nonlinear_terms[[j]]
+    slot_indices <- match(term$slots, valid_slots)
+    if (any(is.na(slot_indices))) {
+      return(NULL)
+    }
+    start[, j] <- as.numeric(term$pars_start[valid_slots])
+    active[slot_indices, j] <- 1L
+    keys <- c(keys, paste(term$feature, term$component, term$slots, sep = "|"))
+
+    if (identical(term$feature, "recency") &&
+        identical(term$component, "KC..Default.")) {
+      if (!identical(term$slots, "para")) {
+        return(NULL)
+      }
+      spacing_col <- paste0(term$component, "spacing")
+      if (!spacing_col %in% names(registry$data)) {
+        return(NULL)
+      }
+      types[j] <- 1L
+      aux[, 3L * (j - 1L) + 1L] <- as.numeric(registry$data[[spacing_col]])
+    } else if (identical(term$feature, "logitdec") &&
+               identical(term$component, "Anon.Student.Id")) {
+      if (!identical(term$slots, "para")) {
+        return(NULL)
+      }
+      types[j] <- 2L
+    } else if (identical(term$feature, "ppes") &&
+               identical(term$component, "KC..Default.")) {
+      if (!all(term$slots %in% c("para", "parb", "parc", "pard"))) {
+        return(NULL)
+      }
+      ppe_data <- lkt_prepare_ppe_static_context(
+        term$prepared_data, term$prepared_data$index, term$component)
+      ppe_context <- lkt_ppe_static_context_names(term$component)
+      if (!all(c("cor", ppe_context[["tn"]], ppe_context[["space"]]) %in%
+               names(ppe_data))) {
+        return(NULL)
+      }
+      types[j] <- 3L
+      aux[, 3L * (j - 1L) + 1L] <- as.numeric(ppe_data$cor)
+      aux[, 3L * (j - 1L) + 2L] <- as.numeric(ppe_data[[ppe_context[["tn"]]]])
+      aux[, 3L * (j - 1L) + 3L] <- as.numeric(ppe_data[[ppe_context[["space"]]]])
+    } else {
+      return(NULL)
+    }
+    original[, j] <- term$original_x
+    coefficient[j] <- term$coefficient
+  }
+
+  list(
+    types = types,
+    aux = aux,
+    original = original,
+    coefficient = coefficient,
+    start = start,
+    active = active,
+    keys = keys
+  )
+}
+
+lkt_online_adaptive_eval_feature_group_native <- function(alpha, registry,
+                                                         return_details = FALSE,
+                                                         require_native = FALSE) {
+  spec <- lkt_online_adaptive_feature_group_native_spec(registry)
+  if (is.null(spec)) {
+    if (isTRUE(require_native)) {
+      stop("require_native = TRUE was requested, but compiled nonlinear ",
+           "online_adaptive evaluation does not support the requested ",
+           "nonlinear terms.", call. = FALSE)
+    }
+    return(lkt_online_adaptive_eval_general(
+      alpha, registry, return_details = return_details))
+  }
+  if (!is.loaded("C_lkt_online_adaptive_feature_group_eval", PACKAGE = "LKT")) {
+    if (isTRUE(require_native)) {
+      stop("The compiled grouped nonlinear online_adaptive evaluator is not ",
+           "loaded. Install/build LKT with compiled code before running with ",
+           "require_native = TRUE.", call. = FALSE)
+    }
+    return(lkt_online_adaptive_eval_general(
+      alpha, registry, return_details = return_details))
+  }
+
+  result <- .Call(
+    "C_lkt_online_adaptive_feature_group_eval",
+    as.numeric(alpha),
+    registry$y,
+    registry$eta_base,
+    registry$beta_x,
+    registry$beta_start,
+    as.integer(spec$types),
+    spec$aux,
+    spec$original,
+    as.numeric(spec$coefficient),
+    spec$start,
+    as.integer(spec$active),
+    as.integer(registry$subject_start),
+    as.integer(registry$subject_end),
+    as.numeric(registry$nonlinear_lower),
+    as.numeric(registry$nonlinear_upper),
+    as.numeric(registry$clip_epsilon),
+    as.numeric(registry$denom_epsilon),
+    as.logical(return_details),
+    PACKAGE = "LKT")
+  if (!isTRUE(return_details)) {
+    return(result)
+  }
+
+  if (length(registry$beta_start) > 0L) {
+    colnames(result$final_beta) <- names(registry$beta_start)
+  }
+  colnames(result$final_nonlinear) <- spec$keys
+  final_states <- data.frame(subject = registry$subject,
+                             stringsAsFactors = FALSE)
+  for (j in seq_along(registry$beta_start)) {
+    final_states[[paste0("final_beta:", names(registry$beta_start)[j])]] <-
+      result$final_beta[, j]
+  }
+  for (j in seq_along(spec$keys)) {
+    final_states[[paste0("final_nonlinear:", spec$keys[j])]] <-
+      result$final_nonlinear[, j]
+  }
   list(
     nll = result$nll,
     loglike = -result$nll,
@@ -1567,13 +1722,15 @@ OnlineAdaptiveModel <- function(alpha_recency_start = 0.03,
                                 nonlinear_alpha_terms = character(0),
                                 alpha_start = NULL,
                                 alpha_lower = -1,
-                                alpha_upper = 1,
-                                nonlinear_lower = 1e-5,
-                                nonlinear_upper = 0.99999,
-                                maxit = 100,
-                                factr = 1e7,
-                                require_native = FALSE,
-                                use_gradient = TRUE) {
+                                 alpha_upper = 1,
+                                 nonlinear_lower = 1e-5,
+                                 nonlinear_upper = 0.99999,
+                                 maxit = 100,
+                                 factr = 1e7,
+                                 optim_trace = 0,
+                                 optim_report = 1,
+                                 require_native = FALSE,
+                                 use_gradient = TRUE) {
   LKTCustomModel(
     name = "OnlineAdaptive",
     fit = function(request, verbose = FALSE) {
@@ -1592,6 +1749,8 @@ OnlineAdaptiveModel <- function(alpha_recency_start = 0.03,
           nonlinear_upper = nonlinear_upper,
           maxit = maxit,
           factr = factr,
+          optim_trace = optim_trace,
+          optim_report = optim_report,
           require_native = require_native,
           use_gradient = use_gradient
         ),
@@ -1822,7 +1981,9 @@ lkt_fit_fast_online_simple_adaptive <- function(design_matrix, data, response,
           nonlinear_upper = options$nonlinear_upper)
         optimized <- lkt_online_adaptive_optimize_general(
           registry,
-          control = list(maxit = options$maxit, factr = options$factr),
+          control = list(maxit = options$maxit, factr = options$factr,
+                         trace = options$optim_trace,
+                         REPORT = options$optim_report),
           require_native = TRUE)
       } else {
         registry <- lkt_online_adaptive_build_registry(
@@ -1838,7 +1999,9 @@ lkt_fit_fast_online_simple_adaptive <- function(design_matrix, data, response,
           nonlinear_upper = options$nonlinear_upper)
         optimized <- lkt_online_adaptive_optimize_general(
           registry,
-          control = list(maxit = options$maxit, factr = options$factr),
+          control = list(maxit = options$maxit, factr = options$factr,
+                         trace = options$optim_trace,
+                         REPORT = options$optim_report),
           require_native = FALSE)
       }
     }

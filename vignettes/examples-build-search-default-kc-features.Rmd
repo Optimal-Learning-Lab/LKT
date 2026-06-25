@@ -1,0 +1,75 @@
+---
+title: "Examples: buildLKTModel Default KC Feature Search"
+author: "Philip I. Pavlik Jr."
+date: "2026-06-23"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: buildLKTModel Default KC Feature Search}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+# Load data
+
+```{r bundled-data}
+val <- prepare_largeraw_sample()
+```
+
+# Search Default KC Features
+
+```{r build-lkt-default-kc-feature-search}
+search_features <- c("recency", "ppes", "linesuc", "linefail")
+
+default_kc_feature_search <- buildLKTModel(
+  data = val,
+  allcomponents = "KC..Default.",
+  allfeatures = search_features,
+  forv = 0,
+  bacv = 0,
+  forward = TRUE,
+  backward = FALSE,
+  maxitv = 10,
+  verbose = FALSE
+)
+
+trace_default_kc <- default_kc_feature_search[[1]]
+fit_default_kc <- default_kc_feature_search[[2]]
+last_trace <- trace_default_kc[nrow(trace_default_kc), ]
+selected_features <- as.character(trace_default_kc$feat[trace_default_kc$feat != "none"])
+
+final_bic <- last_trace$params * log(length(fit_default_kc$prediction)) -
+  2 * fit_default_kc$loglike
+final_aic <- last_trace$params * 2 - 2 * fit_default_kc$loglike
+
+check_true("default KC feature search accepted at least one feature", nrow(trace_default_kc) > 1)
+check_true("default KC feature search returned final model", !is.null(fit_default_kc$coefs))
+check_true(
+  "default KC selected features came from requested search set",
+  all(selected_features %in% search_features)
+)
+check_close("default KC final BIC matches trace", final_bic, last_trace$BIC, tolerance = 5e-2)
+check_close("default KC final AIC matches trace", final_aic, last_trace$AIC, tolerance = 5e-2)
+
+cat("\nFinal selected nonlinear feature parameters:\n")
+model_spec <- as.data.frame(fit_default_kc$model_specification[[1]])
+nonlinear_columns <- c("component", "feature", "para", "parb", "parc", "pard", "pare")
+parameter_columns <- c("para", "parb", "parc", "pard", "pare")
+present_parameter_columns <- intersect(parameter_columns, names(model_spec))
+nonlinear_spec <- unique(model_spec[
+  rowSums(!is.na(model_spec[, present_parameter_columns, drop = FALSE])) > 0,
+  intersect(nonlinear_columns, names(model_spec)),
+  drop = FALSE
+])
+print(nonlinear_spec, row.names = FALSE)
+
+cat("\nFinal logistic regression coefficients:\n")
+coefficient_columns <- c(
+  "coefficient_name", "feature", "component", "component_level", "coefficient"
+)
+print(model_spec[, intersect(coefficient_columns, names(model_spec)), drop = FALSE],
+      row.names = FALSE)
+```

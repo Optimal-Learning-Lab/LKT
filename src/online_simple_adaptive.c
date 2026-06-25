@@ -816,6 +816,239 @@ static double lkt_logitdec_previous_window(const double *y,
   return log(corv / incorv);
 }
 
+static double lkt_ppes_tw_current(const double *tn,
+                                  int start,
+                                  int current,
+                                  double d) {
+  if (current <= start) {
+    return 1.0;
+  }
+  const double current_tn = tn[current];
+  double weighted_sum = 0.0;
+  double weight_total = 0.0;
+  for (int k = start; k < current; k++) {
+    const double lag = current_tn - tn[k];
+    if (lag <= 0.0) {
+      continue;
+    }
+    const double weight = pow(lag, -d);
+    if (R_FINITE(weight)) {
+      weighted_sum += weight * lag;
+      weight_total += weight;
+    }
+  }
+  if (weight_total <= 0.0 || !R_FINITE(weighted_sum)) {
+    return 1.0;
+  }
+  return weighted_sum / weight_total;
+}
+
+SEXP C_lkt_online_adaptive_feature_group_eval(SEXP alpha_,
+                                              SEXP y_,
+                                              SEXP eta_base_,
+                                              SEXP x_beta_,
+                                              SEXP beta_start_,
+                                              SEXP group_type_,
+                                              SEXP group_aux_,
+                                              SEXP group_original_,
+                                              SEXP group_coefficient_,
+                                              SEXP group_start_,
+                                              SEXP group_active_,
+                                              SEXP subject_start_,
+                                              SEXP subject_end_,
+                                              SEXP nonlinear_lower_,
+                                              SEXP nonlinear_upper_,
+                                              SEXP clip_epsilon_,
+                                              SEXP denom_epsilon_,
+                                              SEXP return_details_) {
+  const double *alpha = REAL(alpha_);
+  const double *y = REAL(y_);
+  const double *eta_base = REAL(eta_base_);
+  const double *x_beta = REAL(x_beta_);
+  const double *beta_start = REAL(beta_start_);
+  const int *group_type = INTEGER(group_type_);
+  const double *group_aux = REAL(group_aux_);
+  const double *group_original = REAL(group_original_);
+  const double *group_coefficient = REAL(group_coefficient_);
+  const double *group_start = REAL(group_start_);
+  const int *group_active = INTEGER(group_active_);
+  const int *subject_start = INTEGER(subject_start_);
+  const int *subject_end = INTEGER(subject_end_);
+  const int n_subject = LENGTH(subject_start_);
+  const int n_obs = LENGTH(y_);
+  const int n_beta = LENGTH(beta_start_);
+  const int n_group = LENGTH(group_type_);
+  const int n_alpha = LENGTH(alpha_);
+  const double nonlinear_lower = REAL(nonlinear_lower_)[0];
+  const double nonlinear_upper = REAL(nonlinear_upper_)[0];
+  const double clip_epsilon = REAL(clip_epsilon_)[0];
+  const double denom_epsilon = REAL(denom_epsilon_)[0];
+  const Rboolean return_details = asLogical(return_details_) == TRUE;
+
+  int n_active = 0;
+  for (int g = 0; g < n_group; g++) {
+    for (int slot = 0; slot < 5; slot++) {
+      if (group_active[slot + 5 * g]) {
+        n_active++;
+      }
+    }
+  }
+  if (n_alpha != n_beta + n_active) {
+    error("alpha length must equal selected beta count plus active nonlinear slots.");
+  }
+
+  SEXP pred_ = R_NilValue;
+  SEXP final_beta_ = R_NilValue;
+  SEXP final_nonlinear_ = R_NilValue;
+  double *pred = NULL;
+  double *final_beta = NULL;
+  double *final_nonlinear = NULL;
+  int protect_count = 0;
+
+  if (return_details) {
+    PROTECT(pred_ = allocVector(REALSXP, n_obs));
+    protect_count++;
+    PROTECT(final_beta_ = allocMatrix(REALSXP, n_subject, n_beta));
+    protect_count++;
+    PROTECT(final_nonlinear_ = allocMatrix(REALSXP, n_subject, n_active));
+    protect_count++;
+    pred = REAL(pred_);
+    final_beta = REAL(final_beta_);
+    final_nonlinear = REAL(final_nonlinear_);
+  }
+
+  double *delta = (double *) R_alloc((size_t) n_beta, sizeof(double));
+  double *state = (double *) R_alloc((size_t) (5 * n_group), sizeof(double));
+  double loglike = 0.0;
+
+  for (int s = 0; s < n_subject; s++) {
+    for (int j = 0; j < n_beta; j++) {
+      delta[j] = 0.0;
+    }
+    for (int g = 0; g < n_group; g++) {
+      for (int slot = 0; slot < 5; slot++) {
+        state[slot + 5 * g] = group_start[slot + 5 * g];
+      }
+    }
+
+    const int start = subject_start[s] - 1;
+    const int end = subject_end[s] - 1;
+
+    for (int i = start; i <= end; i++) {
+      double eta = eta_base[i];
+
+      for (int j = 0; j < n_beta; j++) {
+        eta += delta[j] * x_beta[i + n_obs * j];
+      }
+
+      for (int g = 0; g < n_group; g++) {
+        double current_x = 0.0;
+        if (group_type[g] == 1) {
+          const double spacing = group_aux[i + n_obs * (3 * g)];
+          current_x = spacing > 0.0 ? pow(spacing, -state[5 * g]) : 0.0;
+        } else if (group_type[g] == 2) {
+          current_x = lkt_logitdec_previous_window(
+            y, start, i, state[5 * g]);
+        } else if (group_type[g] == 3) {
+          const double cor = group_aux[i + n_obs * (3 * g)];
+          const double *tn = group_aux + n_obs * (3 * g + 1);
+          const double space = group_aux[i + n_obs * (3 * g + 2)];
+          const double para = state[5 * g];
+          const double parb = state[1 + 5 * g];
+          const double parc = state[2 + 5 * g];
+          const double pard = state[3 + 5 * g];
+          const double tw = lkt_ppes_tw_current(tn, start, i, pard);
+          current_x = pow(cor, para) * pow(tw, -(parb + parc * space));
+        } else {
+          error("unsupported compiled nonlinear adaptive feature type.");
+        }
+        eta += group_coefficient[g] *
+          (current_x - group_original[i + n_obs * g]);
+      }
+
+      const double p = clamp_probability(sigmoid_stable(eta), clip_epsilon);
+      const double err = y[i] - p;
+
+      if (return_details) {
+        pred[i] = p;
+      }
+
+      if (y[i] == 1.0) {
+        loglike += log(p);
+      } else {
+        loglike += log(1.0 - p);
+      }
+
+      for (int j = 0; j < n_beta; j++) {
+        const double x = x_beta[i + n_obs * j];
+        const double denom = x * x + denom_epsilon;
+        delta[j] += alpha[j] * x * err / denom;
+      }
+
+      int alpha_pos = n_beta;
+      for (int g = 0; g < n_group; g++) {
+        for (int slot = 0; slot < 5; slot++) {
+          if (group_active[slot + 5 * g]) {
+            state[slot + 5 * g] -= alpha[alpha_pos] * err;
+            if (state[slot + 5 * g] < nonlinear_lower) {
+              state[slot + 5 * g] = nonlinear_lower;
+            } else if (state[slot + 5 * g] > nonlinear_upper) {
+              state[slot + 5 * g] = nonlinear_upper;
+            }
+            alpha_pos++;
+          }
+        }
+      }
+    }
+
+    if (return_details) {
+      for (int j = 0; j < n_beta; j++) {
+        final_beta[s + n_subject * j] = beta_start[j] + delta[j];
+      }
+      int out_col = 0;
+      for (int g = 0; g < n_group; g++) {
+        for (int slot = 0; slot < 5; slot++) {
+          if (group_active[slot + 5 * g]) {
+            final_nonlinear[s + n_subject * out_col] = state[slot + 5 * g];
+            out_col++;
+          }
+        }
+      }
+    }
+  }
+
+  if (!return_details) {
+    SEXP result;
+    PROTECT(result = allocVector(REALSXP, 1));
+    REAL(result)[0] = -loglike;
+    UNPROTECT(1);
+    return result;
+  }
+
+  SEXP result;
+  SEXP nll_;
+  SEXP names;
+  PROTECT(result = allocVector(VECSXP, 4));
+  protect_count++;
+  PROTECT(nll_ = ScalarReal(-loglike));
+  protect_count++;
+  SET_VECTOR_ELT(result, 0, nll_);
+  SET_VECTOR_ELT(result, 1, pred_);
+  SET_VECTOR_ELT(result, 2, final_beta_);
+  SET_VECTOR_ELT(result, 3, final_nonlinear_);
+
+  PROTECT(names = allocVector(STRSXP, 4));
+  protect_count++;
+  SET_STRING_ELT(names, 0, mkChar("nll"));
+  SET_STRING_ELT(names, 1, mkChar("pred"));
+  SET_STRING_ELT(names, 2, mkChar("final_beta"));
+  SET_STRING_ELT(names, 3, mkChar("final_nonlinear"));
+  setAttrib(result, R_NamesSymbol, names);
+
+  UNPROTECT(protect_count);
+  return result;
+}
+
 SEXP C_lkt_online_adaptive_feature_decay_eval(SEXP alpha_,
                                               SEXP y_,
                                               SEXP eta_base_,

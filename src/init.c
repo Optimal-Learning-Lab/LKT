@@ -86,6 +86,24 @@ SEXP C_lkt_online_adaptive_feature_decay_eval(SEXP alpha_,
                                               SEXP clip_epsilon_,
                                               SEXP denom_epsilon_,
                                               SEXP return_details_);
+SEXP C_lkt_online_adaptive_feature_group_eval(SEXP alpha_,
+                                              SEXP y_,
+                                              SEXP eta_base_,
+                                              SEXP x_beta_,
+                                              SEXP beta_start_,
+                                              SEXP group_type_,
+                                              SEXP group_aux_,
+                                              SEXP group_original_,
+                                              SEXP group_coefficient_,
+                                              SEXP group_start_,
+                                              SEXP group_active_,
+                                              SEXP subject_start_,
+                                              SEXP subject_end_,
+                                              SEXP nonlinear_lower_,
+                                              SEXP nonlinear_upper_,
+                                              SEXP clip_epsilon_,
+                                              SEXP denom_epsilon_,
+                                              SEXP return_details_);
 
 static const R_CallMethodDef CallEntries[] = {
   {"C_lkt_online_simple_adaptive_eval",
@@ -102,6 +120,8 @@ static const R_CallMethodDef CallEntries[] = {
    (DL_FUNC) &C_lkt_online_adaptive_recency_decay_eval, 16},
   {"C_lkt_online_adaptive_feature_decay_eval",
    (DL_FUNC) &C_lkt_online_adaptive_feature_decay_eval, 17},
+  {"C_lkt_online_adaptive_feature_group_eval",
+   (DL_FUNC) &C_lkt_online_adaptive_feature_group_eval, 18},
   {NULL, NULL, 0}
 };
 

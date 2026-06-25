@@ -144,8 +144,17 @@ lkt_apply_curve_feature <- function(data, curvefeat) {
 }
 
 lkt_materialize_feature <- function(data, feature, component, pars,
-                                    param_count, nosolve) {
-  data <- lkt_prepare_component_context(data, component, feature)
+                                    param_count, nosolve,
+                                    context_cache = NULL) {
+  context_result <- lkt_prepare_component_context(
+    data, component, feature, context_cache = context_cache)
+  if (is.list(context_result) && all(c("data", "context_cache") %in%
+                                     names(context_result))) {
+    data <- context_result$data
+    context_cache <- context_result$context_cache
+  } else {
+    data <- context_result
+  }
   component <- gsub("\\s+", "", component)
   if (right(feature, 1) == "@") {
     data[[component]] <- computefeatures(
@@ -161,7 +170,7 @@ lkt_materialize_feature <- function(data, feature, component, pars,
       data$index, data$indexcomp, pars[["parc"]],
       pars[["pard"]], pars[["pare"]], component)
   }
-  list(data = data, component = component)
+  list(data = data, component = component, context_cache = context_cache)
 }
 
 lkt_print_feature_progress <- function(feature, component, pars, param_count) {
@@ -349,7 +358,8 @@ lkt_build_accuracy_model_specification <- function(modelvs, features,
 lkt_build_feature_iteration <- function(data, components, features, curvefeats,
                                         fixedpars, seedparameters, connectors,
                                         interacts, interc, first_pass,
-                                        recompute_feature, nosolve, verbose) {
+                                        recompute_feature, nosolve, verbose,
+                                        context_cache = NULL) {
   formula_rhs <- if (interc) "1" else "0"
   fixed_index <- 1L
   optimized_index <- 1L
@@ -377,9 +387,11 @@ lkt_build_feature_iteration <- function(data, components, features, curvefeats,
         component = components[k],
         pars = feature_pars,
         param_count = feature_param_count,
-        nosolve = nosolve)
+        nosolve = nosolve,
+        context_cache = context_cache)
       data <- feature_result$data
       components[k] <- feature_result$component
+      context_cache <- feature_result$context_cache
       recompute_feature <- FALSE
     }
 
@@ -407,7 +419,8 @@ lkt_build_feature_iteration <- function(data, components, features, curvefeats,
     components = components,
     formula_rhs = formula_rhs,
     param_tracker = param_tracker,
-    recompute_feature = recompute_feature
+    recompute_feature = recompute_feature,
+    context_cache = context_cache
   )
 }
 
@@ -523,6 +536,7 @@ LKT <- function(data,usefolds = NA,
   e$components <- components
   e$param_tracker <- vector("list", length(features))
   e$form_terms_cache <- new.env(parent = emptyenv())
+  e$component_context_cache <- list()
   e$model <- model
   e$model_options <- lkt_model_options(
     bias = bias,
@@ -555,11 +569,13 @@ LKT <- function(data,usefolds = NA,
       first_pass = e$counter < 2,
       recompute_feature = e$recompute_feature,
       nosolve = nosolve,
-      verbose = verbose)
+      verbose = verbose,
+      context_cache = e$component_context_cache)
     e$data <- feature_iteration$data
     e$components <- feature_iteration$components
     e$param_tracker <- feature_iteration$param_tracker
     e$recompute_feature <- feature_iteration$recompute_feature
+    e$component_context_cache <- feature_iteration$context_cache
 
     if (verbose) {
       cat(paste(feature_iteration$formula_rhs, "\n"))

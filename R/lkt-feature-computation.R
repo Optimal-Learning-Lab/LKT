@@ -128,7 +128,66 @@ lkt_component_column <- function(data, component, suffix) {
   data[[column]]
 }
 
-lkt_prepare_component_context <- function(data, component, feature) {
+lkt_component_context_cache_key <- function(component) {
+  paste0("component_context::", component)
+}
+
+lkt_apply_component_context <- function(data, context) {
+  for (name in names(context)) {
+    data[[name]] <- context[[name]]
+  }
+  data
+}
+
+lkt_extract_component_context <- function(data, include_counts) {
+  columns <- c("index", "indexcomp")
+  if (isTRUE(include_counts)) {
+    columns <- c(columns, "cor", "icor")
+  }
+  columns <- columns[columns %in% names(data)]
+  stats::setNames(lapply(columns, function(column) data[[column]]), columns)
+}
+
+lkt_ppe_static_context_names <- function(component) {
+  prefix <- paste0(".lkt.", make.names(component), ".ppe.")
+  c(
+    tn = paste0(prefix, "Tn"),
+    space = paste0(prefix, "space")
+  )
+}
+
+lkt_prepare_ppe_static_context <- function(data, index, component) {
+  context_columns <- lkt_ppe_static_context_names(component)
+  if (all(context_columns %in% names(data))) {
+    return(data)
+  }
+  spacing_lagged <- lkt_component_column(data, component, "spacinglagged")
+  mintime <- ave(data$CF..Time., index, FUN = min)
+  transformed_spacing <- ifelse(
+    spacing_lagged == 0, 0, 1 / log(spacing_lagged + exp(1)))
+  cumulative_spacing <- ave(
+    transformed_spacing, index, FUN = function(x) cumsum(x))
+  data[[context_columns[["tn"]]]] <- data$CF..Time. - mintime
+  data[[context_columns[["space"]]]] <- ifelse(
+    (data$cor + data$icor) <= 1,
+    0,
+    cumulative_spacing / (data$cor + data$icor - 1))
+  data
+}
+
+lkt_prepare_component_context <- function(data, component, feature,
+                                          context_cache = NULL) {
+  cache_key <- lkt_component_context_cache_key(component)
+  needs_counts <- !(feature %in% c("numer", "intercept"))
+  if (!is.null(context_cache) && !is.null(context_cache[[cache_key]])) {
+    cached_context <- context_cache[[cache_key]]
+    has_counts <- all(c("cor", "icor") %in% names(cached_context))
+    if (!needs_counts || has_counts) {
+      data <- lkt_apply_component_context(data, cached_context)
+      return(list(data = data, context_cache = context_cache))
+    }
+  }
+
   if (length(grep("%", component)) > 0) {
     parts <- strsplit(component, "%")[[1]]
     if (length(parts) != 3L) {
@@ -165,6 +224,11 @@ lkt_prepare_component_context <- function(data, component, feature) {
       data$cor <- countOutcome(data, data$index, "CORRECT")
       data$icor <- countOutcome(data, data$index, "INCORRECT")
     }
+  }
+  if (!is.null(context_cache)) {
+    context_cache[[cache_key]] <- lkt_extract_component_context(
+      data, include_counts = needs_counts)
+    return(list(data = data, context_cache = context_cache))
   }
   data
 }
@@ -268,24 +332,20 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     ))
   }
   if (feat == "ppe") {
+    data <- lkt_prepare_ppe_static_context(data, index, fcomp)
+    ppe_context <- lkt_ppe_static_context_names(fcomp)
     data$Nc <- (data$cor + data$icor)^par1
-    data$mintime <- ave(data$CF..Time., index, FUN = min)
-    data$Tn <- data$CF..Time. - data$mintime
-    data$space <- lkt_component_column(data, fcomp, "spacinglagged")
-    data$space <- ifelse(data$space == 0, 0, 1 / log(data$space + exp(1)))
-    data$space <- ave(data$space, index, FUN = function(x) cumsum(x))
-    data$space <- ifelse((data$cor + data$icor) <= 1, 0, data$space / (data$cor + data$icor - 1))
+    data$Tn <- data[[ppe_context[["tn"]]]]
+    data$space <- data[[ppe_context[["space"]]]]
     data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
     return(data$Nc * data$tw^-(par2 + par3 * data$space))
   }
   if (feat == "ppes") {
+    data <- lkt_prepare_ppe_static_context(data, index, fcomp)
+    ppe_context <- lkt_ppe_static_context_names(fcomp)
     data$Nc <- (data$cor)^(par1)
-    data$mintime <- ave(data$CF..Time., index, FUN = min)
-    data$Tn <- data$CF..Time. - data$mintime
-    data$space <- lkt_component_column(data, fcomp, "spacinglagged")
-    data$space <- ifelse(data$space == 0, 0, 1 / log(data$space + exp(1)))
-    data$space <- ave(data$space, index, FUN = function(x) cumsum(x))
-    data$space <- ifelse((data$cor + data$icor) <= 1, 0, data$space / (data$cor + data$icor - 1))
+    data$Tn <- data[[ppe_context[["tn"]]]]
+    data$space <- data[[ppe_context[["space"]]]]
     data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
 
     ppes_result <- data$Nc * data$tw^-(par2 + par3 * data$space)
@@ -324,13 +384,11 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     return(ppes_result)
   }
   if (feat == "ppef") {
+    data <- lkt_prepare_ppe_static_context(data, index, fcomp)
+    ppe_context <- lkt_ppe_static_context_names(fcomp)
     data$Nc <- (data$icor)^(par1)
-    data$mintime <- ave(data$CF..Time., index, FUN = min)
-    data$Tn <- data$CF..Time. - data$mintime
-    data$space <- lkt_component_column(data, fcomp, "spacinglagged")
-    data$space <- ifelse(data$space == 0, 0, 1 / log(data$space + exp(1)))
-    data$space <- ave(data$space, index, FUN = function(x) cumsum(x))
-    data$space <- ifelse((data$cor + data$icor) <= 1, 0, data$space / (data$cor + data$icor - 1))
+    data$Tn <- data[[ppe_context[["tn"]]]]
+    data$space <- data[[ppe_context[["space"]]]]
     data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
     return(data$Nc * data$tw^-(par2 + par3 * data$space))
   }
