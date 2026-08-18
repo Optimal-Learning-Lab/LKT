@@ -15,6 +15,7 @@ outcome.
 
 Authors:
 \itemize{
+  \item Philip I. Pavlik Jr. \email{imrryr@gmail.com} (\href{https://orcid.org/0000-0001-6467-9452}{ORCID}) [contributor]
   \item Luke G. Eglington \email{luke.eglington.mail@gmail.com} (\href{https://orcid.org/0000-0002-8432-9203}{ORCID}) [contributor]
 }
 

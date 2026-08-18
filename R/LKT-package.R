@@ -7,7 +7,7 @@
 #'
 #' @keywords internal
 #' @importFrom crayon white
-#' @importFrom data.table %between% := data.table dcast setDT
+#' @importFrom data.table %between% := .SD copy data.table dcast setDT
 #' @importFrom HDInterval hdi
 #' @importFrom LiblineaR LiblineaR
 #' @importFrom Matrix sparse.model.matrix

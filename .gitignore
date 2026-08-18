@@ -11,3 +11,4 @@ vignettes/vigfig-*.png
 vignettes/Rplots.pdf
 src/*.dll
 src/*.o
+src/*.so
