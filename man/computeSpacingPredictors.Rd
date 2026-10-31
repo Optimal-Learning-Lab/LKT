@@ -12,7 +12,7 @@ computeSpacingPredictors(data, KCs)
 \item{KCs}{Character vector of component columns for which spacing predictors should be computed.}
 }
 \value{
-The input data with added spacing-history columns for each component: \code{spacing}, \code{relspacing}, \code{prev}, \code{meanspacing}, \code{relmeanspacing}, and \code{spacinglagged} suffixes.
+The input data with added spacing-history columns for each component: \code{spacing}, \code{relspacing}, \code{prev}, \code{previousstudy}, \code{meanspacing}, \code{relmeanspacing}, and \code{spacinglagged} suffixes. \code{previousstudy} identifies a preceding \code{Outcome == "STUDY"} within the student-component history; binary-only input has no study outcomes.
 }
 \description{
 Adds repetition-spacing history columns for one or more component columns. These columns are required by recency, spacing, and forgetting features in \code{LKT()}. If \code{CF..reltime.} or \code{CF..Time.} is missing, the function derives it from \code{Duration..sec.} when possible.

@@ -1,0 +1,36 @@
+library(LKT)
+library(data.table)
+f<-function(n)getFromNamespace(n,'LKT')
+fail<-function(expr){e<-tryCatch({force(expr);NULL},error=identity);stopifnot(inherits(e,'error'))}
+mu<-c('(Intercept)'=-.5,'logsucKC..Default.'=.6)
+v<-matrix(c(.3,.08,.08,.2),2,dimnames=list(names(mu),names(mu)))
+opts<-list(prior_mean=mu,prior_covariance=v,n_particles=128L,seed=11L,ess_action='ignore',store_trace=TRUE)
+terms<-data.frame(component='KC..Default.',feature='logsuc')
+set.seed(877);before<-.Random.seed
+cfg<-lkt_model_config(terms,TRUE,backend='OnlineBayesian',bayesian_options=opts,options=list(verbose=FALSE))
+stopifnot(identical(before,.Random.seed))
+tables<-f('lkt_bayesian_tables')(cfg$bayesian_options)
+parsed<-f('lkt_bayesian_parse_tables')(tables$mean,tables$covariance)
+stopifnot(identical(parsed$prior_mean,mu),identical(parsed$prior_covariance,v))
+path<-tempfile(fileext='.rds');saveRDS(cfg,path);stopifnot(identical(readRDS(path),cfg));unlink(path)
+d<-data.table(Anon.Student.Id=rep(c('s1','s2'),each=8),KC..Default.='k',
+ CF..ansbin.=rep(c(0,1,1,0,1,0,0,1),2),CF..Time.=rep(seq(1000,1070,10),2))
+a<-fit_lkt_config(d,cfg)
+b<-LKT(copy(d),components='KC..Default.',features='logsuc',interc=TRUE,verbose=FALSE,
+ model=do.call(OnlineBayesianModel,cfg$bayesian_options))
+c<-eval(lkt_config_call(cfg),list(data=copy(d)))
+copied_call<-parse(text=paste(capture.output(print(lkt_config_call(cfg))),collapse='\n'))
+copied<-eval(copied_call,list(data=copy(d)))
+stopifnot(identical(a$prediction,b$prediction),identical(a$prediction,c$prediction),identical(a$coefs,b$coefs),
+ identical(a$prediction,copied$prediction),
+ identical(a$model$final_states,b$model$final_states),identical(before,.Random.seed),
+ identical(predict_lkt(a,a$newdata)$predictions,a$prediction),
+ abs(predict_lkt(a,a$newdata,return_stats=TRUE)$LL-a$loglike)<1e-10)
+fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian'))
+fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian',latency='Wald',bayesian_options=opts))
+fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian',folds=1,bayesian_options=opts))
+fail(lkt_model_config(data.frame(component='KC..Default.',feature='logitdec'),TRUE,backend='OnlineBayesian',bayesian_options=opts))
+bad<-opts;bad$prior_covariance[,]<-1;fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian',bayesian_options=bad))
+bad<-opts;bad$ess_threshold<-0;fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian',bayesian_options=bad))
+bad<-opts;bad$nonlinear_alpha_terms<-'anything';fail(lkt_model_config(terms,TRUE,backend='OnlineBayesian',bayesian_options=bad))
+cat('PASS Bayesian configuration, correlated prior tables, serialization, generated R call, exact native predictions/posteriors, RNG and unsupported-mode validation\n')

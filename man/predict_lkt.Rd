@@ -16,11 +16,11 @@ predict_lkt(
 \arguments{
 \item{modelob}{Fitted LKT model object containing coefficients and predictors.}
 
-\item{data}{Data frame or data table containing \code{CF..ansbin.} and, when fold filtering is requested, a \code{fold} column.}
+\item{data}{Data frame or data table aligned with the fitted rows. \code{CF..ansbin.} is required only for statistics; a \code{fold} column is required when selecting folds.}
 
 \item{fold}{Optional vector of fold values to include in the returned predictions and statistics. \code{NULL} or an empty vector uses all rows.}
 
-\item{return_stats}{Logical; if \code{TRUE}, return predictions plus log-likelihood, AUC, RMSE, and McFadden-style R-squared. If \code{FALSE}, return only predictions.}
+\item{return_stats}{Logical; if \code{TRUE}, return predictions plus log-likelihood, AUC, RMSE, and McFadden-style R-squared. AUC and R-squared are \code{NA} for single-class outcomes. If \code{FALSE}, return only predictions without evaluating outcomes or fitting diagnostics.}
 
 \item{min_pred_limit}{Minimum probability used to clamp predictions.}
 
@@ -40,7 +40,7 @@ If return_stats is FALSE, returns a list containing:
 }
 }
 \description{
-Generates predicted probabilities from a fitted \code{LKT()} object and, optionally, computes common evaluation statistics for selected folds.
+Generates predicted probabilities from a fitted \code{LKT()} object and, optionally, computes common evaluation statistics for selected folds. Stored design matrices and online predictions refer to the fitted rows in their original order; this helper does not reconstruct feature histories for new rows.
 }
 \examples{
 \donttest{

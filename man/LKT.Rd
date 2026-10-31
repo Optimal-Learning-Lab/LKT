@@ -29,11 +29,14 @@ LKT(
   autoKC = rep(0, length(components)),
   autoKCcont = rep("NA", length(components)),
   connectors = rep("+", max(1, length(components) - 1)),
-  distribution = "exp",
-  weibull_mse_weight = 0,
-  weibull_t0_fixed = NULL,
+  distribution = "Wald",
   model = LibLinearModel(),
-  model_options = list()
+  model_options = list(),
+  latency_question_type_filter = NULL,
+  wald_calibration = NULL,
+  wald_contamination_weight = 0.02,
+  wald_t0_fixed = NULL,
+  wald_control = list()
 )
 }
 \arguments{
@@ -85,21 +88,30 @@ LKT(
 
 \item{connectors}{Character vector of formula operators (\code{"+"}, \code{":"}, or \code{"*"}) between model terms. Defaults to additive terms.}
 
-\item{distribution}{Latency model distribution. Supported values are \code{"exp"} and \code{"Weibull"} when \code{dualfit = TRUE}.}
-
-\item{weibull_mse_weight}{Numeric weight in \verb{[0, 1]} for the point-prediction component of Weibull latency fitting.}
-
-\item{weibull_t0_fixed}{Optional fixed minimum response time, in seconds, for Weibull latency fitting.}
+\item{distribution}{Latency distribution, \code{"Wald"}. Exponential and Weibull latency paths are retired and rejected explicitly.}
 
 \item{model}{LKT model adapter. Defaults to \code{LibLinearModel()}.}
 
 \item{model_options}{Optional list of adapter-specific model options.}
+
+\item{latency_question_type_filter}{Optional single question type. Restricts latency fitting observations without changing feature histories or accuracy fitting.}
+
+\item{wald_calibration}{Optional verified centered Wald calibration. NULL fits the current observations. Supplied calibrations must match inputs; mismatches fail.}
+
+\item{wald_contamination_weight}{Fit-only uniform contamination weight; default 0.02. Simulated latencies use the engaged distribution only.}
+
+\item{wald_t0_fixed}{Optional fixed nonnegative Wald shift, in seconds.}
+
+\item{wald_control}{Named controls for Wald optimization and quadrature.}
 }
 \value{
 A list containing the fitted model, coefficients, predictions, fit statistics, processed data, feature metadata, and optional latency-model results. With \code{nosolve = TRUE}, returns the constructed sparse matrices and feature names for downstream legacy model-selection helpers.
 }
 \description{
 Computes LKT features from trial-level learning data and fits a logistic model that predicts \code{CF..ansbin.}. The default model adapter uses \code{LiblineaR}; custom adapters can be supplied with \code{LKTCustomModel()}.
+}
+\details{
+With dual fitting, \code{usefolds} and \code{latency_question_type_filter} select latency observations before correct-response IQR screening. All rows remain in feature histories. Failure latency uses usable failed responses from the same selected subset. Invalid or empty fitting subsets fail explicitly.
 }
 \examples{
 \donttest{

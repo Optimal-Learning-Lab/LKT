@@ -1,0 +1,94 @@
+{
+  "version": "2.0.0.9006",
+  "base": "2.0.0.9005",
+  "files": [
+    {
+      "path": "R/data.R",
+      "sha256": "a4b34ac42e5a7617f5110c583d98ee0cef00d4821fa6ecefed7960e8e2ad9e7e"
+    },
+    {
+      "path": "R/lkt-configuration.R",
+      "sha256": "41d925f89338557d7dbbcd6dcd773ab58cececc1653c70125e7409947c5a7782"
+    },
+    {
+      "path": "R/lkt-fast-online-simple-adaptive.R",
+      "sha256": "ca183149e86329ca6926e65c56447dcbae634afb2d3b36be39bafa582c1af99f"
+    },
+    {
+      "path": "R/lkt-feature-computation.R",
+      "sha256": "14f857e7f375b6162c201c41ac69d8b1521c2c1b7fc9feef12e6981fb4fdb2df"
+    },
+    {
+      "path": "R/lkt-feature-input.R",
+      "sha256": "5c43df2bee01fbb15dce4d0211bdf6bb7356f2fb03597e7d336a5c6a39a96c31"
+    },
+    {
+      "path": "R/lkt-fgui-bayesian.R",
+      "sha256": "a0a1328a676d12ed1fa89340ffe3f5afe00430d79e3260814b98a0e0952e8277"
+    },
+    {
+      "path": "R/lkt-fgui.R",
+      "sha256": "ba12e7485b39ff38692b249842fbf3dd4c7404ef578685bb60e14eb0c4f405af"
+    },
+    {
+      "path": "R/lkt-gui-style.R",
+      "sha256": "201a35bc4eed23a18adeabf1474f54361a84404963d266592dc6cf8b97ee0466"
+    },
+    {
+      "path": "R/lkt-hdi.R",
+      "sha256": "a42194aef7c217887a2a6a2af875f1e0c1927b6d6c17a7db5c85c0d1571dc526"
+    },
+    {
+      "path": "R/lkt-latency-quantile.R",
+      "sha256": "df7291f99f7adb607c0542116c196a59a38724fcd245d68648d4c1058120547b"
+    },
+    {
+      "path": "R/lkt-latency.R",
+      "sha256": "30f9c0289be11a2d4b3a9b96f8d546a50841a236f5c6bd94f4b9926f323d1a19"
+    },
+    {
+      "path": "R/lkt-model-glmm.R",
+      "sha256": "569b0fd8314c9094af10720dba01f44be970a17452e018f69c74397a3e589006"
+    },
+    {
+      "path": "R/lkt-model-interface.R",
+      "sha256": "fad7f9e9a2bb48c8db6d44725ed6910ac50321135969c80b7e8b0015ec52b6a0"
+    },
+    {
+      "path": "R/lkt-model-liblinear.R",
+      "sha256": "6f8adea6a469b3349c5f0c6ff7adcf71ee4b8c9c02194558136edafcc4266bc7"
+    },
+    {
+      "path": "R/lkt-model-online-bayesian.R",
+      "sha256": "588715e06c48a47a69a70df7cf81523c8b185bac0f8fe131344b481f26a430ac"
+    },
+    {
+      "path": "R/lkt-model-online-calibration.R",
+      "sha256": "660e155087676e5fe63a35ca041f5f7d257be10b440218f2a8bb6badfb4b41d7"
+    },
+    {
+      "path": "R/LKT-package.R",
+      "sha256": "48f63f2c4c7733c01d5b3578c9ab9efc6beb7477aae2cbc472e6c19f90414efc"
+    },
+    {
+      "path": "R/lkt-prediction.R",
+      "sha256": "45069ef46f68e9a1220034c30961cddc1d0d2b6a7c624565e9b4a789d1c4c190"
+    },
+    {
+      "path": "R/lkt-search.R",
+      "sha256": "99161648bace71f645265a68df1f682100d6ebe16d47aa759df2442b9ae5db7b"
+    },
+    {
+      "path": "R/LKTfunctions.R",
+      "sha256": "974bc55940e816a732f1077467691038e399bd161e14f67d22b29ea6b76e5e2c"
+    },
+    {
+      "path": "src/init.c",
+      "sha256": "37d7adfe81a5e5f8125d766e7a74c82098c74f24cb76b2b4a1cc3507e2a9ea8b"
+    },
+    {
+      "path": "src/online_simple_adaptive.c",
+      "sha256": "2867c52a9856dab1737e3c72b28e4ce2be9308e4905d9d97d7d8b0be586510b1"
+    }
+  ]
+}

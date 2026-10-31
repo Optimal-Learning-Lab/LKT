@@ -11,7 +11,7 @@
 #'
 #' @param data Data frame or data table containing `Anon.Student.Id`, `CF..ansbin.`, and each component named in `KCs`. Requires either `CF..reltime.` or `Duration..sec.`.
 #' @param KCs Character vector of component columns for which spacing predictors should be computed.
-#' @return The input data with added spacing-history columns for each component: `spacing`, `relspacing`, `prev`, `meanspacing`, `relmeanspacing`, and `spacinglagged` suffixes.
+#' @return The input data with added spacing-history columns for each component: `spacing`, `relspacing`, `prev`, `previousstudy`, `meanspacing`, `relmeanspacing`, and `spacinglagged` suffixes. `previousstudy` identifies a preceding `Outcome == "STUDY"` within the student-component history; binary-only input has no study outcomes.
 #' @examples
 #' data(samplelkt)
 #' data.table::setDT(samplelkt)
@@ -42,10 +42,11 @@ computeSpacingPredictors <- function(data, KCs) {
     data$CF..Time. <- data$CF..reltime.
   }
   for (component in KCs) {
-    data$index <- paste(data[[component]], data$Anon.Student.Id, sep = "")
+    data$index <- lkt_history_index(data[[component]], data$Anon.Student.Id)
     spacing_col <- paste0(component, "spacing")
     relspacing_col <- paste0(component, "relspacing")
     prev_col <- paste0(component, "prev")
+    study_col <- paste0(component, "previousstudy")
     meanspacing_col <- paste0(component, "meanspacing")
     relmeanspacing_col <- paste0(component, "relmeanspacing")
     spacinglagged_col <- paste0(component, "spacinglagged")
@@ -53,6 +54,9 @@ computeSpacingPredictors <- function(data, KCs) {
     data[[spacing_col]] <- componentspacing(data, data$index, data$CF..Time.)
     data[[relspacing_col]] <- componentspacing(data, data$index, data$CF..reltime.)
     data[[prev_col]] <- componentprev(data, data$index, data$CF..ansbin.)
+    outcomes <- if ("Outcome" %in% colnames(data)) data$Outcome else
+      ifelse(data$CF..ansbin. == 1, "CORRECT", "INCORRECT")
+    data[[study_col]] <- prevstudy(data, data$index, outcomes)
     data[[meanspacing_col]] <- meanspacingf(data, data$index, data[[spacing_col]])
     data[[relmeanspacing_col]] <- meanspacingf(data, data$index, data[[relspacing_col]])
     data[[spacinglagged_col]] <- laggedspacingf(data, data$index, data[[spacing_col]])
@@ -128,6 +132,19 @@ lkt_component_column <- function(data, component, suffix) {
   data[[column]]
 }
 
+# Length-prefixed UTF-8 identifiers distinguish tuples even when IDs contain
+# digits, separators, or multibyte characters. This key is internal metadata.
+lkt_history_index <- function(component, student) {
+  if (length(component) != length(student) ||
+      anyNA(component) || anyNA(student)) {
+    stop("History identifiers must be equally sized and nonmissing.", call. = FALSE)
+  }
+  component <- enc2utf8(as.character(component))
+  student <- enc2utf8(as.character(student))
+  paste0(nchar(component, type = "bytes"), ":", component,
+         nchar(student, type = "bytes"), ":", student)
+}
+
 lkt_component_context_cache_key <- function(component) {
   paste0("component_context::", component)
 }
@@ -195,7 +212,7 @@ lkt_prepare_component_context <- function(data, component, feature,
            component, call. = FALSE)
     }
     lkt_require_columns(data, c(parts[1], parts[2]), "LKT component context")
-    data$index <- paste(data[[parts[1]]], data$Anon.Student.Id, sep = "")
+    data$index <- lkt_history_index(data[[parts[1]]], data$Anon.Student.Id)
     data$indexcomp <- paste(data[[parts[1]]], sep = "")
     data$cor <- as.numeric(countOutcomeGen(
       data, data$index, "CORRECT", data[[parts[2]]], parts[3]))
@@ -218,7 +235,7 @@ lkt_prepare_component_context <- function(data, component, feature,
   } else {
     lkt_require_columns(data, component, "LKT component context")
     component_values <- data[[component]]
-    data$index <- paste(component_values, data$Anon.Student.Id, sep = "")
+    data$index <- lkt_history_index(component_values, data$Anon.Student.Id)
     data$indexcomp <- component_values
     if (!(feature %in% c("numer", "intercept"))) {
       data$cor <- countOutcome(data, data$index, "CORRECT")
@@ -355,8 +372,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
       log_file <- "ppes_debug.txt"
       final_idx <- length(ppes_result)
       if (final_idx > 0) {
-        # Extract student ID from index if possible
-        student_id <- if(length(index) >= final_idx) strsplit(index[final_idx], fcomp)[[1]][2] else "unknown"
+        student_id <- as.character(data$Anon.Student.Id[final_idx])
 
         # Get item ID if available in data
         item_id <- if("CF..Stim.File.Index." %in% names(data)) data$CF..Stim.File.Index.[final_idx] else "unknown"
@@ -553,23 +569,6 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
   }
 }
 
-getFeedDur <- function(data, index) {
-  temp <- rep(0, length(data$CF..ansbin.))
-  for (i in unique(index)) {
-    le <- length(data$time_to_answer[index == i])
-    subtemp <- data$time_since_prior_probe[index == i] - data$time_to_answer_inferred[index == i]
-    subtemp <- subtemp[2:(le - 1)]
-    subtemp <- c(subtemp, median(subtemp, na.rm = TRUE))
-    # if huge outlier make median for subject from that subject from that index
-    cutoff <- which(subtemp > 3600)
-    subtemp[cutoff] <- median(subtemp[-cutoff], na.rm = TRUE)
-    # function returns NA for feedDur if subject only did one trial in index
-    # replaced with Median (overall) outside function
-    temp[index == i] <- subtemp
-  }
-  return(temp)
-}
-
 # convenience function
 right <- function(string, char) {
   substr(string, nchar(string) - (char - 1), nchar(string))
@@ -748,13 +747,11 @@ componentspacing <- function(data, index, times) {
 }
 
 prevstudy <- function(data, index, outcomes) {
-
-  temp <- logical(nrow(data)) # initialize temp as a numeric vector
-
-  # calculate the differences within each group and assign to temp
-  temp <- ave(outcomes, index, FUN=function(x) c(F, head(x,-1)=="STUDY"))
-
-  return(temp)
+  # ave() preserves its input's type; grouping character/factor outcomes would
+  # return strings or invalid factor levels instead of a logical indicator.
+  as.logical(ave(seq_along(outcomes), index, FUN = function(rows) {
+    c(FALSE, head(as.character(outcomes[rows]), -1L) == "STUDY")
+  }))
 }
 
 
@@ -831,14 +828,6 @@ logitdec <- function(v, d) {
 }
 
 
-logitdec4 <- function(v, d) {
-  w <- length(v)
-  #  (cat(v,d,w,"\n"))
-  corv <- sum(c(1,1,1,1, v[1:w]) * d^((w+3):0))
-  incorv <- sum(c(1,1,1,1, abs(v[1:w] - 1)) * d^((w+3):0))
-  log(corv / incorv)
-}
-
 slidelogitdecfree <- function(x, d) {
   v <- c(rep(0, length(x)))
   for (i in 1:length(x)) {
@@ -853,15 +842,6 @@ slidelogitdec <- function(x, d) {
     v[i] <- logitdec(x[max(1, i - 59):i], d)
   }
   return(c(0, v[1:length(x) - 1]))
-}
-
-baseratepropdec <- function(v, d) {
-  w <- length(v)
-  targetvalue <- v[w]
-  v <- v==targetvalue
-  corv <- sum(c(1, v[1:w]) * d^(w:0))
-  incorv <- sum(c(1, abs(v[1:w] - 1)) * d^(w:0))
-  log(corv / incorv)
 }
 
 baseratepropdec <- function(v, d) {
@@ -949,7 +929,3 @@ baselevel <- function(x, d) {
   return(c(0, x[2:l]^-d)[1:l])
 }
 
-# find the time that corresponds to the longest break in the sequence
-splittimes <- function(times) {
-  (match(max(rank(diff(times))), rank(diff(times))))
-}

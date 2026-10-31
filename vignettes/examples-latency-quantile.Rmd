@@ -1,0 +1,35 @@
+---
+title: "Examples: Centered Wald Latency"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Centered Wald Latency}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+The Wald model uses one normal trial-noise draw and a fixed participant speed effect.
+The Wald contamination allowance is used for fitting only, never generation.
+
+```{r fit-latencies}
+set.seed(20261030)
+sid <- rep(paste0("s",1:6),each=16)
+d <- data.table::data.table(Anon.Student.Id=sid,
+  KC..Default.=rep(c("k1","k2"),48),
+  CF..ansbin.=rep(c(1,1,0,1,0,0,1,1),12),
+  CF..Time.=rep(seq(1000,1150,10),6),
+  Duration..sec.=rep(seq(3,25,length.out=16),6),fold=1L)
+wald <- LKT(data.table::copy(d),components="KC..Default.",features="logitdec",
+  fixedpars=.9,interc=TRUE,dualfit=TRUE,distribution="Wald",verbose=FALSE,
+  wald_t0_fixed=0,wald_control=list(nodes=15L,maxit=120L))
+check_true("Wald result",wald$model_specification[[2]]$distribution=="Wald")
+check_true("Wald engaged generation",wald$model_specification[[2]]$generation=="engaged_only")
+check_true("Wald finite prediction",all(is.finite(wald$latencymodel[[1]]$predict(c(.2,.5,.9),0,FALSE))))
+```
+
+The `usefolds` and optional `latency_question_type_filter` settings select fitting
+observations. Excluded rows still contribute to the actual feature histories.
+The retired exponential and Weibull latency choices are deliberately rejected.

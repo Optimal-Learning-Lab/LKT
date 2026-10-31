@@ -90,9 +90,11 @@ lkt_resolve_model <- function(model) {
     if (identical(model, "liblinear")) {
       return(LibLinearModel())
     }
+    if (identical(model, "glmm")) return(GLMMModel())
     if (identical(model, "online_calibration")) {
       return(OnlineCalibrationModel())
     }
+    if (identical(model, "online_bayesian")) return(OnlineBayesianModel())
     if (identical(model, "online_adaptive")) {
       return(OnlineAdaptiveModel())
     }
@@ -115,7 +117,7 @@ lkt_resolve_model <- function(model) {
     return(LKTCustomModel(name = model_name, fit = model$fit))
   }
 
-  stop("model must be LibLinearModel(), OnlineCalibrationModel(), OnlineAdaptiveModel(), a model fit function, or an LKTCustomModel().",
+  stop("model must be LibLinearModel(), GLMMModel(), OnlineCalibrationModel(), OnlineAdaptiveModel(), OnlineBayesianModel(), a model fit function, or an LKTCustomModel().",
        call. = FALSE)
 }
 
@@ -188,21 +190,13 @@ lkt_validate_model_fit <- function(fit_result, model_name) {
 }
 
 lkt_call_model_fit <- function(model, request, verbose = FALSE) {
-  fit_result <- tryCatch(
-    model$fit(request = request, verbose = verbose),
-    error = function(err) {
-      msg <- conditionMessage(err)
-      if (!grepl("unused argument", msg, fixed = TRUE)) {
-        stop(err)
-      }
-      model$fit(
-        design_matrix = request$design_matrix,
-        data = request$data,
-        usefolds = request$usefolds,
-        options = request$options,
-        verbose = verbose)
-    })
-  fit_result
+  fit_formals <- names(formals(model$fit))
+  if (!any(c("request", "...") %in% fit_formals)) {
+    stop("LKT model fit must accept a request argument.", call. = FALSE)
+  }
+  args <- list(request = request)
+  if (any(c("verbose", "...") %in% fit_formals)) args$verbose <- verbose
+  do.call(model$fit, args)
 }
 
 lkt_run_model <- function(model, request, verbose = FALSE) {

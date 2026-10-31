@@ -1,0 +1,20 @@
+library(LKT)
+load_gui_data<-getFromNamespace('lkt_gui_load_data','LKT')
+original<-as.data.frame(getExportedValue('LKT','samplelkt'))
+# A workspace object must not shadow the selected package dataset.
+samplelkt<-data.frame(wrong_dataset=TRUE)
+builtin<-load_gui_data('samplelkt (built-in)',data_file='does-not-exist.rds')
+stopifnot(identical(as.data.frame(builtin),original))
+data.table::set(builtin,i=1L,j='Duration..sec.',value=999999)
+stopifnot(identical(as.data.frame(getExportedValue('LKT','samplelkt')),original))
+file<-tempfile(fileext='.rds');saveRDS(original,file)
+stopifnot(identical(as.data.frame(load_gui_data('RDS file',file)),original))
+unlink(file)
+fail<-function(expr,pattern) {
+  e<-tryCatch({force(expr);NULL},error=identity)
+  stopifnot(inherits(e,'error'),grepl(pattern,conditionMessage(e),fixed=TRUE))
+}
+fail(load_gui_data('RDS file','does-not-exist.rds'),'Select a model-ready RDS')
+fail(load_gui_data('unknown source'),'Unknown dataset source')
+stopifnot(identical(samplelkt,data.frame(wrong_dataset=TRUE)))
+cat('PASS package dataset identity, row order, workspace isolation, copy isolation and explicit RDS source/error handling\n')

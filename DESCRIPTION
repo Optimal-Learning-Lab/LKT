@@ -1,6 +1,6 @@
 Package: LKT
 Title: Logistic Knowledge Tracing
-Version: 2.0.0
+Version: 2.0.0.9007
 Authors@R: 
     c(person(given = "Philip I.",
            family = "Pavlik Jr.",
@@ -27,13 +27,21 @@ Collate:
     'lkt-feature-computation.R'
     'lkt-model-interface.R'
     'lkt-model-liblinear.R'
+    'lkt-model-glmm.R'
     'lkt-model-online-calibration.R'
+    'lkt-model-online-bayesian.R'
     'lkt-fast-online-simple-adaptive.R'
+    'lkt-latency-quantile.R'
     'lkt-latency.R'
     'lkt-prediction.R'
     'LKTfunctions.R'
     'lkt-hdi.R'
     'lkt-search.R'
+    'lkt-configuration.R'
+    'lkt-bayesian-prefit.R'
+    'lkt-gui-style.R'
+    'lkt-fgui-bayesian.R'
+    'lkt-fgui.R'
 Depends: 
     R (>= 3.5.0),
     SparseM (>= 1.83),
@@ -49,6 +57,8 @@ Imports:
     crayon,
     HDInterval (>= 0.2.2)
 Suggests: 
+    fgui,
+    tcltk,
     rmarkdown,
     knitr,
     utils,

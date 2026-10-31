@@ -20,11 +20,10 @@ lkt_resolve_feature_parameters <- function(feature, fixedpars, seedparameters,
     if (is.na(fixed_value)) {
       pars[slot] <- seedparameters[optimized_index]
       optimized_index <- optimized_index + 1L
-      if (slot == 1L) {
-        recompute_feature <- TRUE
-      }
+      recompute_feature <- TRUE
     } else if (fixed_value >= 1 && fixed_value %% 1 == 0) {
       pars[slot] <- seedparameters[fixed_value]
+      recompute_feature <- TRUE
     } else {
       pars[slot] <- fixed_value
     }
@@ -41,19 +40,26 @@ lkt_resolve_feature_parameters <- function(feature, fixedpars, seedparameters,
 }
 
 lkt_spacing_requirements <- function(data, components, features) {
-  spacing_dependent_features <- c(
-    "recency", "recencystudy", "recencytest", "recencysuc", "recencyfail",
-    "ppe", "ppes", "ppef")
+  spacing_columns <- list(
+    recency = "spacing",
+    recencystudy = c("spacing", "previousstudy"),
+    recencytest = c("spacing", "previousstudy"),
+    recencysuc = c("spacing", "prev"),
+    recencyfail = c("spacing", "prev"),
+    base4 = c("meanspacing", "relmeanspacing"),
+    base5suc = c("meanspacing", "relmeanspacing"),
+    base5fail = c("meanspacing", "relmeanspacing"),
+    ppe = "spacinglagged", ppes = "spacinglagged", ppef = "spacinglagged")
   features_needing_spacing <- character(0)
   missing_spacing_components <- character(0)
 
   for (i in seq_along(features)) {
     feature <- gsub("[$@]", "", features[i])
     component <- components[i]
-    if (feature %in% spacing_dependent_features) {
+    if (feature %in% names(spacing_columns)) {
       features_needing_spacing <- c(features_needing_spacing, feature)
-      spacing_col <- paste0(component, "spacing")
-      if (!spacing_col %in% colnames(data)) {
+      required_columns <- paste0(component, spacing_columns[[feature]])
+      if (!all(required_columns %in% colnames(data))) {
         missing_spacing_components <- c(missing_spacing_components, component)
       }
     }
@@ -91,16 +97,16 @@ lkt_student_rmse <- function(data) {
     return(NULL)
   }
   stats::aggregate(
-    sqrt((data$pred - data$CF..ansbin.)^2),
+    (data$pred - data$CF..ansbin.)^2,
     by = list(data$Anon.Student.Id),
-    FUN = mean)
+    FUN = function(error_squared) sqrt(mean(error_squared)))
 }
 
 lkt_lkt_result <- function(model, coefs, model_specification, r2, data,
                            nullmodel, optimizedpars, predictors, loglike,
                            model_name, automat, dualfit = FALSE,
-                           distribution = "exp", exp_model = NULL,
-                           weibull_model = NULL, failure_latency = NULL) {
+                           distribution = "Wald", latency_model = NULL,
+                           failure_latency = NULL) {
   result <- list(
     "model" = model,
     "coefs" = coefs,
@@ -111,8 +117,7 @@ lkt_lkt_result <- function(model, coefs, model_specification, r2, data,
     "latencymodel" = if (dualfit) {
       lkt_latency_model_result(
         distribution = distribution,
-        exp_model = exp_model,
-        weibull_model = weibull_model,
+        latency_model = latency_model,
         failure_latency = failure_latency)
     } else NULL,
     "optimizedpars" = optimizedpars,
@@ -126,8 +131,7 @@ lkt_lkt_result <- function(model, coefs, model_specification, r2, data,
   if (dualfit) {
     result$model_specification[[2]] <- lkt_latency_model_specification(
       distribution = distribution,
-      exp_model = exp_model,
-      weibull_model = weibull_model,
+      latency_model = latency_model,
       failure_latency = failure_latency)
   }
   result
@@ -252,14 +256,13 @@ lkt_apply_autokc_components <- function(data, components, autoKC, autoKCcont) {
 lkt_fit_accuracy_step <- function(formula, data, features, feature_spec,
                                   terms_cache, model, model_options, usefolds,
                                   dualfit, nosolve, verbose) {
-  if (any(grep("[@]", features)) && !dualfit) {
-    cat("Using glmer, which uses lme4 package, which is not efficient for large complex data and has memory limitations.")
-    fit <- glmer(formula, data = data, family = binomial(logit))
-    return(list(
-      model = fit,
-      fitstat = logLik(fit),
-      data = data
-    ))
+  if (any(grepl("@$", features))) {
+    if(any(grepl("@",features) & features!='intercept@'))
+      stop('Only intercept@ random-effect features are defined.',call.=FALSE)
+    resolved <- lkt_resolve_model(model)
+    if (resolved$name == 'LibLinear') model <- GLMMModel()
+    else if(resolved$name != 'GLMM')
+      stop('Random-effect terms require GLMMModel.',call.=FALSE)
   }
 
   feature_input <- lkt_feature_input(
@@ -292,6 +295,7 @@ lkt_fit_accuracy_step <- function(formula, data, features, feature_spec,
     feature_input = feature_input,
     predictset2 = model_fit$predictset2,
     model_name = model_fit$model_name,
+    model_metadata = model_fit$model_metadata,
     data = data
   )
 }
@@ -319,31 +323,20 @@ lkt_optimize_lkt_parameters <- function(fixedpars, seedpars,
     seedpars = seedpars,
     nonlinear_param_count = nonlinear_param_count)
   if (opt_input$parameter_count > 0L) {
-    return(stats::optim(
+    optimized <- stats::optim(
       opt_input$seeds,
       objective,
       method = "L-BFGS-B",
       lower = lowb,
       upper = highb,
-      control = list(maxit = maxitv, factr = factrv)))
+      control = list(maxit = maxitv, factr = factrv))
+    # Objective evaluations update the stored model. Numerical differentiation
+    # can leave it at a probe point, so materialize the returned optimum once.
+    optimized$value <- objective(optimized$par)
+    return(optimized)
   }
   objective(numeric(0))
   NA
-}
-
-lkt_report_latency_fit <- function(data, distribution, exp_model, verbose) {
-  failure_latency <- lkt_failure_latency(data)
-  if (identical(distribution, "exp") && verbose) {
-    latency_spec <- lkt_latency_model_specification(
-      distribution = distribution,
-      exp_model = exp_model,
-      failure_latency = failure_latency)
-    cat(paste("Failure latency: ", failure_latency, "\n"))
-    cat(paste("Latency Scalar: ", latency_spec$latency_scalar, "\n",
-              "Latency Intercept: ", latency_spec$latency_intercept, "\n",
-              sep = ""))
-  }
-  failure_latency
 }
 
 lkt_build_accuracy_model_specification <- function(modelvs, features,
@@ -452,11 +445,15 @@ lkt_build_feature_iteration <- function(data, components, features, curvefeats,
 #' @param autoKC Integer vector controlling automatic KC clustering. `0` disables clustering for the corresponding component; positive values are cluster counts.
 #' @param autoKCcont Character vector controlling automatic KC randomization. Use `"rand"` to randomize cluster assignment for comparison runs.
 #' @param connectors Character vector of formula operators (`"+"`, `":"`, or `"*"`) between model terms. Defaults to additive terms.
-#' @param distribution Latency model distribution. Supported values are `"exp"` and `"Weibull"` when `dualfit = TRUE`.
-#' @param weibull_mse_weight Numeric weight in `[0, 1]` for the point-prediction component of Weibull latency fitting.
-#' @param weibull_t0_fixed Optional fixed minimum response time, in seconds, for Weibull latency fitting.
+#' @param distribution Latency distribution, `"Wald"`. Exponential and Weibull latency paths are retired and rejected explicitly.
 #' @param model LKT model adapter. Defaults to `LibLinearModel()`.
 #' @param model_options Optional list of adapter-specific model options.
+#' @param latency_question_type_filter Optional single question type. Restricts latency fitting observations without changing feature histories or accuracy fitting.
+#' @param wald_calibration Optional verified centered Wald calibration. NULL fits the current observations. Supplied calibrations must match inputs; mismatches fail.
+#' @param wald_contamination_weight Fit-only uniform contamination weight; default 0.02. Simulated latencies use the engaged distribution only.
+#' @param wald_t0_fixed Optional fixed nonnegative Wald shift, in seconds.
+#' @param wald_control Named controls for Wald optimization and quadrature.
+#' @details With dual fitting, `usefolds` and `latency_question_type_filter` select latency observations before correct-response IQR screening. All rows remain in feature histories. Failure latency uses usable failed responses from the same selected subset. Invalid or empty fitting subsets fail explicitly.
 #' @return A list containing the fitted model, coefficients, predictions, fit statistics, processed data, feature metadata, and optional latency-model results. With `nosolve = TRUE`, returns the constructed sparse matrices and feature names for downstream legacy model-selection helpers.
 #' @examples
 #' \donttest{
@@ -494,12 +491,17 @@ LKT <- function(data,usefolds = NA,
                 autoKC=rep(0,length(components)),
                 autoKCcont = rep("NA",length(components)),
                 connectors= rep("+",max(1,length(components)-1)),
-                distribution = "exp",
-                weibull_mse_weight = 0,
-                weibull_t0_fixed = NULL,
+                distribution = "Wald",
                 model = LibLinearModel(),
-                model_options = list()) {
+                model_options = list(),
+                latency_question_type_filter = NULL,
+                wald_calibration = NULL, wald_contamination_weight = .02,
+                wald_t0_fixed = NULL, wald_control = list()) {
+  if(!identical(distribution,'Wald'))
+    stop('Only Wald latency is supported. Exponential and Weibull latency models are retired.',call.=FALSE)
   lkt_validate_feature_spec(components, features)
+  if(nosolve && any(grepl('@$',features)))
+    stop('nosolve cannot represent random-effect terms.',call.=FALSE)
   nonlinear_param_count <- sum(lkt_feature_param_counts(features))
   if (nosolve && !(length(fixedpars) == 1L && is.na(fixedpars))) {
     if (length(fixedpars) < nonlinear_param_count) {
@@ -512,6 +514,12 @@ LKT <- function(data,usefolds = NA,
   } else {
     fixedpars <- lkt_normalize_parameter_vector(fixedpars, nonlinear_param_count, "fixedpars")
     seedpars <- lkt_normalize_parameter_vector(seedpars, nonlinear_param_count, "seedpars")
+  }
+  if (identical(lkt_resolve_model(model)$name,'OnlineBayesian')) {
+    if(nosolve||any(grepl('@',features,fixed=TRUE)))
+      stop('OnlineBayesian does not support nosolve or @ random-effect features.',call.=FALSE)
+    if(any(!is.finite(fixedpars))||any(fixedpars>=1 & fixedpars%%1==0)||dualfit||any(autoKC!=0))
+      stop('OnlineBayesian requires fixed nonlinear feature parameters, autoKC = 0, and dualfit = FALSE; fit shared features on separate training subjects.',call.=FALSE)
   }
   if (dualfit && !("Duration..sec." %in% colnames(data))) {
     stop("dualfit requires a Duration..sec. column.", call. = FALSE)
@@ -596,20 +604,17 @@ LKT <- function(data,usefolds = NA,
       verbose = verbose)
     e$data <- accuracy_fit$data
     e$feature_input <- accuracy_fit$feature_input
+    e$model_metadata <- accuracy_fit$model_metadata
 
     if (dualfit) {
-      latency_data <- lkt_prepare_latency_data(e$data)
+      latency_data <- lkt_prepare_latency_data(e$data, usefolds, latency_question_type_filter)
       latency_fit <- lkt_fit_latency_model(
         latency_data = latency_data,
         distribution = distribution,
-        weibull_mse_weight = weibull_mse_weight,
-        weibull_t0_fixed = weibull_t0_fixed,
-        verbose = verbose)
-      if (identical(latency_fit$distribution, "exp")) {
-        e$lm.rt <- latency_fit$model
-      } else {
-        e$weibull.rt <- latency_fit$model
-      }
+        verbose = verbose,
+        wald_calibration=wald_calibration, wald_contamination_weight=wald_contamination_weight,
+        wald_t0_fixed=wald_t0_fixed, wald_control=wald_control)
+      e$latency_model <- latency_fit$model
     }
 
     if (!nosolve) {
@@ -651,11 +656,9 @@ LKT <- function(data,usefolds = NA,
       maxitv = maxitv,
       factrv = factrv)
     failureLatency <- if (dualfit) {
-      lkt_report_latency_fit(
+      lkt_failure_latency(
         data = e$data,
-        distribution = distribution,
-        exp_model = e$lm.rt,
-        verbose = verbose)
+        usefolds=usefolds, question_type=latency_question_type_filter)
     } else NULL
     model_spec <- lkt_build_accuracy_model_specification(
       modelvs = e$modelvs,
@@ -677,9 +680,9 @@ LKT <- function(data,usefolds = NA,
       automat = e$df,
       dualfit = dualfit,
       distribution = distribution,
-      exp_model = e$lm.rt,
-      weibull_model = e$weibull.rt,
+      latency_model = e$latency_model,
       failure_latency = failureLatency)
+    if (!is.null(e$model_metadata)) results <- c(results,e$model_metadata)
   } else {
     results <- list("lassodata" = modelfun(numeric(0)))
   }
@@ -695,12 +698,6 @@ LKT <- function(data,usefolds = NA,
 
 
 #Given a par_reps matrix, computes HDI intervals for each column
-# custom duration function, experimental
-
-texteval <- function(stringv) {
-  eval(parse(text = stringv))
-}
-
 #' Open a data frame in the system spreadsheet viewer
 #'
 #' @description Legacy exported convenience helper that writes a data frame to a temporary CSV file and opens it with the operating system's default application where supported. It is intended for interactive use, not package automation.

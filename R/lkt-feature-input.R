@@ -187,7 +187,9 @@ lkt_sparse_model_matrix <- function(formula, data, terms_cache = NULL) {
 #' input$column_names
 #' @export
 LKTFeatureInput <- function(formula, data, feature_spec, terms_cache = NULL) {
-  design_matrix <- lkt_sparse_model_matrix(formula, data, terms_cache)
+  matrix_formula <- if (length(lme4::findbars(formula)))
+    lme4::nobars(lkt_glmm_formula(formula)) else formula
+  design_matrix <- lkt_sparse_model_matrix(matrix_formula, data, terms_cache)
   structure(list(
     formula = formula,
     data = data,

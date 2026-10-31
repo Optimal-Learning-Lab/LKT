@@ -30,7 +30,15 @@ if (length(files) == 0) {
   stop("No vignette files matched: ", paste(patterns, collapse = ", "))
 }
 
-Sys.setenv(LKT_SOURCE_WORKTREE = "true")
+expected_library <- Sys.getenv("LKT_EXPECTED_LIBRARY")
+expected_version <- Sys.getenv("LKT_EXPECTED_VERSION")
+if (!nzchar(expected_library) || !nzchar(expected_version))
+  stop("Set LKT_EXPECTED_LIBRARY and LKT_EXPECTED_VERSION for installed-package example validation.")
+loaded_library <- normalizePath(find.package("LKT"),winslash="/",mustWork=TRUE)
+expected_package <- normalizePath(file.path(expected_library,"LKT"),winslash="/",mustWork=TRUE)
+if (!identical(loaded_library,expected_package) || as.character(packageVersion("LKT"))!=expected_version)
+  stop("Example runner loaded the wrong installed LKT package.")
+message("Verified installed LKT ",expected_version," at ",loaded_library)
 
 source_files_for_hash <- function(file) {
   candidates <- c(
@@ -38,7 +46,10 @@ source_files_for_hash <- function(file) {
     file.path(vignette_dir, "lkt-vignette-setup.R"),
     sort(list.files(file.path(root, "R"), pattern = "[.]R$",
                     full.names = TRUE)),
-    file.path(root, "DESCRIPTION")
+    file.path(root, "DESCRIPTION"),
+    file.path(loaded_library,"DESCRIPTION"),
+    list.files(file.path(loaded_library,"R"),full.names=TRUE),
+    list.files(file.path(loaded_library,"libs"),recursive=TRUE,full.names=TRUE)
   )
   candidates[file.exists(candidates)]
 }
