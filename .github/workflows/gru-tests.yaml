@@ -29,23 +29,36 @@ jobs:
         run: R CMD INSTALL .
       - name: Require and run neural regression tests
         run: |
-          Rscript tests/gru-defaults.R
-          Rscript tests/gru-configuration.R
-          Rscript tests/gru-features.R
-          Rscript tests/gru-regression.R
-          Rscript tests/gru-inference.R
-          Rscript tests/gru-runtime.R
-          Rscript tests/gru-encoders.R
-          Rscript tests/gru-time-features.R
-          Rscript tests/gru-retrieval.R
-          Rscript tests/gru-retrieval-filter.R
-          Rscript tests/gru-ktst-ideas.R
-          Rscript tests/gru-input-fusion.R
-          Rscript tests/gru-joint-encoder.R
-          Rscript tests/gru-all-layer-inputs.R
-          Rscript tests/gru-initialization.R
-          Rscript tests/sequence-mamba.R
-          Rscript tests/sequence-configuration.R
-          Rscript tests/sequence-runtime.R
-          Rscript tests/sequence-unit-contract.R
-          python3 scripts/test-sequence-launcher.py
+          failed=()
+          for test in \
+            tests/gru-defaults.R \
+            tests/gru-configuration.R \
+            tests/gru-features.R \
+            tests/gru-regression.R \
+            tests/gru-inference.R \
+            tests/gru-runtime.R \
+            tests/gru-encoders.R \
+            tests/gru-time-features.R \
+            tests/gru-retrieval.R \
+            tests/gru-retrieval-filter.R \
+            tests/gru-ktst-ideas.R \
+            tests/gru-input-fusion.R \
+            tests/gru-joint-encoder.R \
+            tests/gru-all-layer-inputs.R \
+            tests/gru-initialization.R \
+            tests/sequence-mamba.R \
+            tests/sequence-configuration.R \
+            tests/sequence-runtime.R \
+            tests/sequence-unit-contract.R \
+          ; do
+            echo "::group::$test"
+            if ! Rscript "$test"; then failed+=("$test"); fi
+            echo "::endgroup::"
+          done
+          if ! python3 scripts/test-sequence-launcher.py; then
+            failed+=("scripts/test-sequence-launcher.py")
+          fi
+          if ((${#failed[@]})); then
+            printf 'Failed regression scripts: %s\n' "${failed[*]}" >&2
+            exit 1
+          fi

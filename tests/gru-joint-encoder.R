@@ -35,6 +35,7 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     s <- base;s$joint_encoder_output_size <- 9L;s$joint_encoder_hidden_sizes <- hidden
     stopifnot(isTRUE(all.equal(get('lkt_gru_gui_decode',ns)(get('lkt_gru_gui_encode',ns)(s)),s)))
     fit <- LKT(d,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE)
+    initial_weights <- serialize(fit$model$weights,NULL)
     rt <- LKTGRURuntime(fit);net <- rt$network
     e <- get('lkt_gru_encode',ns)(d[1:12,],fit$model$preprocessing,fit$model$recipe,s)
     b <- get('lkt_gru_batch',ns)(e,d[1:12,],list(1:12),list(1:12),s)
@@ -71,7 +72,8 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     close(predict_lkt(fit,changed)$predictions[1:6],fit$prediction[1:6])
     changed <- d;changed$CF..ansbin.[d$fold==3] <- 1-changed$CF..ansbin.[d$fold==3]
     other <- LKT(changed,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE)
-    stopifnot(identical(fit$model$weights,other$model$weights))
+    test_gru_same_weights(fit,other,paste('Joint encoder',paste(hidden,collapse=',')),initial_weights,
+      function()LKT(d,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE))
   }
   cat('PASS shared input encoder: direct/linear maps, all three routes, gradients, disabled RNG, GUI, causality, held-out isolation, immutable scoring and continuation.\n')
 } else if(identical(Sys.getenv('LKT_REQUIRE_TORCH_TESTS'),'true'))stop('Torch runtime required.')

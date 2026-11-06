@@ -408,7 +408,7 @@
     },
     {
       "path": "tests/fixtures/gru-minimal-settings.R",
-      "sha256": "5bda93fdb93d9962f7c8947f6755ffb4d3b2460d5bd454f2a9953cc50967172b"
+      "sha256": "1f966825e1fe52701c2f612f8861b2b6ac5ef88450264c100969eca628d4f1bc"
     },
     {
       "path": "tests/fixtures/sequence-mamba.json",
@@ -448,11 +448,11 @@
     },
     {
       "path": "tests/gru-input-fusion.R",
-      "sha256": "59172524fd5d2ccceea853b74effe8723144dfaa1dded58b15d9fc6413ee606b"
+      "sha256": "7411074eab5746a10187d93133d28c0a30f3d2dd3b2f743206b21870b6b6414f"
     },
     {
       "path": "tests/gru-joint-encoder.R",
-      "sha256": "f39877a86162db974cfdfe4e5c1e0e009bc5c7f388c8b72c7b594ff611e56701"
+      "sha256": "5fa0be3e7e192a4d70f78e6c764fda8233a5f07a8c54c8b32c3b39aa7d27d21d"
     },
     {
       "path": "tests/gru-ktst-ideas.R",

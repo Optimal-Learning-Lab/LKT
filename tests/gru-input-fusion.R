@@ -37,6 +37,7 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     # FGUI must preserve every width and combination, with no parsed R expressions.
     stopifnot(isTRUE(all.equal(get('lkt_gru_gui_decode',ns)(get('lkt_gru_gui_encode',ns)(s)),s)))
     fit <- LKT(d,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE)
+    initial_weights <- serialize(fit$model$weights,NULL)
     runtime <- LKTGRURuntime(fit);net <- runtime$network
     encoded <- get('lkt_gru_encode',ns)(d[1:12,],fit$model$preprocessing,fit$model$recipe,s)
     batch <- get('lkt_gru_batch',ns)(encoded,d[1:12,],list(1:12),list(1:12),s)
@@ -80,7 +81,8 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     close(predict_lkt(fit,changed)$predictions[1:6],fit$prediction[1:6])
     changed <- d;changed$CF..ansbin.[d$fold==3] <- 1-changed$CF..ansbin.[d$fold==3]
     other <- LKT(changed,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE)
-    stopifnot(identical(fit$model$weights,other$model$weights))
+    test_gru_same_weights(fit,other,paste('Input fusion',condition),initial_weights,
+      function()LKT(d,usefolds=1,components='skill',features='intercept',model=do.call(test_gru_model,s),verbose=FALSE))
   }
   prep <- fit$model$preprocessing
   bad <- base;bad$numeric_fusion <- 'sum';bad$encoder_output_sizes <- c(time=3L,history=4L)
