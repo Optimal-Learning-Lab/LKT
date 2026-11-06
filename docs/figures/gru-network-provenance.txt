@@ -1,0 +1,10 @@
+Checkpoint: C:/dev/LKT-outputs/gru-grid-largerawsample-bigblue-20261101/models/augmented_g003_seed1.rds
+Checkpoint SHA256: f815126c840f32917ec37317d80df3597cd3813651944e80322c42ff3f3e5434
+Drawn source SHA256: 41aa3d79f0709f7bdbe9f20889fd29dde63f63ea460ce959077bd4c11d6b4913
+Numeric column order:
+  time:log1p_gap_seconds
+  lkt:(Intercept)
+  lkt:logitdecKC..Default.
+  lkt:ppesKC..Default.
+  lkt:logitdecAnon.Student.Id
+PASS: saved dimensions, parameter count, Torch GRU equations, head equation, and current-answer causality.

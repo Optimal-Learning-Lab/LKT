@@ -1,0 +1,11 @@
+"check","maximum_difference"
+"encoded_inputs",9.19928155318495e-08
+"encoded_response",5.63588727353626e-08
+"attention_weights",9.65797699592486e-08
+"logits",1.88304530412964e-07
+"final_gru_state",1.00729687257939e-07
+"bank_event_records",1.9666725675771e-07
+"bank_post_answer_states",1.9666725675771e-07
+"chunk_continuation",1.00172667050202e-07
+"current_and_future_answer_effect",0
+"real_held_out_history",1.19209289550781e-07

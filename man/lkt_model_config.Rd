@@ -7,14 +7,16 @@
 lkt_model_config(
   terms,
   intercept = TRUE,
-  backend = c("LibLinear", "GLMM", "OnlineBayesian"),
+  backend = c("LibLinear", "GLMM", "OnlineBayesian", "GRU", "Sequence"),
   latency = c("none", "Wald"),
   folds = NA,
   options = list(),
   glmm_prediction = "conditional",
   glmm_unseen = "error",
   bayesian_options = NULL,
-  bayesian_training = NULL
+  bayesian_training = NULL,
+  gru_options = NULL,
+  sequence_options = NULL
 )
 }
 \arguments{
@@ -23,7 +25,7 @@ start (semicolon-separated numbers), interaction, and connector columns.}
 
 \item{intercept}{Include the global intercept.}
 
-\item{backend}{LibLinear, GLMM, or OnlineBayesian.}
+\item{backend}{LibLinear, GLMM, OnlineBayesian, GRU, or Sequence.}
 
 \item{latency}{none or Wald. Retired latency models are rejected.}
 
@@ -43,6 +45,10 @@ prior knowledge. Only linear coefficients are personalized.}
 training_fraction and split_seed for a whole-participant training/evaluation
 split. A correlated logistic mixed-model prefit estimates population means
 and between-participant covariance using training participants only.}
+
+\item{gru_options}{Named GRUModel arguments. All resolved settings are saved.}
+
+\item{sequence_options}{Named SequenceModel arguments, including unit and unit_options.}
 }
 \value{
 A versioned LKTModelConfig list, suitable for saveRDS().

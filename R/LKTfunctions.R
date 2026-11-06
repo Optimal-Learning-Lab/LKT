@@ -499,6 +499,13 @@ LKT <- function(data,usefolds = NA,
                 wald_t0_fixed = NULL, wald_control = list()) {
   if(!identical(distribution,'Wald'))
     stop('Only Wald latency is supported. Exponential and Weibull latency models are retired.',call.=FALSE)
+  resolved_model <- lkt_resolve_model(model)
+  if (resolved_model$name %in% c('GRU','Sequence')) {
+    lkt_validate_feature_spec(components, features)
+    return(lkt_gru_lkt(data, resolved_model, usefolds, components, features,
+      fixedpars, interacts, connectors, interc, maketimes, dualfit, nosolve,
+      autoKC, curvefeats, model_options, verbose))
+  }
   lkt_validate_feature_spec(components, features)
   if(nosolve && any(grepl('@$',features)))
     stop('nosolve cannot represent random-effect terms.',call.=FALSE)

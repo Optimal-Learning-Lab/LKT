@@ -1,0 +1,20 @@
+"check","value"
+"Known item identities",144
+"Known skill identities",36
+"Reserved rows per embedding table",1
+"Item embedding width",16
+"Skill embedding width",16
+"Numeric input columns",5
+"Encoded feature width",37
+"First-layer update input width",38
+"GRU layers",3
+"Units per GRU layer",32
+"Prediction-head input width",69
+"Head hidden units",128
+"Parameter entries including reserved rows",31585
+"Maximum manual-GRU state error",3.64961195292723e-08
+"Maximum manual-head logit error",9.25160292819527e-09
+"Current-answer effect on current logit",0
+"Current-answer effect on updated memory",0.0899142324924469
+"Real held-out response replay rows",110
+"Maximum held-out replay error",5.96046447753906e-08

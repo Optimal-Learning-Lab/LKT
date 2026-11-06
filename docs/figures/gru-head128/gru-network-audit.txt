@@ -1,0 +1,23 @@
+Selected augmented GRU: diagram accuracy checks
+                                     check        value
+                     Known item identities 1.440000e+02
+                    Known skill identities 3.600000e+01
+         Reserved rows per embedding table 1.000000e+00
+                      Item embedding width 1.600000e+01
+                     Skill embedding width 1.600000e+01
+                     Numeric input columns 5.000000e+00
+                     Encoded feature width 3.700000e+01
+            First-layer update input width 3.800000e+01
+                                GRU layers 3.000000e+00
+                       Units per GRU layer 3.200000e+01
+               Prediction-head input width 6.900000e+01
+                         Head hidden units 1.280000e+02
+ Parameter entries including reserved rows 3.158500e+04
+            Maximum manual-GRU state error 3.649612e-08
+           Maximum manual-head logit error 9.251603e-09
+    Current-answer effect on current logit 0.000000e+00
+   Current-answer effect on updated memory 8.991423e-02
+        Real held-out response replay rows 1.100000e+02
+             Maximum held-out replay error 5.960464e-08
+PASS: all dimensions and equations agree with the saved model.
+PASS: current LKT 2.0.0.9010 replays the unmodified historical checkpoint within 3e-6.

@@ -1,0 +1,20 @@
+Checkpoint: C:/dev/LKT-outputs/gru-retrieval-comparison-20261104/download/results/models/development__one_head__seed3.rds
+Checkpoint SHA256: c7dbb3c09f371f99f16c5eb886a1e99c2580f7da57bb7bda44edccca9fd5e7a6
+Study SHA256: 068a85135a015b72208dc14ae692baa8c8c5f1873cf38cd500648cef7bb959d4
+Release source SHA256: 4d9dbdf6dcff3a2345c80bd189788647189060fb68830313c0edbb2158b9a4d3
+Drawing script SHA256: 8afee27503c8609c87bcc90c96e36ae3f2cee2989d3e06911d5856144e04dd1b
+One head selected by user; representative seed selected by validation loss: 3
+Restored epoch: 27
+46,257 parameter entries, including reserved zero embedding rows.
+PASS: full ordinary R calculation of encoders, embeddings, all three GRU layers, one-head attention and prediction head.
+PASS: strict past-only retrieval, first-trial zero read, 100-event window, chunk continuation and 120 real held-out responses.
+                  encoded_inputs                 encoded_response
+                    9.199282e-08                     5.635887e-08
+               attention_weights                           logits
+                    9.657977e-08                     1.883045e-07
+                 final_gru_state               bank_event_records
+                    1.007297e-07                     1.966673e-07
+         bank_post_answer_states               chunk_continuation
+                    1.966673e-07                     1.001727e-07
+current_and_future_answer_effect            real_held_out_history
+                    0.000000e+00                     1.192093e-07

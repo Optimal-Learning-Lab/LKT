@@ -58,3 +58,27 @@ saved_models/
 test-results/
 test-output/
 verification_artifacts/
+# Experiments and bulk inputs live in sibling LKT-outputs and LKT-data.
+# Reject accidental in-repository copies, including scripts and Markdown logs.
+/artifacts/
+/LKT-data/
+/LKT-outputs/
+
+# Local operator records and downloaded research-paper copies
+/policy.md
+/docs/papers/*.pdf
+
+# Intentional curated figure configurations and small verification tables.
+# These contain settings, dimensions and aggregate checks, not fitted weights or learner rows.
+!/docs/figures/gru-base-model/model-specification.rds
+!/docs/figures/gru-base-model/selection.rds
+!/docs/figures/gru-base-model/accuracy-check.csv
+!/docs/figures/gru-base-model/weight-shapes.csv
+!/docs/figures/gru-encoder-augmented/accuracy-check.csv
+!/docs/figures/gru-encoder-augmented/weight-shapes.csv
+!/docs/figures/gru-head128/gru-network-audit.csv
+!/docs/figures/gru-head128/gru-network-numeric-inputs.csv
+!/docs/figures/gru-head128/gru-network-weight-shapes.csv
+!/docs/figures/gru-network-audit.csv
+!/docs/figures/gru-retrieval-one-head/accuracy-check.csv
+!/docs/figures/gru-retrieval-one-head/weight-shapes.csv

@@ -1,0 +1,20 @@
+Checkpoint: C:/dev/LKT-outputs/encoder-inference-20261103/development-review/results/models/development__augmented__encoders__g112__seed3.rds
+Checkpoint SHA256: d7858567095d526e22644ab14a29e80b3e59351ffe3a204d344081158157e4cd
+Original study SHA256: 2db408ecfdc5190fbc437abeaf8d1d76b3c9374b2dfa8ad854c5f34aea756e7c
+Current release SHA256: 6e40c95f9c55027d3b3388fc59633ff3ae596dc2ee01fbe13ede3ff82b4bb9ad
+Installed library: C:/dev/PolicyFactory2/.r-libs/LKT-2.0.0.9011-6e40c95f9c55/LKT
+Drawing script SHA256: 60f334dd19626434015b9d4b50a517d8623fe49e0716b7a0582599c50cbae9e9
+Candidate selected by mean validation loss: g112
+Representative seed selected by validation loss: 3
+Restored epoch: 18
+Replayed real held-out responses: 110
+PASS: feature/response encoders, both embedding tables, three GRU layers, head, causal order, and real-history predictions.
+This is the best mean-AUC architecture on the original development test split so far. Full CV aggregation is pending.
+                 feature_encoder                 response_encoder
+                    4.346841e-08                     3.478284e-08
+                 recurrent_state                  prediction_head
+                    7.547018e-08                     4.375992e-08
+current_answer_prediction_effect     current_answer_memory_effect
+                    0.000000e+00                     2.505322e-01
+             real_history_replay
+                    1.192093e-07

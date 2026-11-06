@@ -1,0 +1,45 @@
+{
+  "downloaded_utc": "2026-11-04T13:14:43.058235+00:00",
+  "papers": [
+    {
+      "file": "Delianidi-Diamantaras-2023-KT-Bi-GRU.pdf",
+      "title": "KT-Bi-GRU: Student Performance Prediction with a Bi-Directional Recurrent Knowledge Tracing Neural Network",
+      "year": 2023,
+      "source_url": "https://jedm.educationaldatamining.org/index.php/JEDM/article/download/604/162",
+      "doi": "10.5281/zenodo.7808087",
+      "pages": 21,
+      "sha256": "1a3c8719d41928b5266c3e2330ad0ae2de32f73aaaa55b691120ddeb8889ba7a",
+      "copy": "Unchanged public PDF download."
+    },
+    {
+      "file": "Nagatani-et-al-2019-Augmenting-Knowledge-Tracing-Forgetting.pdf",
+      "title": "Augmenting Knowledge Tracing by Considering Forgetting Behavior",
+      "year": 2019,
+      "source_url": "https://archives.iw3c2.org/www2019/media/TheWebConf2019-Proceedings.pdf",
+      "doi": "10.1145/3308558.3313565",
+      "pages": 7,
+      "sha256": "e5ab175b88fef2f10adcc21ddf7c54c013b5555a7b17d533e6354e2846c1cb1e",
+      "copy": "Exact page extraction from official conference proceedings, printed pages 3101-3107; every page verified pixel-identical."
+    },
+    {
+      "file": "Zhang-et-al-2017-Dynamic-Key-Value-Memory-Networks.pdf",
+      "title": "Dynamic Key-Value Memory Networks for Knowledge Tracing",
+      "year": 2017,
+      "source_url": "https://archives.iw3c2.org/www2017/proceedings/proceedings/p765.pdf",
+      "doi": "10.1145/3038912.3052580",
+      "pages": 10,
+      "sha256": "df12cf795915cc4975eb29d44a8be991a3372eb3d52f39f8da6f7b30f521a594",
+      "copy": "Unchanged public PDF download."
+    },
+    {
+      "file": "Ghosh-Heffernan-Lan-2020-Context-Aware-Attentive-Knowledge-Tracing.pdf",
+      "title": "Context-Aware Attentive Knowledge Tracing",
+      "year": 2020,
+      "source_url": "https://people.umass.edu/~andrewlan/papers/20kdd-akt.pdf",
+      "doi": "10.1145/3394486.3403282",
+      "pages": 10,
+      "sha256": "21d102792d68c752fff5d8ca44429949046b719668f53fb4575e638523ec730d",
+      "copy": "Unchanged public PDF download."
+    }
+  ]
+}

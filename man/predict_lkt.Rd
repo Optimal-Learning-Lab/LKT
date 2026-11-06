@@ -10,7 +10,9 @@ predict_lkt(
   fold = NULL,
   return_stats = FALSE,
   min_pred_limit = 1e-05,
-  max_pred_limit = 0.99999
+  max_pred_limit = 0.99999,
+  state = NULL,
+  return_state = FALSE
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ predict_lkt(
 \item{min_pred_limit}{Minimum probability used to clamp predictions.}
 
 \item{max_pred_limit}{Maximum probability used to clamp predictions.}
+
+\item{state}{Optional retained sequence-model or GRU student state.}
+
+\item{return_state}{Include updated sequence state in the result.}
 }
 \value{
 If return_stats is FALSE, returns a list containing:

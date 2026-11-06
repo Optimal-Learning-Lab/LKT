@@ -54,10 +54,13 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
     stop('Set a nonempty default output filename.')
   if(!is.function(confirm_overwrite))stop('confirm_overwrite must be a function.')
   default_output_file<-path.expand(output_file)
+  if(inherits(config,'LKTModelConfig') && identical(config$backend,'Sequence'))
+    stop('Sequence models currently use the R APIs; GUI architecture selection is not implemented.',call.=FALSE)
   if(!requireNamespace('fgui',quietly=TRUE))stop('Install the optional fgui package to open this interface.',call.=FALSE)
   if(is.null(config))config<-lkt_model_config(data.frame(component='KC..Default.',feature='intercept'),options=list(verbose=FALSE))
   lkt_config_arguments(config)
   bayesian<-new.env(parent=emptyenv());bayesian$options<-config$bayesian_options
+  gru<-new.env(parent=emptyenv());gru$options<-config$gru_options
   controller<-function(action='Preview',terms='',intercept=TRUE,backend='LibLinear',
     latency='none',folds='NA',wald_allowance=.02,dataset='RDS file',data_file='',output_file='',load_file='',
     bayesian_workflow='Participant split + prefit',training_fraction=.7,split_seed=1,
@@ -89,6 +92,7 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
         maxitv=as.numeric(maxitv),factrv=as.numeric(factrv)),
         if(latency=='Wald')list(wald_contamination_weight=as.numeric(wald_allowance)) else list())),
       glmm_prediction=glmm_prediction,glmm_unseen=glmm_unseen,bayesian_options=online_options,
+      gru_options=if(backend=='GRU')gru$options else NULL,
       bayesian_training=if(split_mode)list(training_fraction=as.numeric(training_fraction),split_seed=as.numeric(split_seed)) else NULL)
     if(action=='Predictor names') {
       # Explicit matrix-only inspection of shared features; no model is fitted
@@ -198,7 +202,7 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
     choices=list(action=c('Preview','Preview participant split','Save specification','Run and save model','Load specification','Feature reference','Add term','Predictor names'),
       bayesian_workflow=c('Participant split + prefit','Supplied prior (no split)'),
       ess_action=c('warn','error','ignore'),store_trace=c('FALSE','TRUE'),
-      backend=c('LibLinear','GLMM','OnlineBayesian'),latency=c('none','Wald'),
+      backend=c('LibLinear','GLMM','OnlineBayesian','GRU'),latency=c('none','Wald'),
       intercept=c('TRUE','FALSE'),glmm_prediction=c('conditional','fixed'),
       glmm_unseen=c('error','zero'),dataset=c('RDS file','samplelkt (built-in)')),
     files=c('data_file','load_file'),edit=list(terms=c(85,8,FALSE)),
@@ -211,7 +215,11 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
       store_trace='Store posterior trace',
       wald_allowance='Wald fit contamination allowance',dataset='Dataset',data_file='Data file (RDS file source only)',output_file='New output file (.rds)',
       load_file='Specification to load (.rds)'),
-    buttons=list('Supplied prior...'=function() {
+    buttons=list('GRU settings...'=function() {
+      updated<-lkt_gru_gui(gru$options,theme)
+      if(!is.null(updated))gru$options<-updated
+      'GRU settings ready. Preview or save the GRU specification to review them. No model has been run.'
+    },'Supplied prior...'=function() {
       updated<-lkt_bayesian_gui(bayesian$options,theme)
       if(!is.null(updated))bayesian$options<-updated
       if(is.null(bayesian$options))'No supplied Bayesian prior configured.' else paste('Supplied prior ready (used only in Supplied prior mode):',

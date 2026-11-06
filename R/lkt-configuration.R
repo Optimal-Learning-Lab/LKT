@@ -11,7 +11,9 @@ lkt_features <- function() lkt_feature_registry()
 #' @param terms Data frame with component and feature, and optional fixed,
 #'   start (semicolon-separated numbers), interaction, and connector columns.
 #' @param intercept Include the global intercept.
-#' @param backend LibLinear, GLMM, or OnlineBayesian.
+#' @param backend LibLinear, GLMM, OnlineBayesian, GRU, or Sequence.
+#' @param gru_options Named GRUModel arguments. All resolved settings are saved.
+#' @param sequence_options Named SequenceModel arguments, including unit and unit_options.
 #' @param latency none or Wald. Retired latency models are rejected.
 #' @param folds Numeric fitting folds, or NA for all rows. History is retained.
 #' @param options Named additional LKT arguments. Cannot override term settings.
@@ -26,10 +28,10 @@ lkt_features <- function() lkt_feature_registry()
 #'   and between-participant covariance using training participants only.
 #' @return A versioned LKTModelConfig list, suitable for saveRDS().
 #' @export
-lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM','OnlineBayesian'),
+lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM','OnlineBayesian','GRU','Sequence'),
                              latency=c('none','Wald'), folds=NA,
                              options=list(), glmm_prediction='conditional',
-                             glmm_unseen='error',bayesian_options=NULL,bayesian_training=NULL) {
+                             glmm_unseen='error',bayesian_options=NULL,bayesian_training=NULL,gru_options=NULL,sequence_options=NULL) {
   backend<-match.arg(backend);latency<-match.arg(latency)
   terms<-as.data.frame(terms,stringsAsFactors=FALSE)
   if(!nrow(terms) || !all(c('component','feature') %in% names(terms)))
@@ -72,6 +74,19 @@ lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM'
       stop('Invalid positive numeric option: ',n,call.=FALSE)
   }
   if(backend=='GLMM')GLMMModel(glmm_prediction,glmm_unseen)
+  if(backend=='GRU') {
+    gru_options<-lkt_gru_settings(if(is.null(gru_options))list() else gru_options)
+    if(latency!='none'||any(!is.finite(fixed))||any(fixed>=1 & fixed%%1==0)||
+        isTRUE(options$nosolve)||any(options$autoKC!=0)||length(options$model_options)||
+        any(!is.na(options$curvefeats)))
+      stop('GRU requires accuracy-only fitting and fixed nonlinear parameters; use gru_options for controls.',call.=FALSE)
+  } else if(!is.null(gru_options))stop('gru_options require backend GRU.',call.=FALSE)
+  if(backend=='Sequence') {
+    if(is.null(sequence_options))sequence_options <- list()
+    sequence_options <- lkt_sequence_arguments(do.call(SequenceModel,sequence_options)$settings)
+    if(latency!='none' || any(is.na(fixed)) || any(fixed>=1 & fixed%%1==0))
+      stop('Sequence requires accuracy-only fitting and fixed nonlinear parameters.',call.=FALSE)
+  } else if(!is.null(sequence_options))stop('sequence_options require backend Sequence.',call.=FALSE)
   if(backend=='OnlineBayesian') {
     if(latency!='none'||!all(is.na(folds))||any(!is.finite(fixed))||any(fixed>=1 & fixed%%1==0)||any(random))
       stop('Bayesian online models require latency none, folds NA and fixed nonlinear parameters without parameter ties or random-effect terms.',call.=FALSE)
@@ -88,20 +103,22 @@ lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM'
   structure(list(schema=1L,terms=terms,intercept=intercept,backend=backend,latency=latency,
     folds=folds,options=options,fixedpars=fixed,seedpars=starts,
     glmm_prediction=glmm_prediction,glmm_unseen=glmm_unseen,bayesian_options=bayesian_options,
-    bayesian_training=bayesian_training),class='LKTModelConfig')
+    bayesian_training=bayesian_training,gru_options=gru_options,sequence_options=sequence_options),class='LKTModelConfig')
 }
 
 lkt_config_arguments <- function(config) {
   if(!inherits(config,'LKTModelConfig')||!identical(config$schema,1L))stop('Expected an LKT model configuration.',call.=FALSE)
   # Revalidate loaded files; serialized lists are not an alternative validation path.
   checked<-lkt_model_config(config$terms,config$intercept,config$backend,config$latency,
-    config$folds,config$options,config$glmm_prediction,config$glmm_unseen,config$bayesian_options,config$bayesian_training)
+    config$folds,config$options,config$glmm_prediction,config$glmm_unseen,config$bayesian_options,config$bayesian_training,config$gru_options,config$sequence_options)
   terms<-checked$terms;interaction<-terms$interaction;interaction[!nzchar(interaction)]<-NA_character_
   c(list(components=terms$component,features=terms$feature,interc=checked$intercept,
     fixedpars=if(length(checked$fixedpars))checked$fixedpars else NA_real_,
     seedpars=if(length(checked$seedpars))checked$seedpars else NA_real_,
     interacts=interaction,connectors=terms$connector[-1L],usefolds=checked$folds,
     model=switch(checked$backend,GLMM=GLMMModel(checked$glmm_prediction,checked$glmm_unseen),
+      GRU=do.call(GRUModel,checked$gru_options),
+      Sequence=do.call(SequenceModel,checked$sequence_options),
       OnlineBayesian=do.call(OnlineBayesianModel,checked$bayesian_options),LibLinear=LibLinearModel()),
     dualfit=checked$latency!='none',distribution='Wald'),checked$options)
 }
@@ -129,6 +146,8 @@ lkt_config_call <- function(config) {
   if(!is.null(config$bayesian_training))
     return(as.call(list(as.name('fit_lkt_config'),data=as.name('data'),config=literal(config))))
   args$model<-switch(config$backend,GLMM=call('GLMMModel',prediction_mode=config$glmm_prediction,unseen_levels=config$glmm_unseen),
+    GRU=as.call(c(list(as.name('GRUModel')),lapply(lkt_gru_settings(config$gru_options),literal))),
+    Sequence=as.call(c(list(as.name('SequenceModel')),lapply(lkt_sequence_arguments(args$model$settings),literal))),
     OnlineBayesian=as.call(c(list(as.name('OnlineBayesianModel')),lapply(lkt_validate_bayesian_options(config$bayesian_options),literal))),
     LibLinear=call('LibLinearModel'))
   as.call(c(list(as.name('LKT'),data=as.name('data')),args))

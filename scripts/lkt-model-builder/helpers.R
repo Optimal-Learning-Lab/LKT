@@ -4,17 +4,8 @@ load_lkt_namespace <- function(root = getwd()) {
     root <- normalizePath(file.path(root, "..", ".."),
                           winslash = "/", mustWork = FALSE)
   }
-  if (file.exists(file.path(root, "DESCRIPTION")) &&
-      requireNamespace("pkgload", quietly = TRUE)) {
-    pkgload::load_all(root, quiet = TRUE)
-    return(invisible(TRUE))
-  }
-  if (requireNamespace("LKT", quietly = TRUE)) {
-    library(LKT)
-    return(invisible(TRUE))
-  }
-  stop("LKT is not loadable. Install LKT or install pkgload and run this app ",
-       "from the package checkout.", call. = FALSE)
+  source(file.path(root, "scripts/load-current-lkt.R"), local = TRUE)
+  invisible(TRUE)
 }
 
 feature_choices <- c(

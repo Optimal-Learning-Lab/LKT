@@ -1,0 +1,6 @@
+"coordinate","source","training_center","training_scale"
+1,"time:log1p_gap_seconds",2.71125216837407,1.05449995539594
+2,"lkt:(Intercept)",1,1
+3,"lkt:logitdecKC..Default.",0.151700090787555,1.2959008872004
+4,"lkt:ppesKC..Default.",0.0451951070598858,0.0768318462092912
+5,"lkt:logitdecAnon.Student.Id",0.107467093649268,1.0808768928285

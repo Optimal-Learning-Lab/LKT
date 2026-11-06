@@ -1,0 +1,16 @@
+"check","value"
+"Known KC identities",72
+"Reserved embedding rows",1
+"Embedding width",16
+"Numeric input columns",5
+"Encoded feature width",21
+"First-layer update input width",22
+"GRU layers",3
+"Units per GRU layer",32
+"Prediction-head input width",53
+"Head hidden units",32
+"Parameter entries including reserved row",20977
+"Maximum manual-GRU state error",4.28776378014195e-08
+"Maximum manual-head logit error",1.06707929325989e-07
+"Current-answer effect on current logit",0
+"Current-answer effect on updated memory",0.142481423914433

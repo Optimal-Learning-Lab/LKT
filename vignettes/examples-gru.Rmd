@@ -1,0 +1,186 @@
+---
+title: "Examples: Configurable GRU comparisons and continued prediction"
+author: "Philip I. Pavlik Jr."
+date: "2026-11-01"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples: Configurable GRU comparisons and continued prediction}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup}
+source("lkt-vignette-setup.R")
+```
+
+The optional `torch` package and LibTorch runtime are required for neural
+execution. Install them explicitly with `install.packages("torch")` and
+`torch::install_torch(type = "cpu")`. Loading LKT and editing/saving GRU
+configurations do not require Torch. Select a CUDA device explicitly if needed;
+CUDA execution currently requires `deterministic = FALSE`.
+
+## Architecture and all controls
+
+The default prediction head receives current predictors and a retrieved memory
+read. Retrieval uses the previous GRU state and current predictors to query
+earlier completed interactions. Only after predicting does the observed answer
+enter the recurrent update. The defaults use three 32-unit GRU layers, separate
+16-value feature encodings, one filtered retrieval head, and one 128-unit ReLU
+prediction-head layer. Explicit arguments select other architectures; LKT's
+overall backend default remains LibLinear.
+
+```{r settings}
+defaults <- lkt_gru_defaults()
+str(defaults)
+model <- GRUModel(
+  hidden_size = 64, num_layers = 2, gru_dropout = .1,
+  head_hidden_sizes = c(32, 16), head_activation = "relu",
+  categorical_cols = c("KC..Default.", "Problem.Type"),
+  retrieval_filter_cols = c("KC..Default.", "Problem.Type"),
+  embedding_dims = c(KC..Default. = 16, Problem.Type = 4),
+  numeric_cols = "Item.Difficulty",
+  time_col = "CF..Time.", time_units = "seconds",
+  input_dropout = .05, head_dropout = .1,
+  learning_rate = .001, weight_decay = 1e-4,
+  epochs = 100, batch_size = 32, sequence_length = 100,
+  early_stopping = TRUE, patience = 10,
+  seed = 1, split_seed = 2
+)
+```
+
+All arguments are documented under `?GRUModel`. `num_layers` controls recurrent
+depth; `head_hidden_sizes` controls prediction-head depth and width. Use
+`integer(0)` for a linear head. Recurrent dropout requires at least two layers;
+input and head dropout are independent. Numeric scaling, vocabularies, and
+engineered-feature column schemas are fitted using optimization-training rows.
+
+## A reproducible comparison
+
+This small synthetic example explicitly includes KC and timing information.
+Real comparisons should also match the information available to each model,
+use the same test students, and distinguish a sequence representation from
+engineered summaries of that sequence. A GRU processes event order; elapsed
+time is only available when supplied as a predictor.
+
+```{r comparison}
+set.seed(41)
+d <- data.frame(
+  Anon.Student.Id = rep(paste0("s", 1:24), each = 20),
+  KC..Default. = rep(c("a", "b"), 240),
+  KC..Cluster. = rep(c("skill1", "skill2"), 240),
+  CF..Time. = rep(seq(0, by = 300, length.out = 20), 24),
+  CF..ansbin. = rbinom(480, 1, .65)
+)
+d$CF..reltime. <- d$CF..Time.
+d <- LKTGRUTimeFeatures(d)
+d$fold <- ifelse(d$Anon.Student.Id %in% paste0("s", 21:24), 2, 1)
+
+default_gru <- LKT(
+  d, usefolds = 1, components = "KC..Default.", features = "intercept",
+  model = GRUModel(time_col = "CF..Time.", epochs = 20), verbose = FALSE
+)
+
+terms <- data.frame(
+  component = c("KC..Default.", "KC..Default."),
+  feature = c("intercept", "recency"), fixed = c("", "0.3")
+)
+config <- lkt_model_config(
+  terms, backend = "GRU", folds = 1,
+  gru_options = list(use_lkt_features = TRUE, time_col = "CF..Time.", epochs = 20),
+  options = list(verbose = FALSE)
+)
+engineered_gru <- fit_lkt_config(d, config)
+
+baseline_data <- data.table::as.data.table(d)
+baseline_data$fold <- ifelse(seq_len(nrow(d)) %in% default_gru$fit_rows, 1,
+                            ifelse(seq_len(nrow(d)) %in% default_gru$validation_rows, 3, 2))
+lkt <- LKT(
+  baseline_data, usefolds = 1, components = terms$component, features = terms$feature,
+  fixedpars = .3, interc = TRUE, verbose = FALSE
+)
+predict_lkt(default_gru, d, fold = 2, return_stats = TRUE)
+predict_lkt(engineered_gru, d, fold = 2, return_stats = TRUE)
+predict_lkt(lkt, baseline_data, fold = 2, return_stats = TRUE)
+engineered_gru$training_history
+lkt_config_call(config)
+```
+
+By default, 10% of fitting students (rounded up, at least one) are reserved for
+validation. Their outcomes never enter gradients. Test folds are separate.
+Explicit `validation_folds` require explicit, disjoint fitting folds.
+Within each student, folds must form training, then validation, then evaluation
+segments, or the student must belong entirely to one partition. Interleaving
+held-out responses before later fitting rows is rejected.
+
+Early stopping and plateau scheduling monitor unweighted validation log loss.
+Training can use class/trial weights, but reported predictive metrics remain
+unweighted. The best validation weights are restored by default, without an
+automatic refit on validation students. `fit_rows`, `validation_rows`, and
+`evaluation_rows` record the effective assignment. `loglike` and the null model
+refer to optimization-training rows. For fixed-epoch training without validation,
+set `validation_fraction = 0, early_stopping = FALSE, scheduler = "none"`.
+
+Engineered nonlinear parameters must already be fixed, estimated independently
+on training data if necessary. This backend does not run LKT's outer nonlinear
+optimizer, discover KCs, fit random effects, use model-dependent curve features,
+or jointly fit latency. Saved terms are inactive when `use_lkt_features = FALSE`.
+Raw numeric predictors must be available at prediction time; do not provide
+answer-dependent fields such as the current response duration.
+
+## New students, pending trials, and continued histories
+
+```{r continuation}
+new_student <- d[d$Anon.Student.Id == "s21", ]
+state <- LKTGRUState(engineered_gru)
+first <- LKTGRUStep(engineered_gru, state, new_student[1:10, ])
+second <- predict_lkt(
+  engineered_gru, new_student[11:20, ],
+  state = first$state, return_state = TRUE
+)
+whole <- predict_lkt(engineered_gru, new_student)$predictions
+stopifnot(isTRUE(all.equal(c(first$predictions, second$predictions), whole)))
+
+next_trial <- new_student[1, ]
+next_trial$CF..ansbin. <- NULL
+pending <- LKTGRUStep(engineered_gru, LKTGRUState(engineered_gru), next_trial)
+# Supply this trial again with its observed binary answer before advancing.
+answered <- LKTGRUStep(engineered_gru, pending$state, new_student[1, ])
+```
+
+States are explicit, tied to one fitted model, and returned as new R objects.
+They do not change network weights. The default is one history per student.
+Set `history_group_cols = c("Anon.Student.Id", "KC..Default.")` for separate
+student-by-KC histories; engineered LKT features still follow their own declared
+component histories.
+
+An unanswered trial may occur at the end of each history group. It is predicted
+without committing a hidden-state update. Unknown categories use the reserved
+zero-vector encoding by default; `unknown_levels = "error"` rejects them. Missing
+predictors, backwards ordering, or incompatible model states fail explicitly.
+
+Raw-input continuation retains only hidden state and required time/order
+metadata. Engineered-feature states additionally retain each student's raw
+observed history and rebuild the frozen feature recipe; this has
+history-dependent computation and storage costs within that student. Sequence chunk length limits
+backpropagation, not how much observed history the fitted model can remember.
+
+## Save, reload, and GUI
+
+```{r save-load}
+path <- tempfile(fileext = ".rds")
+saveRDS(list(model = engineered_gru, state = first$state), path)
+loaded <- readRDS(path)
+continued <- LKTGRUStep(loaded$model, loaded$state, new_student[11:20, ])
+stopifnot(isTRUE(all.equal(continued$predictions, second$predictions)))
+unlink(path)
+```
+
+Weights and hidden states are ordinary named R arrays rather than live Torch
+pointers. Configurations, preprocessing, training diagnostics, and software
+versions are retained. Architecture changes require a new fitted model.
+
+Open `lkt_gui(config)`, select **GRU**, and use **GRU settings...** to edit every
+control. Preview shows the complete generated call without fitting. Save/load
+preserves all settings. Vectors use commas; named embedding widths, numeric
+transforms, and optimizer/scheduler controls use `name|value` lines. These fields
+are parsed as data, never evaluated as R code. There is no automatic search
+workflow; vary and save configurations for separate runs.

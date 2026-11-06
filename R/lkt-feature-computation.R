@@ -441,9 +441,9 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     data$x <- ave(data$CF..Time., index, FUN = function(x) countOutcomeDash(x, par1))
     return(log(1 + data$x))
   }
-  if (feat == "dashsuc") {
+  if (feat %in% c("dashsuc", "dashfail")) {
     dataV <- data.frame(data$CF..Time., data$Outcome, index)
-    h <- countOutcomeDashPerf(dataV, "CORRECT", par1)
+    h <- countOutcomeDashPerf(dataV, if (feat == "dashsuc") "CORRECT" else "INCORRECT", par1)
     return(log(1 + h))
   }
   # single factor dynamic features

@@ -1,0 +1,19 @@
+"tensor","shape","entries"
+"embeddings.0.weight","145 x 16",2320
+"embeddings.1.weight","37 x 16",592
+"gru.weight_ih_l1","96 x 38",3648
+"gru.weight_hh_l1","96 x 32",3072
+"gru.bias_ih_l1","96",96
+"gru.bias_hh_l1","96",96
+"gru.weight_ih_l2","96 x 32",3072
+"gru.weight_hh_l2","96 x 32",3072
+"gru.bias_ih_l2","96",96
+"gru.bias_hh_l2","96",96
+"gru.weight_ih_l3","96 x 32",3072
+"gru.weight_hh_l3","96 x 32",3072
+"gru.bias_ih_l3","96",96
+"gru.bias_hh_l3","96",96
+"head.0.weight","128 x 69",8832
+"head.0.bias","128",128
+"head.3.weight","1 x 128",128
+"head.3.bias","1",1

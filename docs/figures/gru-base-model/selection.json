@@ -1,0 +1,17 @@
+{
+  "condition": "frozen_gru_defaults",
+  "run_id": "holdout__seed1",
+  "checkpoint": "../LKT-outputs/gru-defaults-freeze-20261106/model.rds",
+  "checkpoint_sha256": "d2aa459056bf799106dccf8024311444faba58873beaafeb1380304adebe2e22",
+  "prepared_data": "../LKT-outputs/gru-defaults-freeze-20261106/prepared-data.rds",
+  "prepared_data_sha256": "b7a3bf9941110f6b84401a3c3e9ad8c7c2d7bb2ec9ce6b01edb3aa365ee6a0d1",
+  "study": "../LKT-outputs/gru-defaults-freeze-20261106/study.rds",
+  "study_sha256": "12d29d2a4f9e05b16353611b2801e4c572802292fe698b85aa4479f8312180c6",
+  "release": ["2.0.0.9018", "LKT_2.0.0.9018.tar.gz", "462f7c32a1557e413c63f99481bbda9a4b2183f694080c8f28f9546179f8f61a", "a6ee856b37defc405c49d15e0a8f90c477db292bb89987f2091873b02dfdc77e"],
+  "specification_sha256": "faf3abfe395f11b54986fa336915a03ec9df66c8b2a8f90bd31880016f9e9ba8",
+  "selected_epoch": 8,
+  "phase_column": "author_phase",
+  "evaluation_phase": 3,
+  "selection": "User froze the shared architecture and the already reviewed seed-1 checkpoint; no selection among seeds by test performance.",
+  "structure": "Separate 16-value time/history/response towers; 16-value item/skill-combination embeddings; 3x32 GRU; filtered one-head retrieval; 128-unit head."
+}

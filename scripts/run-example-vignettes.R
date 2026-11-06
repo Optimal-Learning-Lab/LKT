@@ -19,7 +19,7 @@ if (length(patterns) == 0) {
 
 root <- normalizePath(".", winslash = "/", mustWork = TRUE)
 vignette_dir <- file.path(root, "vignettes")
-report_dir <- file.path(vignette_dir, "_example-reports")
+report_dir <- file.path(dirname(root), "LKT-outputs", "package-vignettes", "_example-reports")
 dir.create(report_dir, showWarnings = FALSE, recursive = TRUE)
 manifest_file <- file.path(vignette_dir, "example-section-manifest.csv")
 
@@ -156,6 +156,9 @@ execute_vignette <- function(file) {
 
 knit_report <- function(file) {
   paths <- report_paths(file)
+  old_base_dir <- knitr::opts_knit$get("base.dir")
+  on.exit(knitr::opts_knit$set(base.dir = old_base_dir), add = TRUE)
+  knitr::opts_knit$set(base.dir = report_dir)
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
   setwd(dirname(file))

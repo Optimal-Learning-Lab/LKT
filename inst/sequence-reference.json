@@ -1,0 +1,9 @@
+{
+  "architecture": "Mamba-1",
+  "repository": "https://github.com/state-spaces/mamba",
+  "revision": "60dadf2e0ee730ac337035d5533de10bc26e4847",
+  "files": ["mamba_ssm/modules/mamba_simple.py", "mamba_ssm/ops/selective_scan_interface.py"],
+  "copyright": "Copyright (c) 2023, Tri Dao, Albert Gu",
+  "license": "Apache-2.0",
+  "implementation": "Native R/Torch differentiable chronological reference scan; pre-RMSNorm residual blocks, learned input projection, and between-layer dropout are LKT stack integration choices."
+}

@@ -1,0 +1,22 @@
+Checkpoint: C:/dev/LKT-outputs/gru-defaults-freeze-20261106/model.rds
+Checkpoint SHA256: d2aa459056bf799106dccf8024311444faba58873beaafeb1380304adebe2e22
+Study SHA256: 12d29d2a4f9e05b16353611b2801e4c572802292fe698b85aa4479f8312180c6
+Fitted release source SHA256: 462f7c32a1557e413c63f99481bbda9a4b2183f694080c8f28f9546179f8f61a
+Verification runtime source SHA256: 462f7c32a1557e413c63f99481bbda9a4b2183f694080c8f28f9546179f8f61a
+Drawing script SHA256: 7a41c90b84694b4ee02f5ca42833ea6ddaafd1f75dd5e9dcef957116f0ba4a20
+User-frozen default design; exact saved seed: 1
+Restored epoch: 8
+215,233 parameter entries, including reserved zero embedding rows.
+PASS: full ordinary R calculation of encoders, embeddings, all three GRU layers, one-head attention and prediction head.
+PASS: strict past-only retrieval, same-item OR same-skill mask, empty-match zero read, 100-event window, chunk continuation and 120 real held-out responses.
+PASS: initial item table is all zero, skills start random, trained items are nonzero and differ across items.
+                  encoded_inputs                 encoded_response
+                    7.929817e-08                     1.226953e-07
+               attention_weights                           logits
+                    8.548213e-07                     3.922996e-07
+                 final_gru_state               bank_event_records
+                    5.714189e-07                     6.013383e-07
+         bank_post_answer_states               chunk_continuation
+                    6.013383e-07                     1.924739e-07
+current_and_future_answer_effect            real_held_out_history
+                    0.000000e+00                     1.192093e-07

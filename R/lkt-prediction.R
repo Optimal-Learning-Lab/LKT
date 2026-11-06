@@ -109,6 +109,8 @@ build_model_specification <- function(coef_vec,
 #' @param return_stats Logical; if `TRUE`, return predictions plus log-likelihood, AUC, RMSE, and McFadden-style R-squared. AUC and R-squared are `NA` for single-class outcomes. If `FALSE`, return only predictions without evaluating outcomes or fitting diagnostics.
 #' @param min_pred_limit Minimum probability used to clamp predictions.
 #' @param max_pred_limit Maximum probability used to clamp predictions.
+#' @param state Optional retained sequence-model or GRU student state.
+#' @param return_state Include updated sequence state in the result.
 #' @return If return_stats is FALSE, returns a list containing:
 #' \itemize{
 #'   \item \code{predictions}: The predicted probabilities for each observation in the specified fold(s).
@@ -136,7 +138,8 @@ build_model_specification <- function(coef_vec,
 #' }
 #' @export
 predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
-                        min_pred_limit = .00001, max_pred_limit = .99999) {
+                        min_pred_limit = .00001, max_pred_limit = .99999,
+                        state = NULL, return_state = FALSE) {
   if (!is.numeric(min_pred_limit) || length(min_pred_limit) != 1L ||
       !is.numeric(max_pred_limit) || length(max_pred_limit) != 1L ||
       !is.finite(min_pred_limit) || !is.finite(max_pred_limit) ||
@@ -151,10 +154,18 @@ predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
     data$fold %in% fold
 
   bayesian <- identical(modelob$model_name,'OnlineBayesian')
+  gru <- modelob$model_name %in% c('GRU','Sequence')
+  if (!is.logical(return_state) || length(return_state)!=1L || is.na(return_state))
+    stop('return_state must be TRUE or FALSE.',call.=FALSE)
+  if (!gru && (!is.null(state) || return_state))
+    stop('Retained state is supported by predict_lkt only for sequence models.',call.=FALSE)
   if(bayesian&&!identical(as.data.frame(data),as.data.frame(modelob$newdata)))
     stop('OnlineBayesian predict_lkt requires the stored modelob$newdata; for new trials use LKTBayesianStep with causal features and retained state, or run a new LKT evaluation for new subjects.',call.=FALSE)
   sequential <- modelob$model_name %in% c("OnlineCalibration", "OnlineAdaptive", "OnlineBayesian")
-  if (identical(modelob$model_name,'GLMM')) {
+  if (gru) {
+    continued <- LKTSequenceStep(modelob,if(is.null(state))LKTSequenceState(modelob) else state,data)
+    pred <- continued$predictions
+  } else if (identical(modelob$model_name,'GLMM')) {
     policy <- modelob$prediction_policy
     if(is.null(policy))stop('GLMM prediction policy is missing.',call.=FALSE)
     pred <- lkt_glmm_prediction(modelob$model,data,policy$mode,
@@ -196,7 +207,7 @@ predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
   pred <- if(bayesian)as.numeric(pred)[keep] else
     as.numeric(pmin(pmax(pred, min_pred_limit), max_pred_limit))[keep]
   # Prediction-only requests do not require outcomes or fit diagnostic models.
-  if (!return_stats) return(list(predictions = pred))
+  if (!return_stats) return(c(list(predictions = pred),if(return_state)list(state=continued$state)))
 
   if (!"CF..ansbin." %in% names(data)) {
     stop("Prediction statistics require CF..ansbin. outcomes.", call. = FALSE)
@@ -212,6 +223,6 @@ predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
     as.numeric(pROC::auc(actuals, pred, quiet = TRUE)) else NA_real_
   null_LL <- sum(stats::dbinom(actuals, 1L, mean(actuals), log = TRUE))
   R2 <- if (null_LL == 0) NA_real_ else round(1 - LL / null_LL, 6)
-  list(predictions = pred, LL = LL, AUC = AUC,
-       RMSE = sqrt(mean((actuals - pred)^2)), R2 = R2)
+  c(list(predictions = pred, LL = LL, AUC = AUC,
+       RMSE = sqrt(mean((actuals - pred)^2)), R2 = R2),if(return_state)list(state=continued$state))
 }

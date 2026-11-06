@@ -5,7 +5,7 @@ if (is.na(script_file) || !nzchar(script_file)) {
 root <- normalizePath(file.path(dirname(script_file), ".."),
                       winslash = "/", mustWork = TRUE)
 vignette_dir <- file.path(root, "vignettes")
-report_dir <- file.path(vignette_dir, "_example-reports")
+report_dir <- file.path(dirname(root), "LKT-outputs", "package-vignettes", "_example-reports")
 dir.create(report_dir, recursive = TRUE, showWarnings = FALSE)
 
 Sys.setenv(LKT_SOURCE_WORKTREE = "true")

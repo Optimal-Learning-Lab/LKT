@@ -1,0 +1,14 @@
+# Stable source bytes for hash-verified builds and cross-platform checkouts.
+* text=auto eol=lf
+
+# Package samples, portable configurations and curated figures are binary assets.
+*.rds binary
+*.RDS binary
+*.rda binary
+*.Rda binary
+*.RDA binary
+*.RData binary
+*.png binary
+*.pdf binary
+*.zip binary
+*.gz binary

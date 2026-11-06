@@ -104,6 +104,8 @@ lkt_resolve_model <- function(model) {
     stop("Unknown LKT model: ", model, call. = FALSE)
   }
 
+  if (inherits(model, 'LKTModel') && is.function(model$fit)) return(model)
+
   if (is.function(model)) {
     return(LKTCustomModel(name = "custom", fit = model))
   }

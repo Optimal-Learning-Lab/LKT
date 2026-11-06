@@ -1,0 +1,8 @@
+"check","maximum_difference"
+"feature_encoder",4.34684068739699e-08
+"response_encoder",3.47828430502517e-08
+"recurrent_state",7.54701805494307e-08
+"prediction_head",4.37599227756658e-08
+"current_answer_prediction_effect",0
+"current_answer_memory_effect",0.250532224774361
+"real_history_replay",1.19209289550781e-07

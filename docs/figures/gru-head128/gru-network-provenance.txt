@@ -1,0 +1,15 @@
+Checkpoint: C:/dev/LKT-outputs/gru-head-widths-largerawsample-bigblue-20261102/models/augmented__head128__seed1.rds
+Checkpoint SHA256: dc553ba7bd721c6287bd37eac385c66358f27c7f0fd4350dc2ac9b2956a52bc5
+Historical training LKT version: 2.0.0.9009
+Diagram runtime LKT: 2.0.0.9010
+Active installation: C:/dev/PolicyFactory2/.r-libs/LKT-2.0.0.9010-bff71a9ac39e/LKT
+Current release archive SHA256: bff71a9ac39e8dddf361563078fc232f07ab8388d33b15ca7fcc29661a6f6823
+Original protocol SHA256: 9d96b46ddce3d8244d276ee246166a329998c9601a886d6d069388909639515c
+Drawing script SHA256: f760d20f03263d77ee6cb307e454d9b32dc32a707c1162abe3df8abd2e8e6b13
+Numeric column order:
+  time:log1p_gap_seconds
+  lkt:(Intercept)
+  lkt:logitdecKC..Default.
+  lkt:ppesKC..Default.
+  lkt:logitdecAnon.Student.Id
+PASS: exact saved weights/settings, both embeddings, parameter count, Torch GRU equations, head equation, current-answer causality, and real-history replay.
