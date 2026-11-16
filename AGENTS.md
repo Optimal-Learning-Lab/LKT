@@ -54,3 +54,10 @@ research data and live lock files before applying .Rbuildignore. The helper
 prunes those ignored trees before copying and verifies every included file hash.
 This input is an immutable build artifact, not another maintained source tree;
 edit C:/dev/LKT and regenerate it when changes are required.
+
+# Local-only verification
+
+Do not add, enable, or run GitHub Actions or other GitHub-hosted CI for LKT.
+The owner requires checks and regression tests to remain local. Keep GitHub
+Actions disabled for this repository and do not recreate workflow definitions.
+Existing local tests and package-verification scripts remain available.
