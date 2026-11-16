@@ -6,7 +6,7 @@
 \usage{
 lkt_model_config(
   terms,
-  intercept = TRUE,
+  intercept = NULL,
   backend = c("LibLinear", "GLMM", "OnlineBayesian", "GRU", "Sequence"),
   latency = c("none", "Wald"),
   folds = NA,
@@ -23,7 +23,8 @@ lkt_model_config(
 \item{terms}{Data frame with component and feature, and optional fixed,
 start (semicolon-separated numbers), interaction, and connector columns.}
 
-\item{intercept}{Include the global intercept.}
+\item{intercept}{Include the global intercept. NULL uses FALSE for GRU/Sequence
+and TRUE for other backends. An explicit logical value overrides this default.}
 
 \item{backend}{LibLinear, GLMM, OnlineBayesian, GRU, or Sequence.}
 

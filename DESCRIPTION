@@ -1,6 +1,6 @@
 Package: LKT
 Title: Logistic Knowledge Tracing
-Version: 2.0.0.9018
+Version: 2.0.0.9027
 Authors@R: 
     c(person(given = "Philip I.",
            family = "Pavlik Jr.",
@@ -26,16 +26,28 @@ Collate:
     'lkt-feature-input.R'
     'lkt-feature-computation.R'
     'lkt-model-interface.R'
+    'lkt-pdp-controlled.R'
+    'lkt-pdp-source.R'
+    'lkt-gru-semantic.R'
+    'lkt-gru-exercise-attributes.R'
+    'lkt-gru-latent-denoising.R'
+    'lkt-gru-bayesian-prototypes.R'
     'lkt-model-gru.R'
     'lkt-sequence-unit.R'
     'lkt-sequence-mamba.R'
     'lkt-gru-recurrent.R'
+    'lkt-gru-hidden-decay.R'
+    'lkt-gru-plasticity.R'
+    'lkt-gru-gate-fatigue.R'
+    'lkt-gru-connection-fatigue.R'
     'lkt-gru-initialization.R'
+    'lkt-gru-adaptive-embeddings.R'
     'lkt-gru-retrieval.R'
     'lkt-gru-inference.R'
     'lkt-gru-fusion.R'
     'lkt-gru-input.R'
     'lkt-gru-time-features.R'
+    'lkt-gru-candidate-scoring.R'
     'lkt-gru-prediction.R'
     'lkt-model-liblinear.R'
     'lkt-model-glmm.R'
@@ -69,6 +81,7 @@ Imports:
     crayon,
     HDInterval (>= 0.2.2)
 Suggests: 
+    digest,
     jsonlite,
     torch (>= 0.17.0),
     fgui,

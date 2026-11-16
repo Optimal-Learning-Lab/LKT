@@ -21,7 +21,7 @@ LASSOLKTData(
 \arguments{
 \item{data}{Data frame or data table containing \code{Anon.Student.Id}, \code{CF..ansbin.}, component columns, and optional \code{fold}.}
 
-\item{gridpars}{Numeric vector of parameter values used to materialize nonlinear feature candidates.}
+\item{gridpars}{Finite numeric values for zero/one-parameter candidate families. Multi-parameter terms require explicit complete vectors in \code{specialpars}; Cartesian grids are never inferred.}
 
 \item{allcomponents}{Character vector of candidate component columns.}
 

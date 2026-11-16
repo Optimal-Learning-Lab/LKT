@@ -30,14 +30,16 @@ lkt_fit_liblinear <- function(design_matrix, data, usefolds, bias, cost,
   predictset2 <- design_matrix$csr
   pred <- data$pred
   success <- FALSE
+  keep <- !is.na(data$CF..ansbin.)
+  if (!is.na(usefolds)[1]) keep <- keep & data$fold %in% usefolds
+  if (!any(keep)) stop("No scored responses selected for fitting.", call. = FALSE)
 
   while (!success) {
     if (is.na(usefolds)[1]) {
-      temp <- LiblineaR(predictset2, data$CF..ansbin.,
+      temp <- LiblineaR(predictset2[keep, ], data$CF..ansbin.[keep],
                         bias = bias,
                         cost = cost, epsilon = epsilon, type = type)
     } else {
-      keep <- data$fold %in% usefolds
       temp <- LiblineaR(predictset2[keep, ], data$CF..ansbin.[keep],
                         bias = bias,
                         cost = cost, epsilon = epsilon, type = type)
@@ -57,7 +59,6 @@ lkt_fit_liblinear <- function(design_matrix, data, usefolds, bias, cost,
       ), .99999)
       success <- sum(is.nan(pred)) == 0 && sum(is.na(pred)) == 0
     } else {
-      keep <- data$fold %in% usefolds
       pred <- pmin(pmax(
         predict(temp, predictset2, proba = TRUE)$probabilities[, 1],
         .00001
@@ -71,9 +72,8 @@ lkt_fit_liblinear <- function(design_matrix, data, usefolds, bias, cost,
   }
 
   if (is.na(usefolds)[1]) {
-    fitstat <- sum(log(ifelse(data$CF..ansbin. == 1, pred, 1 - pred)))
+    fitstat <- sum(log(ifelse(data$CF..ansbin.[keep] == 1, pred[keep], 1 - pred[keep])))
   } else {
-    keep <- data$fold %in% usefolds
     fitstat <- sum(log(ifelse(data$CF..ansbin.[keep] == 1,
                               pred[keep],
                               1 - pred[keep])))

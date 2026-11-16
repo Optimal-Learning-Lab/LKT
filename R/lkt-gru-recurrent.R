@@ -40,7 +40,9 @@ lkt_gru_recurrent <- function(input_size,s) {
   net <- definition()
   if(!is.null(reference)) {
     mapped <- lkt_gru_expand_input_weights(lkt_gru_weights(reference),lkt_gru_weights(net))
-    lkt_gru_load_weights(net,mapped,s)
+    # This is only the recurrent submodule. Validate/load its exact keys here;
+    # whole-network loading separately validates optional mechanism parameters.
+    net$load_state_dict(lapply(mapped,lkt_gru_tensor,s=s))
     reference <- NULL
   }
   net

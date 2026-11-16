@@ -82,3 +82,12 @@ verification_artifacts/
 !/docs/figures/gru-network-audit.csv
 !/docs/figures/gru-retrieval-one-head/accuracy-check.csv
 !/docs/figures/gru-retrieval-one-head/weight-shapes.csv
+!/docs/figures/gru-simplified-alternative/architecture-settings.rds
+!/docs/figures/gru-simplified-alternative/connection-parameters.csv
+!/docs/figures/gru-simplified-alternative/layout-check.csv
+!/docs/figures/gru-simplified-consolidated/architecture-settings.rds
+!/docs/figures/gru-simplified-consolidated/connection-parameters.csv
+!/docs/figures/gru-simplified-consolidated/layout-check.csv
+!/docs/figures/gru-default-model/architecture-settings.rds
+!/docs/figures/gru-default-model/connection-parameters.csv
+!/docs/figures/gru-default-model/layout-check.csv

@@ -16,6 +16,7 @@ lkt_latency_fit_mask <- function(data, usefolds = NA, question_type = NULL) {
     lkt_require_columns(data, "CF..Question.Type.", "LKT latency question-type filter")
     keep <- keep & !is.na(data$CF..Question.Type.) & data$CF..Question.Type. == question_type
   }
+  keep <- keep & !is.na(data$CF..ansbin.)
   if (!any(keep)) stop("No observations match the latency fitting mask.", call. = FALSE)
   keep
 }

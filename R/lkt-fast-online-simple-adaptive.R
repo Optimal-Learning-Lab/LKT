@@ -223,6 +223,7 @@ lkt_online_simple_adaptive_gradient_r <- function(par, input, clip_epsilon,
       } else {
         numeric(6L)
       }
+      if (is.na(y[row])) next
       gradient <- gradient + (p - y[row]) * d_eta
       err <- y[row] - p
       d_err <- -d_p
@@ -356,6 +357,7 @@ lkt_online_simple_adaptive_eval_r <- function(par, input, clip_epsilon,
       if (isTRUE(return_details)) {
         pred[row] <- p
       }
+      if (is.na(y[row])) next
       loglike <- loglike + log(ifelse(y[row] == 1, p, 1 - p))
       if (input$x_recency[row] != 0 && alpha_recency != 0) {
         beta_recency <- beta_recency +
@@ -479,6 +481,7 @@ lkt_online_simple_adaptive_decay_eval_r <- function(
       if (isTRUE(return_details)) {
         pred[row] <- p
       }
+      if (is.na(y[row])) next
       loglike <- loglike + log(ifelse(y[row] == 1, p, 1 - p))
       if (xr != 0 && alpha_recency != 0) {
         beta_recency <- beta_recency +
@@ -1568,6 +1571,7 @@ lkt_online_adaptive_eval_general <- function(alpha, registry,
       p <- pmin(pmax(p_raw, registry$clip_epsilon),
                 1 - registry$clip_epsilon)
       pred[row] <- p
+      if (is.na(y[row])) next
       nll <- nll - (y[row] * log(p) + (1 - y[row]) * log(1 - p))
       error <- y[row] - p
 

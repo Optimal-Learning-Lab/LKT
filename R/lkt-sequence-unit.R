@@ -14,17 +14,31 @@ lkt_sequence_build <- function(input_size,s) {
   if(lkt_sequence_kind(s)=='gru')lkt_gru_recurrent(input_size,lkt_sequence_gru_settings(s)) else lkt_mamba_network(input_size,s)
 }
 lkt_sequence_initial <- function(s,batch,like) {
+  if(lkt_gru_connection_fatigue(s))return(list(
+    h=torch::torch_zeros(c(s$num_layers,batch,s$hidden_size),dtype=like$dtype,device=like$device),
+    a=torch::torch_ones(c(batch,0L),dtype=like$dtype,device=like$device)))
+  if(lkt_gru_gate_active(s))return(list(
+    h=torch::torch_zeros(c(s$num_layers,batch,s$hidden_size),dtype=like$dtype,device=like$device),
+    a=torch::torch_ones(c(s$num_layers,batch,s$hidden_size),dtype=like$dtype,device=like$device)))
+  if(s$hidden_decay) {
+    zero <- torch::torch_zeros(c(s$num_layers,batch,s$hidden_size),dtype=like$dtype,device=like$device)
+    return(list(h=zero,dk=zero$clone()))
+  }
   if(lkt_sequence_kind(s)=='gru')return(torch::torch_zeros(c(s$num_layers,batch,s$hidden_size),
     dtype=like$dtype,device=like$device))
   lkt_mamba_initial(s,batch,like)
 }
 lkt_sequence_read <- function(state,s) {
+  if(s$hidden_decay || lkt_gru_gate_active(s))state <- state$h
   if(lkt_sequence_kind(s)=='gru')return(state[s$num_layers,,,drop=FALSE]$permute(c(2,1,3)))
   state$read
 }
 # Architecture-specific batch axes are declared on leaves, so an LSTM or other
 # unit can carry any number of tensors without changing these operations.
 lkt_sequence_layout <- function(s) {
+  if(lkt_gru_connection_fatigue(s))return(list(h=2L,a=1L))
+  if(lkt_gru_gate_active(s))return(list(h=2L,a=2L))
+  if(s$hidden_decay)return(list(h=2L,dk=2L))
   if(lkt_sequence_kind(s)=='gru')return(2L)
   list(read=1L,layers=rep(list(list(conv=1L,ssm=1L)),s$num_layers))
 }
@@ -44,7 +58,12 @@ lkt_sequence_state_map <- function(state,s,operation,indices=NULL,layout=lkt_seq
   }
   walk(state,layout)
 }
-lkt_sequence_advance <- function(net,input,state,s) lkt_sequence_module(net,s)(input,state)
+lkt_sequence_advance <- function(net,input,state,s) {
+  if(lkt_gru_gate_active(s))stop('Gate fatigue requires the compiled clocked transition.',call.=FALSE)
+  if(!s$hidden_decay)return(lkt_sequence_module(net,s)(input,state))
+  result <- lkt_sequence_module(net,s)(input,state$h)
+  list(result[[1L]],list(h=result[[2L]],dk=state$dk+(result[[2L]]-state$h)))
+}
 
 #' Selectable sequence memory for knowledge tracing
 #'
@@ -73,6 +92,13 @@ SequenceModel <- function(unit=c('gru','mamba'),...,layer_dropout=.1,unit_option
   lkt_gru_named(unit_options,names(defaults),'sequence unit options')
   options <- utils::modifyList(defaults,unit_options,keep.null=TRUE)
   settings <- do.call(GRUModel,c(common,list(gru_dropout=layer_dropout),if(unit=='gru')options else list()))$settings
+  if(unit!='gru' && lkt_gru_exercise_active(settings))stop('Exercise attributes are supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && lkt_gru_denoising_active(settings))stop('Latent denoising is supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && lkt_gru_semantic_active(settings))stop('Semantic completed input is currently supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && lkt_gru_gate_active(settings))stop('Gate fatigue is supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && settings$hidden_decay)stop('hidden_decay is supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && lkt_gru_plastic(settings))stop('Plastic output connections are currently supported only for the GRU unit.',call.=FALSE)
+  if(unit!='gru' && lkt_gru_adaptive(settings))stop('Adaptive embeddings are currently supported only for the GRU unit.',call.=FALSE)
   settings$unit <- unit;settings$unit_options <- options
   if(unit=='mamba') {
     for(n in c('d_state','d_conv','expand')) {

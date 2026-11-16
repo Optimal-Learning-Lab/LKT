@@ -1,4 +1,4 @@
-# Load the same base specification used by the current network figure. Verify
+# Load the preserved previous-base specification. Verify
 # its historical checkpoint and data before opening the ordinary LKT editor.
 args <- commandArgs(TRUE)
 root <- normalizePath(if(length(args))args[1L] else '.',winslash='/',mustWork=TRUE)
@@ -18,7 +18,7 @@ config <- readRDS(specification);saved <- readRDS(checkpoint)
 settings <- getFromNamespace('lkt_config_arguments','LKT')(config)$model$settings
 # Historical source identity stays in selection$release. Resolve supported saved
 # controls through the active package rather than selecting an old installation.
-expected <- getFromNamespace('lkt_gru_settings','LKT')(saved$fit$gru_settings)
+expected <- getFromNamespace('lkt_sequence_model','LKT')(saved$fit)$settings
 stopifnot(identical(settings,expected),
   identical(settings$zero_init_embedding_cols,'KC..Default.'),
   identical(settings$retrieval_filter_cols,c('KC..Default.','KC..Cluster.')),

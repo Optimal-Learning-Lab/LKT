@@ -99,7 +99,7 @@ lkt_student_rmse <- function(data) {
   stats::aggregate(
     (data$pred - data$CF..ansbin.)^2,
     by = list(data$Anon.Student.Id),
-    FUN = function(error_squared) sqrt(mean(error_squared)))
+    FUN = function(error_squared) sqrt(mean(error_squared, na.rm = TRUE)))
 }
 
 lkt_lkt_result <- function(model, coefs, model_specification, r2, data,
@@ -190,7 +190,8 @@ lkt_print_feature_progress <- function(feature, component, pars, param_count) {
 }
 
 lkt_prepare_lkt_data <- function(data, components, features, maketimes,
-                                 verbose) {
+                                 verbose, allow_pending = FALSE) {
+  data <- lkt_normalize_outcomes(data, allow_pending = allow_pending)
   if (maketimes) {
     if (!("CF..reltime." %in% colnames(data))) {
       data$CF..reltime. <- practiceTime(data)
@@ -198,12 +199,6 @@ lkt_prepare_lkt_data <- function(data, components, features, maketimes,
     if (!("CF..Time." %in% colnames(data))) {
       data$CF..Time. <- data$CF..reltime.
     }
-  }
-  if (!("Outcome" %in% colnames(data))) {
-    data$Outcome <- ifelse(data$CF..ansbin. == 1, "CORRECT", "INCORRECT")
-  }
-  if (!("CF..ansbin." %in% colnames(data))) {
-    data$CF..ansbin. <- ifelse(data$Outcome == "CORRECT", 1, 0)
   }
 
   spacing_requirements <- lkt_spacing_requirements(data, components, features)
@@ -421,7 +416,7 @@ lkt_build_feature_iteration <- function(data, components, features, curvefeats,
 #'
 #' @description Computes LKT features from trial-level learning data and fits a logistic model that predicts `CF..ansbin.`. The default model adapter uses `LiblineaR`; custom adapters can be supplied with `LKTCustomModel()`.
 #'
-#' @param data Data frame or data table containing one row per trial. Must include `Anon.Student.Id`, `CF..ansbin.`, and every component column named in `components`. Some features also require timing columns such as `CF..Time.`, `CF..reltime.`, or `Duration..sec.`.
+#' @param data Data frame or data table containing one row per trial. Must include `Anon.Student.Id`, either `Outcome` or binary `CF..ansbin.`, and every component column named in `components`. `Outcome` is authoritative: `CORRECT`, `INCORRECT`, and `STUDY` derive binary answers 1, 0, and NA. Studies remain in exposure histories but are excluded from response updates and fitting losses. Some features also require timing columns such as `CF..Time.`, `CF..reltime.`, or `Duration..sec.`.
 #' @param usefolds Numeric vector of fold values to use for fitting. Features are still computed over all rows so held-out rows can be evaluated later. `NA` fits on all rows.
 #' @param components Character vector naming component columns or component specifications used to build feature histories.
 #' @param features Character vector of LKT feature names, parallel to `components`.
@@ -538,6 +533,9 @@ LKT <- function(data,usefolds = NA,
     features = features,
     maketimes = maketimes,
     verbose = verbose)
+
+  if (!nosolve && !any(!is.na(data$CF..ansbin.)))
+    stop("LKT fitting requires at least one scored response.", call. = FALSE)
 
   equation <- "CF..ansbin.~ "
   e <- new.env()

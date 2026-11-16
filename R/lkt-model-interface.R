@@ -139,6 +139,7 @@ lkt_model_log_likelihood <- function(response, pred, usefolds, data) {
   } else {
     keep <- data$fold %in% usefolds
   }
+  keep <- keep & !is.na(response)
   sum(log(ifelse(response[keep] == 1, pred[keep], 1 - pred[keep])))
 }
 

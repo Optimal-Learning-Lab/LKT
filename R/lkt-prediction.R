@@ -104,7 +104,7 @@ build_model_specification <- function(coef_vec,
 #' @description Generates predicted probabilities from a fitted `LKT()` object and, optionally, computes common evaluation statistics for selected folds. Stored design matrices and online predictions refer to the fitted rows in their original order; this helper does not reconstruct feature histories for new rows.
 #'
 #' @param modelob Fitted LKT model object containing coefficients and predictors.
-#' @param data Data frame or data table aligned with the fitted rows. `CF..ansbin.` is required only for statistics; a `fold` column is required when selecting folds.
+#' @param data Data frame or data table aligned with the fitted rows. `Outcome` or `CF..ansbin.` is required only for statistics; authoritative study outcomes are excluded from statistics. A `fold` column is required when selecting folds.
 #' @param fold Optional vector of fold values to include in the returned predictions and statistics. `NULL` or an empty vector uses all rows.
 #' @param return_stats Logical; if `TRUE`, return predictions plus log-likelihood, AUC, RMSE, and McFadden-style R-squared. AUC and R-squared are `NA` for single-class outcomes. If `FALSE`, return only predictions without evaluating outcomes or fitting diagnostics.
 #' @param min_pred_limit Minimum probability used to clamp predictions.
@@ -209,20 +209,22 @@ predict_lkt <- function(modelob, data, fold = NULL, return_stats = FALSE,
   # Prediction-only requests do not require outcomes or fit diagnostic models.
   if (!return_stats) return(c(list(predictions = pred),if(return_state)list(state=continued$state)))
 
-  if (!"CF..ansbin." %in% names(data)) {
-    stop("Prediction statistics require CF..ansbin. outcomes.", call. = FALSE)
-  }
-  actuals <- data$CF..ansbin.[keep]
-  if (!length(actuals) || anyNA(actuals) || any(!actuals %in% c(0, 1))) {
+  if (!any(c("CF..ansbin.", "Outcome") %in% names(data)))
+    stop("Prediction statistics require CF..ansbin. outcomes or Outcome.", call. = FALSE)
+  outcomes <- lkt_normalize_outcomes(data)
+  selected <- !is.na(outcomes$CF..ansbin.[keep])
+  actuals <- outcomes$CF..ansbin.[keep][selected]
+  scored_pred <- pred[selected]
+  if (!length(actuals) || any(!actuals %in% c(0, 1))) {
     stop("Prediction statistics require nonempty binary outcomes.", call. = FALSE)
   }
-  LL <- if(bayesian)sum(modelob$model$diagnostics$log_score[keep]) else
-    sum(log(ifelse(actuals == 1, pred, 1 - pred)))
+  LL <- if(bayesian)sum(modelob$model$diagnostics$log_score[keep][selected]) else
+    sum(log(ifelse(actuals == 1, scored_pred, 1 - scored_pred)))
   # AUC and null-relative R2 are undefined for a one-class sample.
   AUC <- if (length(unique(actuals)) == 2L)
-    as.numeric(pROC::auc(actuals, pred, quiet = TRUE)) else NA_real_
+    as.numeric(pROC::auc(actuals, scored_pred, quiet = TRUE)) else NA_real_
   null_LL <- sum(stats::dbinom(actuals, 1L, mean(actuals), log = TRUE))
   R2 <- if (null_LL == 0) NA_real_ else round(1 - LL / null_LL, 6)
   c(list(predictions = pred, LL = LL, AUC = AUC,
-       RMSE = sqrt(mean((actuals - pred)^2)), R2 = R2),if(return_state)list(state=continued$state))
+       RMSE = sqrt(mean((actuals - scored_pred)^2)), R2 = R2),if(return_state)list(state=continued$state))
 }

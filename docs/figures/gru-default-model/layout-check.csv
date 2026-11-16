@@ -1,0 +1,61 @@
+"text","width_in","height_in","box_width_in","box_height_in"
+"6 numeric inputs; no intercept / item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",5.61002604166667,0.5695,7.77777777777778,1.33333333333333
+"Current item ID",1.578125,0.1317,4,1
+"Current skill-combination ID",2.86870659722222,0.1317,4.77777777777778,1
+"Shared numeric encoder: Linear 6 <U+2192> 32; ReLU / 32 biases",4.63736979166667,0.374366666666667,7.77777777777778,1
+"Current predictors x(t): concatenate 32 numeric + 16 item + 16 skill = 64 values / Numeric output: Linear 32 <U+2192> 32; 32 biases / Item embedding: 16 values per item, initialized at zero; skill-combination embedding: 16 values, random start / Both tables train; reserved rows stay zero. Apply input dropout 0.1 after concatenation. / Carry exact raw item and skill-combination IDs alongside x(t).",10.4055989583333,1.0175,18,2
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Carry raw item/skill IDs alongside e(t).",3.63107638888889,0.5695,5.22222222222222,1.22222222222222
+"Past completed events from this participant; newest 100 globally / Stored e(j): 96, post-answer h3(j): 32, exact raw item/skill IDs / FILTER: past item = current item OR past skill-combination ID = current ID",6.99262152777778,0.5695,12.2222222222222,1.44444444444444
+"Attention and weighted mean m(t): 32 values / Current q(t) and past k(j): shared Linear 96 <U+2192> 32; 32 shared biases / Scores q(t) <U+00B7> k(j) / sqrt(32); softmax over eligible past events only / Weighted mean <U+03A3> a(t,j) h3(j) of their raw post-answer states; no separate value map",8.63411458333333,0.8597,18,2.22222222222222
+"Prediction input: 96 values / Retrieved r(t): Linear 32 <U+2192> 32; 32 biases / No eligible memory: force r(t) = 0 / Concatenate r(t): 32 + x(t): 64",3.79253472222222,0.7935,5.22222222222222,1.55555555555556
+"Prediction hidden layer: 128 / Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.88758680555556,0.617033333333334,4.44444444444444,1.55555555555556
+"Correctness probability p(correct at trial t) / Linear 128 <U+2192> 1; 1 bias / Sigmoid and clipping",4.37760416666667,0.617033333333334,5.55555555555556,1.55555555555556
+"Observed response y(t) / 0 = incorrect; 1 = correct",2.58072916666667,0.374366666666667,5.22222222222222,1
+"Completed interaction: 65 values / Concatenate x(t): 64 + raw y(t): 1 / No response encoder",3.18055555555556,0.5695,5.22222222222222,1.22222222222222
+"Previous h1(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1
+"GRU layer 1: 32 units / 192 biases; h1(t): 32 / Then dropout 0.1 / to the next layer",1.98806423611111,0.7935,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1
+"GRU layer 2: 32 units / 192 biases; h2(t): 32 / Then dropout 0.1 / to the next layer",1.98806423611111,0.7935,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1
+"GRU layer 3: 32 units / 192 biases; h3(t): 32 / Top completed state",1.98806423611111,0.5695,2.77777777777778,1.44444444444444
+"Retain all three states h1(t), h2(t), h3(t) for the next trial / Append [cached pre-answer e(t): 96, post-answer h3(t): 32, raw item/skill IDs] to the bank / Keep the newest 100 global completed events; retained GRU states are before between-layer dropout.",9.69118923611111,0.5695,18,1.33333333333333
+"6 numeric inputs; no intercept / item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",5.610107421875,0.583389539930556,7.77777777777778,1.33333333333333
+"Current item ID",1.57800971137153,0.145514594184029,4,1
+"Current skill-combination ID",2.86887613932292,0.145514594184029,4.77777777777778,1
+"Shared numeric encoder: Linear 6 <U+2192> 32; ReLU / 32 biases",4.64419216579861,0.388181260850695,7.77777777777778,1
+"Current predictors x(t): concatenate 32 numeric + 16 item + 16 skill = 64 values / Numeric output: Linear 32 <U+2192> 32; 32 biases / Item embedding: 16 values per item, initialized at zero; skill-combination embedding: 16 values, random start / Both tables train; reserved rows stay zero. Apply input dropout 0.1 after concatenation. / Carry exact raw item and skill-combination IDs alongside x(t).",10.4066569010417,1.03138953993056,18,2
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Carry raw item/skill IDs alongside e(t).",3.63102213541667,0.583389539930556,5.22222222222222,1.22222222222222
+"Past completed events from this participant; newest 100 globally / Stored e(j): 96, post-answer h3(j): 32, exact raw item/skill IDs / FILTER: past item = current item OR past skill-combination ID = current ID",7.02067057291667,0.583389539930556,12.2222222222222,1.44444444444444
+"Attention and weighted mean m(t): 32 values / Current q(t) and past k(j): shared Linear 96 <U+2192> 32; 32 shared biases / Scores q(t) <U+00B7> k(j) / sqrt(32); softmax over eligible past events only / Weighted mean <U+03A3> a(t,j) h3(j) of their raw post-answer states; no separate value map",8.64118787977431,0.873514594184028,18,2.22222222222222
+"Prediction input: 96 values / Retrieved r(t): Linear 32 <U+2192> 32; 32 biases / No eligible memory: force r(t) = 0 / Concatenate r(t): 32 + x(t): 64",3.79353841145833,0.807389539930556,5.22222222222222,1.55555555555556
+"Prediction hidden layer: 128 / Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.89329698350694,0.630847927517362,4.44444444444444,1.55555555555556
+"Correctness probability p(correct at trial t) / Linear 128 <U+2192> 1; 1 bias / Sigmoid and clipping",4.37767876519097,0.630847927517362,5.55555555555556,1.55555555555556
+"Observed response y(t) / 0 = incorrect; 1 = correct",2.58067491319444,0.388181260850695,5.22222222222222,1
+"Completed interaction: 65 values / Concatenate x(t): 64 + raw y(t): 1 / No response encoder",3.18107096354167,0.583389539930556,5.22222222222222,1.22222222222222
+"Previous h1(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1
+"GRU layer 1: 32 units / 192 biases; h1(t): 32 / Then dropout 0.1 / to the next layer",1.993896484375,0.807389539930556,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1
+"GRU layer 2: 32 units / 192 biases; h2(t): 32 / Then dropout 0.1 / to the next layer",1.993896484375,0.807389539930556,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1
+"GRU layer 3: 32 units / 192 biases; h3(t): 32 / Top completed state",1.993896484375,0.583389539930556,2.77777777777778,1.44444444444444
+"Retain all three states h1(t), h2(t), h3(t) for the next trial / Append [cached pre-answer e(t): 96, post-answer h3(t): 32, raw item/skill IDs] to the bank / Keep the newest 100 global completed events; retained GRU states are before between-layer dropout.",9.69913736979166,0.583389539930556,18,1.33333333333333
+"6 numeric inputs; no intercept / item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",5.610107421875,0.577833984374999,7.77777777777778,1.33333333333333
+"Current item ID",1.57800971137153,0.139959038628472,4,1
+"Current skill-combination ID",2.86887613932292,0.139959038628472,4.77777777777778,1
+"Shared numeric encoder: Linear 6 <U+2192> 32; ReLU / 32 biases",4.64419216579861,0.382625705295139,7.77777777777778,1
+"Current predictors x(t): concatenate 32 numeric + 16 item + 16 skill = 64 values / Numeric output: Linear 32 <U+2192> 32; 32 biases / Item embedding: 16 values per item, initialized at zero; skill-combination embedding: 16 values, random start / Both tables train; reserved rows stay zero. Apply input dropout 0.1 after concatenation. / Carry exact raw item and skill-combination IDs alongside x(t).",10.4066569010417,1.025833984375,18,2
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Carry raw item/skill IDs alongside e(t).",3.63102213541667,0.577833984374999,5.22222222222222,1.22222222222222
+"Past completed events from this participant; newest 100 globally / Stored e(j): 96, post-answer h3(j): 32, exact raw item/skill IDs / FILTER: past item = current item OR past skill-combination ID = current ID",7.02067057291667,0.577833984374999,12.2222222222222,1.44444444444444
+"Attention and weighted mean m(t): 32 values / Current q(t) and past k(j): shared Linear 96 <U+2192> 32; 32 shared biases / Scores q(t) <U+00B7> k(j) / sqrt(32); softmax over eligible past events only / Weighted mean <U+03A3> a(t,j) h3(j) of their raw post-answer states; no separate value map",8.64118787977431,0.867959038628472,18,2.22222222222222
+"Prediction input: 96 values / Retrieved r(t): Linear 32 <U+2192> 32; 32 biases / No eligible memory: force r(t) = 0 / Concatenate r(t): 32 + x(t): 64",3.79353841145833,0.801833984375,5.22222222222222,1.55555555555556
+"Prediction hidden layer: 128 / Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.89329698350694,0.625292371961805,4.44444444444444,1.55555555555556
+"Correctness probability p(correct at trial t) / Linear 128 <U+2192> 1; 1 bias / Sigmoid and clipping",4.37767876519097,0.625292371961805,5.55555555555556,1.55555555555556
+"Observed response y(t) / 0 = incorrect; 1 = correct",2.58067491319444,0.382625705295139,5.22222222222222,1
+"Completed interaction: 65 values / Concatenate x(t): 64 + raw y(t): 1 / No response encoder",3.18107096354167,0.577833984374999,5.22222222222222,1.22222222222222
+"Previous h1(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1
+"GRU layer 1: 32 units / 192 biases; h1(t): 32 / Then dropout 0.1 / to the next layer",1.993896484375,0.801833984375,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1
+"GRU layer 2: 32 units / 192 biases; h2(t): 32 / Then dropout 0.1 / to the next layer",1.993896484375,0.801833984375,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1
+"GRU layer 3: 32 units / 192 biases; h3(t): 32 / Top completed state",1.993896484375,0.577833984374999,2.77777777777778,1.44444444444444
+"Retain all three states h1(t), h2(t), h3(t) for the next trial / Append [cached pre-answer e(t): 96, post-answer h3(t): 32, raw item/skill IDs] to the bank / Keep the newest 100 global completed events; retained GRU states are before between-layer dropout.",9.69913736979166,0.577833984374999,18,1.33333333333333

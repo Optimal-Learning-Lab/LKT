@@ -1,4 +1,4 @@
-# Draw the current default GRU design from its explicitly frozen checkpoint.
+# Draw the previous reviewed GRU design from its explicitly frozen checkpoint.
 # Args: ROOT [SELECTION_RDS] [OUTPUT_DIRECTORY]. All network code
 # stays in the installed LKT package; the ordinary R equations below audit the figure.
 args <- commandArgs(TRUE)
@@ -18,10 +18,10 @@ stopifnot(hash(attr(lkt_release,'archive'))==lkt_release[['lkt_source_sha256']],
   requireNamespace('svglite',quietly=TRUE),torch::torch_is_installed())
 checkpoint <- readRDS(checkpoint_file);fit <- checkpoint$fit
 selected <- list(seed=checkpoint$task$seed,run_id=selection$run_id)
-s <- do.call(GRUModel,fit$gru_settings)$settings;prep <- fit$model$preprocessing;w <- fit$model$weights
-expected <- do.call(GRUModel,protocol$settings)$settings;expected$seed <- as.integer(selected$seed)
+s <- getFromNamespace('lkt_sequence_model','LKT')(fit)$settings;prep <- fit$model$preprocessing;w <- fit$model$weights
+expected <- getFromNamespace('lkt_gru_settings','LKT')(getFromNamespace('lkt_gru_saved_controls','LKT')(protocol$settings));expected$seed <- as.integer(selected$seed)
 n_items <- length(prep$vocabularies[[1L]]);n_skills <- length(prep$vocabularies[[2L]])
-stopifnot(identical(s,expected),identical(do.call(GRUModel,fit$gru_settings)$settings,s),
+stopifnot(identical(s,expected),
   sum(vapply(w,length,integer(1)))==fit$parameter_count,
   s$feature_encoder=='mlp',s$inference_mode=='none',s$temporal_kl_beta==0,
   s$num_layers==3L,s$hidden_size==32L,identical(s$head_hidden_sizes,128L),

@@ -1,0 +1,13 @@
+Generic simplified GRU alternative; no training or dataset loaded.
+Weights on connectors; biases in receiving boxes. Reused weights count once.
+I and S denote learned training-vocabulary item and skill-combination categories.
+Embedding tables also have one reserved, fixed-zero row each.
+Learnable scalar entries: 40,193 + 16(I + S).
+Stored tensor entries including reserved rows: 40,193 + 16(I + S + 2).
+Previous design: 43,345 + 16(I + S + 2) stored entries; reduction 3,152.
+Seven inputs assume the stated three-feature LKT recipe and four timing coordinates.
+interc=FALSE (configuration intercept=FALSE) removes the global intercept.
+Source draw script SHA256: 1bea78dacdc45e9eccf3efc512d7bd0e7de3f36de42606cf28deb8c90918aad8
+Consolidated layout SHA256: aef8ccaa7524b6310cda91478de8aa98251de7e9e7aca3a85d77ab48523d05ad
+Source model SHA256: 3eb790ed8fbe4746d88948cbc6e6af98b0e1c55ef8c0e36929de2bb06e37b43c
+Verified runtime: C:/dev/LKT-outputs/gru-simplified-alternative-20261106/verification/candidate-library/LKT

@@ -5,7 +5,9 @@ test_gru_minimal_settings <- function()list(hidden_size=64L,num_layers=1L,
   gru_dropout=0,head_dropout=0,use_lkt_features=FALSE,time_col=NULL,order_col=NULL,
   unknown_levels='error',feature_encoder='none',encoder_hidden_sizes=16L,
   time_feature_cols=character(),time_missing_cols=character(),retrieval_heads=0L,
-  retrieval_filter_cols=character(),zero_init_embedding_cols=character())
+  retrieval_filter_cols=character(),zero_init_embedding_cols=character(),
+  numeric_encoder='separate',encoder_output_sizes=integer(),response_encoding='mlp',
+  retrieval_value_mode='projected')
 test_gru_model <- function(...)do.call(LKT::GRUModel,
   utils::modifyList(test_gru_minimal_settings(),list(...),keep.null=TRUE))
 test_sequence_model <- function(unit=c('gru','mamba'),...,layer_dropout=0,unit_options=list()) {

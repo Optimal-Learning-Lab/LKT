@@ -7,6 +7,11 @@ current package is selected by the single central release definition.
 See the [workspace layout guide](docs/workspace-layout.md) for the code, bulk-data,
 and experiment-output homes, the frozen GRU checkpoint/results, and package builds.
 
+For the three current GRU families—six-input predictive baseline, student-local
+knowledge tracer, and eight-input trait-conditioned ground-truth candidate—see
+[README-GRU.md](README-GRU.md). It identifies the model contracts, fitted artifacts,
+evaluation contexts and current-release rerun entry points.
+
 Load the verified local installation through the research bridge:
 
 ```r

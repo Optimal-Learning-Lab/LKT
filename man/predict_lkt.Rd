@@ -18,7 +18,7 @@ predict_lkt(
 \arguments{
 \item{modelob}{Fitted LKT model object containing coefficients and predictors.}
 
-\item{data}{Data frame or data table aligned with the fitted rows. \code{CF..ansbin.} is required only for statistics; a \code{fold} column is required when selecting folds.}
+\item{data}{Data frame or data table aligned with the fitted rows. \code{Outcome} or \code{CF..ansbin.} is required only for statistics; authoritative study outcomes are excluded from statistics. A \code{fold} column is required when selecting folds.}
 
 \item{fold}{Optional vector of fold values to include in the returned predictions and statistics. \code{NULL} or an empty vector uses all rows.}
 

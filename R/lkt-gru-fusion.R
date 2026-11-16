@@ -5,9 +5,11 @@ lkt_gru_input_layout <- function(prep,s) {
   time <- which(startsWith(as.character(prep$numeric_names),'time:'))
   history <- setdiff(seq_along(prep$numeric_names),time)
   learned <- s$feature_encoder=='mlp'
-  sizes <- stats::setNames(rep(s$encoder_output_size,3L),c('time','history','response'))
+  sizes <- stats::setNames(rep(s$encoder_output_size,4L),c('time','history','response','numeric'))
   sizes[names(s$encoder_output_sizes)] <- s$encoder_output_sizes
-  numeric_parts <- if(learned)c(if(length(time))sizes[['time']],if(length(history))sizes[['history']]) else length(prep$numeric_names)
+  numeric_parts <- if(!learned)length(prep$numeric_names) else if(s$numeric_encoder=='combined') {
+    if(length(prep$numeric_names))sizes[['numeric']] else integer()
+  } else c(if(length(time))sizes[['time']],if(length(history))sizes[['history']])
   categories <- if(s$categorical_encoding=='embedding')prep$embedding_dims else lengths(prep$vocabularies)
   if(s$numeric_fusion=='sum' && (length(numeric_parts)!=2L || numeric_parts[1]!=numeric_parts[2]))
     stop('numeric_fusion sum requires both time and history encoders with equal output widths.',call.=FALSE)
@@ -22,7 +24,7 @@ lkt_gru_input_layout <- function(prep,s) {
     categorical_width=as.integer(categorical_width),
     combined_width=combined_width,
     width=if(is.null(s$joint_encoder_output_size))combined_width else s$joint_encoder_output_size,
-    response_width=if(learned)sizes[['response']] else 1L)
+    response_width=if(learned && s$response_encoding=='mlp')sizes[['response']] else 1L)
 }
 
 # Addition preserves the learned coordinates and their gradients. Concatenation

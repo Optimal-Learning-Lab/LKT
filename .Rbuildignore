@@ -32,3 +32,6 @@ cran-comments.md
 ^vignettes/vigfig-.*\.png$
 ^src/.*\.(dll|o)$
 ^\.gitattributes$
+
+^\.codex-attachments$
+^tests/diagnostics$

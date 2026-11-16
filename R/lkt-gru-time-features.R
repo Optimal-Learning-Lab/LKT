@@ -55,3 +55,34 @@ LKTGRUTimeFeatures <- function(data,time_col='CF..Time.',item_cols='KC..Default.
   result[[outputs[2L]]] <- spacing
   result
 }
+
+#' Timing inputs for independent GRU candidates
+#' @inheritParams LKTGRUTimeFeatures
+#' @param history Complete committed exposure log. Candidates are never appended.
+#' @return Candidate data with the same two timing columns as LKTGRUTimeFeatures.
+#' @export
+LKTGRUCandidateTimeFeatures <- function(history,data,time_col='CF..Time.',item_cols='KC..Default.',
+                                        subject_col='Anon.Student.Id',time_units='seconds') {
+  # The ordinary timing helper validates configuration even for empty history.
+  empty <- as.data.frame(data)[FALSE,,drop=FALSE]
+  LKTGRUTimeFeatures(empty,time_col,item_cols,subject_col,time_units)
+  rows <- as.data.frame(data);past <- as.data.frame(history)
+  if(any(c('gru_item_age_seconds','gru_mean_prior_spacing_seconds')%in%names(rows)))
+    stop('Timing output columns already exist; supply original candidate rows.',call.=FALSE)
+  times <- lkt_gru_time(rows,list(time_col=time_col,time_units=time_units))
+  keys <- lkt_gru_keys(rows,c(subject_col,item_cols))
+  rows$gru_item_age_seconds <- 0;rows$gru_mean_prior_spacing_seconds <- NA_real_
+  if(!nrow(past))return(rows)
+  oldtime <- lkt_gru_time(past,list(time_col=time_col,time_units=time_units))
+  oldkeys <- lkt_gru_keys(past,c(subject_col,item_cols))
+  groups <- split(seq_len(nrow(past)),oldkeys)
+  for(key in unique(keys)) {
+    old <- groups[[key]];current <- which(keys==key)
+    if(!length(old))next
+    t <- sort(oldtime[old],method='radix')
+    if(any(times[current]<utils::tail(t,1L)))stop('Candidate timing precedes committed item history.',call.=FALSE)
+    rows$gru_item_age_seconds[current] <- times[current]-t[1L]
+    if(length(t)>=2L)rows$gru_mean_prior_spacing_seconds[current] <- (utils::tail(t,1L)-t[1L])/(length(t)-1L)
+  }
+  rows
+}

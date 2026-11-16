@@ -1,0 +1,13 @@
+Current default GRU architecture; no training or dataset loaded.
+Weights on connectors; biases in receiving boxes. Reused weights count once.
+I and S denote learned training-vocabulary item and skill-combination categories.
+Embedding tables also have one reserved, fixed-zero row each.
+Learnable scalar entries: 40,193 + 16(I + S).
+Stored tensor entries including reserved rows: 40,193 + 16(I + S + 2).
+Previous design: 43,345 + 16(I + S + 2) stored entries; reduction 3,152.
+Seven inputs assume the stated three-feature LKT recipe and four timing coordinates.
+interc=FALSE (configuration intercept=FALSE) removes the global intercept.
+Source draw script SHA256: f56c40d5134e18914a4de81ec5a5cdabe9cb400327f8b0b36340fb5871c923f8
+Consolidated layout SHA256: ea3ba66e2df9b02aa8181404927804e8b243adb2e659e1be6578a194276018e8
+Source model SHA256: 7d838fc4cce890d3e5142847768722251478d401eca9f960b12a1653dda80264
+Verified runtime: C:/dev/PolicyFactory2/.r-libs/LKT-2.0.0.9019-0f460a4d55d5/LKT

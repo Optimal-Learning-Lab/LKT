@@ -1,18 +1,18 @@
 {
-  "version": "2.0.0.9018",
-  "base": "2.0.0.9017",
+  "version": "2.0.0.9027",
+  "base": "2.0.0.9026",
   "files": [
     {
       "path": "DESCRIPTION",
-      "sha256": "cb3686b6e48c3d62468ee77e7487b83ab915af7f3c83f42a1a125af67a5bb33a"
+      "sha256": "36f9b1d318f35a752dc4760e63aa0a8bfd1f34f2d9870d1cdc6abe5e7ba700cb"
     },
     {
       "path": "NAMESPACE",
-      "sha256": "4d27b47604075b9f6d60d430a3e8aa9f2671b64a0b20a940f99c1deaac929caa"
+      "sha256": "da18b2a7a6792f5cde8f1edfb8099b653dbdb2a4e5edb5b019a879675d6b8ba2"
     },
     {
       "path": "NEWS.md",
-      "sha256": "f1a89f57a8b40b96debf5661ec7f8f32f57e134f495c168afc061085bcaff680"
+      "sha256": "8c0777d553d6396ded9f4db3723e9bc1d1ab61c7f27ff7b1dc1bdfee6924fa3e"
     },
     {
       "path": "R/LKT-package.R",
@@ -20,7 +20,7 @@
     },
     {
       "path": "R/LKTfunctions.R",
-      "sha256": "67560d499ea7b1e3961b6a4e6c530e29c455d66e36093f39c58592773de5476c"
+      "sha256": "7207306dbd134c9d08d41937fa5f273cfbb7c830560cd17c4159c74ea8cd3279"
     },
     {
       "path": "R/data.R",
@@ -32,19 +32,19 @@
     },
     {
       "path": "R/lkt-configuration.R",
-      "sha256": "8c5d313ca8357a0cf8a47ed11d1b7b7f48a634d49f34d262dd44290a060ddfe2"
+      "sha256": "e8db5ba1f98a85a0b11546802d5547f3d2d05464a351fea6c4d6d8d1516f1605"
     },
     {
       "path": "R/lkt-fast-online-simple-adaptive.R",
-      "sha256": "ca183149e86329ca6926e65c56447dcbae634afb2d3b36be39bafa582c1af99f"
+      "sha256": "767a0dc946e3906650a2013ae5a122044437048157b6ce15b889f80666cc1b2b"
     },
     {
       "path": "R/lkt-feature-computation.R",
-      "sha256": "11fec653d1c9768c6b8b3685a38c220f1afcaf1dadb7d76da9f4249c528b6b64"
+      "sha256": "203dbbba8bc8d03f755cc5f6f33497f9080a3169bc0ae46d017ddcad86a91c27"
     },
     {
       "path": "R/lkt-feature-input.R",
-      "sha256": "13ca862b06c4897b69ac174ecc048b69ec1f50cdb6921393501e16e6f447dcbb"
+      "sha256": "3fbad7e3cc8a18de43f39a0f4e94e1535845f8f54be26b9d2be4b7509ba53e08"
     },
     {
       "path": "R/lkt-fgui-bayesian.R",
@@ -52,43 +52,83 @@
     },
     {
       "path": "R/lkt-fgui-gru.R",
-      "sha256": "dc525ed057e0ff3aa9988ac9b54b4472cbe78fdd27b9d213fb5e8e7ae29b04a6"
+      "sha256": "d53d6a179045b04b72e3d09b5744478d81a6f970a49f6152197d34626f4081f3"
     },
     {
       "path": "R/lkt-fgui.R",
-      "sha256": "8118d87b791b7529632953f214a29d496c8a1f2ac83fa75df342118098bfedd3"
+      "sha256": "52e36d90816712202c3dd1afebb3060e7aa3ecc55d7efd693fad309f904945a6"
+    },
+    {
+      "path": "R/lkt-gru-adaptive-embeddings.R",
+      "sha256": "7fa91e234d1cc9237c64826b254639188b1ac6b036e816254171e04888b1940b"
+    },
+    {
+      "path": "R/lkt-gru-bayesian-prototypes.R",
+      "sha256": "5eff17dcbfd32fba1d5fbab0bcda38aaedbfb88bfe3643c17f03e128fed7d629"
+    },
+    {
+      "path": "R/lkt-gru-candidate-scoring.R",
+      "sha256": "dfdf4ea467e750c410c41a3756c99679b2c3cc9d36b31af76c60babee7d948df"
+    },
+    {
+      "path": "R/lkt-gru-connection-fatigue.R",
+      "sha256": "868392a79ac70c84aece3bb8c0c5801136109098f3a95255ceb5019cb77f6f87"
+    },
+    {
+      "path": "R/lkt-gru-exercise-attributes.R",
+      "sha256": "208a88cbb0cfda5cc83a0a6c5cc7607492083cf68a48e425f20c334694c7350e"
     },
     {
       "path": "R/lkt-gru-fusion.R",
-      "sha256": "506bf537adddd05205910854cdabe70c7404f842043a8cc5e20e24087d70ad74"
+      "sha256": "91652271dfa4047e97da080e39bc226965c858e6a7e324fcec142fd4e0027ccf"
+    },
+    {
+      "path": "R/lkt-gru-gate-fatigue.R",
+      "sha256": "363b178208460304e9b435e8a54d64421048181efc690c7e95618f8066c985ac"
+    },
+    {
+      "path": "R/lkt-gru-hidden-decay.R",
+      "sha256": "1bc6f911cb91aab2591b32277a22aec0bc9ba3ec474e7ca09046a6fbaaaec21d"
     },
     {
       "path": "R/lkt-gru-inference.R",
-      "sha256": "ed7c4db318345a2e7898438c3f54b7a879aa64201b54659a52078db0cc040840"
+      "sha256": "447afba0d034be14735482b5d254eed334491fbfb23d0d0d9bd98da7b3215f24"
     },
     {
       "path": "R/lkt-gru-initialization.R",
-      "sha256": "afc65072a869ec6f568eb9673223aed152a3750f04063a4057b220b41a57d168"
+      "sha256": "b28b5d94fedfd71d18e91cf2887cf90f5b347a18c9f72bb08ba905a5eac3560d"
     },
     {
       "path": "R/lkt-gru-input.R",
-      "sha256": "2cbd4765d18c47105d7ff62fbef1ab6744d10cb19ad8a57423c0d9fbb4409536"
+      "sha256": "301a93ba67d4fb961e96d10c36bce0e7dbbb1ce52b6702c8113b15d7bdc76fe6"
+    },
+    {
+      "path": "R/lkt-gru-latent-denoising.R",
+      "sha256": "d8f496177c647d019f5abb0b34e4e3c7536e41e30af18fcbcc46e28f942e00bf"
+    },
+    {
+      "path": "R/lkt-gru-plasticity.R",
+      "sha256": "09175d8868f5db08dc0260167812e61b95e86edbb55f156e0163f1e74ec812da"
     },
     {
       "path": "R/lkt-gru-prediction.R",
-      "sha256": "420520f75ba3938fef355a3383aba3d0fcd55a45bac6e07209570e8147a90d96"
+      "sha256": "1ff0634ffff394c30cb1fe6db24aad9c2bc69648309b96adc08e22850dd6ce5e"
     },
     {
       "path": "R/lkt-gru-recurrent.R",
-      "sha256": "694ef5e26d477c09b5af892210899f7258d7d4ca5733e295f4e55a04b9f7dad3"
+      "sha256": "0bf212d1a8807d7479626342ba89c42bcbf5955a40d7d124b17323d69ab53a3e"
     },
     {
       "path": "R/lkt-gru-retrieval.R",
-      "sha256": "49b5e66875becfddbd0f4aeddf31454ab9f957e77edcb533ff336bb1be4d679c"
+      "sha256": "de16ac1bf38f4ee84068d22246e1c4acdb2dd33ca9b545e3d52955714473f246"
+    },
+    {
+      "path": "R/lkt-gru-semantic.R",
+      "sha256": "f3c2b285bd98c1f515cefa103fdf01fa8bc8d27fff2b13e94e07004ff8231ea8"
     },
     {
       "path": "R/lkt-gru-time-features.R",
-      "sha256": "ace21a6ef9a4da8608158d4d212157141ebccfc9844cd6c5051c89a0082a1a2f"
+      "sha256": "e067ea6aaa308d4ec0ad07d8adbdc935b4acdd48b0caf559dca6cbbd389dea60"
     },
     {
       "path": "R/lkt-gui-style.R",
@@ -104,39 +144,47 @@
     },
     {
       "path": "R/lkt-latency.R",
-      "sha256": "73a7c8f52fbf1dc4110ae2affda2ed5057125ae883e5935d5a7b9d933f9235ae"
+      "sha256": "bfa458a7a4275a6172cc16b727f6280ca109d35df5a220e76cc02ddf4b6ecb51"
     },
     {
       "path": "R/lkt-model-glmm.R",
-      "sha256": "328a2113b20f3d3b3e719fed0b7870b8fa4dd52df4a092faf075244dc0e87c45"
+      "sha256": "1cdcd3a974992c2ad7bc10520e69a4ed884be05a2551dbb935256e6c2431b5b8"
     },
     {
       "path": "R/lkt-model-gru.R",
-      "sha256": "30abe918a8eea9e6be446421167daf9880ee703843f708a59cb6de914684edb1"
+      "sha256": "9283afc64910b380dd6da8500321c727cb3ea87fdfcad52eec8906757d74b6e4"
     },
     {
       "path": "R/lkt-model-interface.R",
-      "sha256": "fe87d2cc2f87131da34aa7d025232df053c0ed4d75aa06eded969c400fd13d8b"
+      "sha256": "6be1581384bea763a95e8e8aac2b94b0d0e8b682fe02e4b822de8a151b29089f"
     },
     {
       "path": "R/lkt-model-liblinear.R",
-      "sha256": "617b68f096ff73ad3bb0386bc1f308b4eb975224ff161b2c93424cf059be07b6"
+      "sha256": "244a2eea00dcbac814687be255ad7167bb64df670e2ab50404c5a889b4d47f4c"
     },
     {
       "path": "R/lkt-model-online-bayesian.R",
-      "sha256": "588715e06c48a47a69a70df7cf81523c8b185bac0f8fe131344b481f26a430ac"
+      "sha256": "c6f230ed368b6a30bb7a389e37526ff44d6632f7c631a82f1a01c31c2adc9dfc"
     },
     {
       "path": "R/lkt-model-online-calibration.R",
-      "sha256": "660e155087676e5fe63a35ca041f5f7d257be10b440218f2a8bb6badfb4b41d7"
+      "sha256": "6f79570e62a0c7ed5571ae3ac83ed3b9129f6e8b8272511dec08cd4971feb9b8"
+    },
+    {
+      "path": "R/lkt-pdp-controlled.R",
+      "sha256": "cc519449add68731bc7bf71aef8c46e7ef495dfbeb6ad4710f94fc4604bcc5fa"
+    },
+    {
+      "path": "R/lkt-pdp-source.R",
+      "sha256": "d9d5ae07b3871cc159202b735897b473e2b2e4c6bd10654575a3951da0c02fd2"
     },
     {
       "path": "R/lkt-prediction.R",
-      "sha256": "fa487005dcd6ed4279c6c0d28b936fae148577805fdd0c04ab1d872504542e74"
+      "sha256": "d3944020b9c983c8c113266778f80859f9ba645f8eae79d42d554b8669bcd64e"
     },
     {
       "path": "R/lkt-search.R",
-      "sha256": "90e3e2d34a8329937bf9a754a74a221d2efbc06cbae4aff30a1b4222106a130f"
+      "sha256": "5f11fb1da853c9f4e2f3f463a6948f4053efe0b9348e08eb7a0efaa7231c5313"
     },
     {
       "path": "R/lkt-sequence-mamba.R",
@@ -144,7 +192,31 @@
     },
     {
       "path": "R/lkt-sequence-unit.R",
-      "sha256": "ffb18dd32f9071d76b29c1306874c8d4112f4c9ad92c6c3cdb836b850eb83c83"
+      "sha256": "a62053f2c1c4cf7d001063870f9844512407df497e37143a44e7a28b91345ddb"
+    },
+    {
+      "path": "data/largerawsample.rda",
+      "sha256": "8871aaa7515aeb914566b200945249edcd3db67f89056e740159de3b7d4c559d"
+    },
+    {
+      "path": "data/samplelkt.rda",
+      "sha256": "36200eb6ce815adc86b02594aed924532d7e5f9a6d872b1be77363dd3c3b1a56"
+    },
+    {
+      "path": "docs/gru-bayesian-prototypes.md",
+      "sha256": "8ec02bee3dc1257aa8f67542ce1e8ad42b335e0f840da1f9d8690ca40fa1ac49"
+    },
+    {
+      "path": "docs/gru-exercise-attributes.md",
+      "sha256": "9fb247d81a1f90f192362175da5c8d2326ce5d4ee98696d747507c704d61d952"
+    },
+    {
+      "path": "docs/gru-latent-denoising.md",
+      "sha256": "0978bf00c1d8bfc1930dc7520d2166796d352d446b4a58a1e46e36a1b17cc005"
+    },
+    {
+      "path": "docs/gru-semantic-input.md",
+      "sha256": "010dce6adb018f2b4cb4b9f05147857c911e4ca4011343871b7911b3b1c2aad1"
     },
     {
       "path": "docs/sequence-units.md",
@@ -159,6 +231,10 @@
       "sha256": "63bd96c27268e9dd792f5ebd5d392177743f012196c77e92dc051bac066db4b0"
     },
     {
+      "path": "inst/python/lkt_semantic_encode.py",
+      "sha256": "d17a0f4d34797fa394475ed079b4e8d446baad013199ea91b1fe39a55cb15db4"
+    },
+    {
       "path": "inst/sequence-reference.json",
       "sha256": "685e1c3cc6299d21202fc01cd84c45cc8430faf19892125b0c1a4d89bc2896fd"
     },
@@ -168,15 +244,15 @@
     },
     {
       "path": "man/GRUModel.Rd",
-      "sha256": "4c8b301891606023ed8843f7f1e39b895eee3e4c31c57406b733d49cc7bc72ba"
+      "sha256": "27859b1232f05c72246e8c9b2f35679db3316065df76aefc7513e0884278ac1d"
     },
     {
       "path": "man/LASSOLKTData.Rd",
-      "sha256": "53ba137583014e5f5b86d87e0c69645d88c8a0107388c23daee3cf53764945ef"
+      "sha256": "f17672c950b4fbd45f2763d2d93ea9ed575e79b861f95b768eef531c481ab5bb"
     },
     {
       "path": "man/LASSOLKTModel.Rd",
-      "sha256": "68e1e1e04f66d1fcc837734297e6ac8c0c59a754ffb7170a280d63f40c429c8b"
+      "sha256": "52b99b0f101931b48ef0eccdd82312af48cce9726f594d7ab6c97a9d7f92c60e"
     },
     {
       "path": "man/LKT-package.Rd",
@@ -184,7 +260,7 @@
     },
     {
       "path": "man/LKT.Rd",
-      "sha256": "3c312175578d973d1f4f2bced920a4e3a2b8a0984b82230896bf18bedb718712"
+      "sha256": "e2c8e7489cf64f87230f1e37255becb13ad30a325cf6b6df86e599f3e21220df"
     },
     {
       "path": "man/LKTBayesianState.Rd",
@@ -203,16 +279,24 @@
       "sha256": "57aa866cb128edc59cbadbc697ea44128f3a680d8ba1a685e3132bfea3dad1db"
     },
     {
+      "path": "man/LKTGRUCandidateTimeFeatures.Rd",
+      "sha256": "6c69aa3a0e5a9ddc6c4c362d0080a3b5e8a080404210fb96eeab1b9a876ad497"
+    },
+    {
+      "path": "man/LKTGRUOptionalIdentities.Rd",
+      "sha256": "c5abea64739b0a658a5c7b18e10320644c7cb5b97cf3542a0a7306cfb333d8f7"
+    },
+    {
       "path": "man/LKTGRURuntime.Rd",
       "sha256": "a048bd32dbfdeb805cf85f793bee5e1f7ef85ccc5e711d452daa3e997ac77f33"
     },
     {
       "path": "man/LKTGRUScore.Rd",
-      "sha256": "76b946959f095a3d18008fd37732ed0d193453380bd8bdad9954e44196fff4db"
+      "sha256": "2f64773ebdf3aebc8ee6459306e1be1fd8e72de874fc1e4da5b766d1e52fe828"
     },
     {
       "path": "man/LKTGRUState.Rd",
-      "sha256": "7a39d78bc0e1302613cb19871ffefe8445f48686b452ede12b4c6abcc863a18d"
+      "sha256": "0bc9c8aa0dc9cb825dd453dcfd239d750cb4baac7895b01189feb4d1b897faf3"
     },
     {
       "path": "man/LKTGRUTimeFeatures.Rd",
@@ -256,11 +340,11 @@
     },
     {
       "path": "man/LKTSequenceScore.Rd",
-      "sha256": "a3a08c49bccdad19beabca269add76b64d498b82aaa6c8d709076ae0a6de2f5f"
+      "sha256": "ed8936171b7e9516d860b29910f022c8115d553874270232c9a9ca62e52a7b95"
     },
     {
       "path": "man/LKTSequenceState.Rd",
-      "sha256": "e0042d5e9c8cb900721c683fe20b8f7e410ca3c5a5416f9ec9464bd82f2b530a"
+      "sha256": "48febbf96e09dfc42b9ec74192a3eb75d1ebf7fa9292767cdefc2bdc3aa9fd26"
     },
     {
       "path": "man/LKT_HDI.Rd",
@@ -296,7 +380,7 @@
     },
     {
       "path": "man/computeSpacingPredictors.Rd",
-      "sha256": "aac7b2b78b0bdcfecdbc723d51eea63abf0f0e0aee96139d752e16ab97091c07"
+      "sha256": "4cd3103390d5d20fd5684504cb1aadad75bac7772e0a2be791dfedb5f1a6d541"
     },
     {
       "path": "man/computefeatures.Rd",
@@ -332,11 +416,11 @@
     },
     {
       "path": "man/lkt_model_config.Rd",
-      "sha256": "ac528da0216b0a14d060c241ffa0ceffd66cc7ba502d7734f0ddfb9932351e1c"
+      "sha256": "393bc11dfd582aec3579e908141559715cf3f7a655c3d75d5c545e486ecb3388"
     },
     {
       "path": "man/predict_lkt.Rd",
-      "sha256": "1f4ebedfcc163c563407fc64829524ce6b157a67c0e3c2b43bf4f37642f088f4"
+      "sha256": "de359f15d2f580a67875f20c06d9f4d94170cf3ba2cdc4ad3abd68b40295f925"
     },
     {
       "path": "man/samplelkt.Rd",
@@ -347,16 +431,128 @@
       "sha256": "22d2ba8dbd8b2a7bf952ae5e0b5812e25ab2ce322f308995b0486b4eea94fa96"
     },
     {
+      "path": "scripts/README-gru-mechanism-validation.md",
+      "sha256": "6d9bf2a876da36ae61fc831b697e17bfd5804558f7c49cfb405ce8d5b71c1f10"
+    },
+    {
+      "path": "scripts/README-pfa-gru-study.md",
+      "sha256": "449edc11ef0e24982cd9426d97be8bc27a86743adfa8cc55bbd3c9e31946fc04"
+    },
+    {
       "path": "scripts/README-sequence-comparison.md",
       "sha256": "5b8d2c167ebd3e001703263604bdd17d81e94864ab36afe76e2d3617da6a1c11"
+    },
+    {
+      "path": "scripts/compare-gru-numeric-ablation.R",
+      "sha256": "36c501ce2960759deedc6bba2a89e1fa89575a5b10c8e6391011392c7d4eea15"
+    },
+    {
+      "path": "scripts/compare-gru-simplified.R",
+      "sha256": "71ada1f0e49b2abc4e6f97463e66297f0f62270d74d4d3646e1d853c932219e8"
     },
     {
       "path": "scripts/compare-sequence-units.R",
       "sha256": "27c092aa0a347620f76a36f1757128312b2c3860844e1cc56a6282dfdf90648b"
     },
     {
+      "path": "scripts/draw-gru-simplified-network.R",
+      "sha256": "2fa2978ed65ab32650f0f99bc9d2c5c7ffe557d15b53391b5356243684c1fdd5"
+    },
+    {
+      "path": "scripts/finalize-pfa-gru-study.py",
+      "sha256": "61c46ad397f63146a457743fe96aa216e2b03923843f095548015b859160d52f"
+    },
+    {
+      "path": "scripts/gru-consolidated-layout.R",
+      "sha256": "bb9c6a56a77a479bab95a236529b220a409cf1c8cb865407843a131c1bdb235d"
+    },
+    {
+      "path": "scripts/gru-previous-default.R",
+      "sha256": "c8c58dadc34b7bd11f228267f31a040ebee2196e991948a0013fe574e4c6c153"
+    },
+    {
+      "path": "scripts/gru-simplified-alternative.R",
+      "sha256": "4dc494eeb3014680f5f1892d1e992cc666829f61afdd4e833f367d7141e0b106"
+    },
+    {
+      "path": "scripts/hpc/README-pfa-environment.md",
+      "sha256": "dc76369a6813188f6f7845450c4922c794ed18fdee0cda067c1ab19da691ae15"
+    },
+    {
+      "path": "scripts/hpc/README-pfa-semantic-runtime.md",
+      "sha256": "df2af7f7390985f10d2a98e671c3543f51d75d83d5bf2070da7e2351447e72cc"
+    },
+    {
+      "path": "scripts/hpc/report-gru-numeric-ablation.slurm",
+      "sha256": "0d70c700b0988401c630626d5040b59c17fe629d81b9a4eee12ec05c046b59bf"
+    },
+    {
+      "path": "scripts/hpc/report-gru-simplified.slurm",
+      "sha256": "41d9f97adc36ba14d2edce833651254a93ba33f443cb6bc1832e448b3c2fd989"
+    },
+    {
+      "path": "scripts/hpc/run-gru-numeric-ablation.slurm",
+      "sha256": "52ac36fcee7bac8ef8fbf56d8f15cb138fb5c354065a9774e09e48c7a139701c"
+    },
+    {
+      "path": "scripts/hpc/run-gru-simplified.slurm",
+      "sha256": "74ab3b1641cb5b4fe1b463c4a8875b5152c8ce54fa4edfb5ca85fb31a6f77df3"
+    },
+    {
+      "path": "scripts/hpc/setup-gru-numeric-ablation.slurm",
+      "sha256": "7a8cc1aad56ad9302c99bd10e41c029c7804517059134f79002b40b7a84f90e7"
+    },
+    {
+      "path": "scripts/hpc/setup-gru-simplified.slurm",
+      "sha256": "836c6e47d032e572e0fb20ca342b2f38e6cf898f279e4a3243d5bd9dc546b76f"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-environment.R",
+      "sha256": "13984de348b49a9e85d95a5f544d53fb3499a57021311b4b9b5016ded29c46cd"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-environment.py",
+      "sha256": "4d5d7163852927779f7e88446d5fe3b2c27439d71ce36e60dc5ec0d83c74845c"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-environment.slurm",
+      "sha256": "0a60d99b38dfd0a9c2b5505043f9c0c280c2b7709f79d69dde17f48cb99dc425"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-semantic-runtime.py",
+      "sha256": "ff3817dcb4342f82f8e680ed52b4549ab43362f64cc2e063e572bc020369ad0a"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-semantic-runtime.slurm",
+      "sha256": "7bf589cd1a8165b71b214d13e5853a8b82cd9111382e17ef26ea502e1dff4e2e"
+    },
+    {
+      "path": "scripts/hpc/setup-pfa-semantic-worker.py",
+      "sha256": "0b09eca7ce9c12cc9086add723dc7923ccd0def3c0e023469522bf41d38296bf"
+    },
+    {
+      "path": "scripts/pfa-gru-study.R",
+      "sha256": "535c5baf9939f88501deadd5ca67e88cefbded716027ffb3ce7578fd93ab9bb1"
+    },
+    {
+      "path": "scripts/prepare-gru-simplified-remote.py",
+      "sha256": "d8f42c99ce01246531d7bcedbc9b749b0fb9b46d8c499e97e5ad391268a8ea58"
+    },
+    {
+      "path": "scripts/report-gru-numeric-ablation.R",
+      "sha256": "3d2752ce7afe16fd8800318884d9e27755832d6e6fc83519bf92b4ea52f3eff1"
+    },
+    {
+      "path": "scripts/report-gru-simplified.R",
+      "sha256": "7f756cab72762fabeef35a30a8fa6ad77f2caa61669fce501f0fc3f584e07fc5"
+    },
+    {
       "path": "scripts/report-sequence-units.R",
       "sha256": "40619859e6e77fc1da46d8d6065a35dcd8b2b45b9be5ccc656b5120f63bf7a39"
+    },
+    {
+      "path": "scripts/run-pfa-gru-batch.py",
+      "sha256": "e22d2d6655cdc270e7cd0e2787802d689abd223553c0ba6a9be84e5dd85ac61d"
     },
     {
       "path": "scripts/run-sequence-experiment.py",
@@ -367,8 +563,20 @@
       "sha256": "86dc622ac4afe19a027e833706b23db06d7438faf3275368f275924c7c23f854"
     },
     {
+      "path": "scripts/stage-gru-numeric-ablation-code.ps1",
+      "sha256": "edcec645c7b5c13b8d1db6ad7515fd1ad519bfb0c593199f31d92413c2df4a01"
+    },
+    {
+      "path": "scripts/stage-gru-simplified-code.ps1",
+      "sha256": "294fb8434fb6d16bd0acbdc5dab037b604724b745a3feaa4f6518ca8e5ce44cb"
+    },
+    {
       "path": "scripts/stage-package-verification.R",
       "sha256": "658aba28543963716ecfbdd23f1465a0b892322f35e8b7b84e6d44b230cae1b9"
+    },
+    {
+      "path": "scripts/test-pfa-exercise-attributes.R",
+      "sha256": "cf9c33974b16d34dbfb8daabf314f38d594eda2755a579f53d8328367ab60f40"
     },
     {
       "path": "scripts/test-sequence-launcher.py",
@@ -377,6 +585,38 @@
     {
       "path": "scripts/test-sequence-report.R",
       "sha256": "c5c026e0faafa8ad674838684657b2a4005b32e41a40114dd03243e146ee0cd7"
+    },
+    {
+      "path": "scripts/validate-gru-mechanisms.R",
+      "sha256": "54be545879d01dbacf64b16acd76fe0bfc2d256c65436aaeb95efbc25b9d5bff"
+    },
+    {
+      "path": "scripts/verify-gru-mechanism-parameters.R",
+      "sha256": "803cedcf6288bb01b3536753657ef0115ed191c29c6c61dedd2983acf3a0f2ce"
+    },
+    {
+      "path": "scripts/verify-gru-numeric-ablation-results.R",
+      "sha256": "678fea678a850a053783cdc550925c7383ffc377d7aa50411d00148f08c37af9"
+    },
+    {
+      "path": "scripts/verify-gru-simplified-results.R",
+      "sha256": "39eb74252e98d0d4efc77618264192a315ee596e5bfd5d5c28a73fd8206286e7"
+    },
+    {
+      "path": "scripts/verify-gru-six-input-release.R",
+      "sha256": "37a5f11f1138c9608397e21d0bb996b59ba1ef9bb50414bd02c1f6fa3aafcab7"
+    },
+    {
+      "path": "scripts/verify-pfa-exercise-attributes.R",
+      "sha256": "c0a0837f379fb5897036c7062a6f9f91fcf16a779db45d2650fcd13cf9ae2792"
+    },
+    {
+      "path": "scripts/verify-pfa-gru-controls.R",
+      "sha256": "53f22fca66f083a962d3f26385f21105d09b3c87360e4e3026a4353edb2bc096"
+    },
+    {
+      "path": "scripts/verify-pfa-gru-metrics.py",
+      "sha256": "4481e4d3632d6bc16c1beada74012f84f4c3ea7a6018521bf2d45ae50573c23b"
     },
     {
       "path": "scripts/verify-sequence-gru-parity.R",
@@ -388,7 +628,7 @@
     },
     {
       "path": "src/online_simple_adaptive.c",
-      "sha256": "2867c52a9856dab1737e3c72b28e4ce2be9308e4905d9d97d7d8b0be586510b1"
+      "sha256": "cecb715514c66960df65f0551f721ac6223312aa044583b2328e898e1a6fbed5"
     },
     {
       "path": "tests/bayesian-configuration.R",
@@ -407,8 +647,12 @@
       "sha256": "54ba641fc8531746c5d44fa34c6bbfa4d2204cb04e291cfd27e53f69624402bf"
     },
     {
+      "path": "tests/fixtures/gru-exercise-attributes-fixture.R",
+      "sha256": "4b20230fdb6e33bb191344a3ff7f2132c51ce2c156987d235866d79eb2756e8f"
+    },
+    {
       "path": "tests/fixtures/gru-minimal-settings.R",
-      "sha256": "1f966825e1fe52701c2f612f8861b2b6ac5ef88450264c100969eca628d4f1bc"
+      "sha256": "45fb49f9b04e5a66f751d3a9be8a7348e3517ab3627c4f086b1805e777004d40"
     },
     {
       "path": "tests/fixtures/sequence-mamba.json",
@@ -416,27 +660,83 @@
     },
     {
       "path": "tests/glmm-regression.R",
-      "sha256": "932bad0df64ff969a5bf22efb83a779d5926290dce0b7b68fcf9d6bb46c2185f"
+      "sha256": "33c11ab847f324b36cc2a719b85341ac6e196d9aa68bcda4afe432cf0049332c"
+    },
+    {
+      "path": "tests/gru-adaptive-embeddings.R",
+      "sha256": "0167722c1bb77b8c39d36bd8602b1688463a3d967df652008164d788bb8d7d06"
     },
     {
       "path": "tests/gru-all-layer-inputs.R",
       "sha256": "aa10c1186d1f85c2ddffe1271b2e4ca4fb53537ce7156be1df836fa46ad7bb75"
     },
     {
+      "path": "tests/gru-bayesian-prototypes.R",
+      "sha256": "956d324139875bfdb887b7514226f6152c878bfd63940a800f3bcfead8601cce"
+    },
+    {
+      "path": "tests/gru-candidate-scoring.R",
+      "sha256": "042072c39563835707669c6a7fb4f2c4ab95d943d198591fa680f81366a9d2ee"
+    },
+    {
       "path": "tests/gru-configuration.R",
       "sha256": "7bc61ab7fa0413474c300cdb0738ce6b20b6b7120dad7ef19626577f25ba5380"
     },
     {
+      "path": "tests/gru-connection-candidate-fatigue.R",
+      "sha256": "abeb3be0069a313e974d57e1394a5b42c191634e469313c5fb6a61054f2f72fe"
+    },
+    {
+      "path": "tests/gru-connection-fatigue.R",
+      "sha256": "8e5c59fe86469e7501bf49279fbcd21dec91291a14fcfaaf6378c99958c183cc"
+    },
+    {
+      "path": "tests/gru-connection-input-fatigue.R",
+      "sha256": "edfa888d29412891bf2d665d560eb6c74139bb932b885e5710083ea2cad1137e"
+    },
+    {
+      "path": "tests/gru-connection-lambda-decay.R",
+      "sha256": "9708b1d5e0e562dd971fb517bb4b5818362acbb7b0c063af4ed873c1ae8dd30b"
+    },
+    {
+      "path": "tests/gru-connection-recurrent-fatigue.R",
+      "sha256": "d5b2b42de77476d808657f91ae6205f148e41b4b6276476550a563ec214a1d34"
+    },
+    {
+      "path": "tests/gru-connection-time-scales.R",
+      "sha256": "090283178f4c0fd1b0c3de30bb8addb88808a08394db1ff1cc58b8c4ff45fb6a"
+    },
+    {
       "path": "tests/gru-defaults.R",
-      "sha256": "6fc63a605a2e4985c00cbdf2eddc11985eb4ef7e582f9f130ba36897a9f34719"
+      "sha256": "40eafd829a85b4df1a1ad8c567090bec074825362ef5031abaeab5d4430e78b1"
     },
     {
       "path": "tests/gru-encoders.R",
       "sha256": "e467da2f24010e52b879425d3a5b75a9d5b34ed04319cd469855ecfdbe92a865"
     },
     {
+      "path": "tests/gru-error-rate.R",
+      "sha256": "ac81d8930c51fe5f8a3e07e50c080541693a0ed764ea52dea4765e2e11de3ff4"
+    },
+    {
+      "path": "tests/gru-exercise-attributes.R",
+      "sha256": "7482a8455a410a01f0b76cf9c9ced6873038cb3c90328bff4f6e471fd263d7d0"
+    },
+    {
       "path": "tests/gru-features.R",
       "sha256": "6368e8922cc97e9ef54183394c6b420b622d9a19419aa0e3ec616a3272cb6ae2"
+    },
+    {
+      "path": "tests/gru-gate-fatigue.R",
+      "sha256": "55e771e6c75d7795d8667d290be23d3ccea9d250f9aa69b01a7be65d692e9be2"
+    },
+    {
+      "path": "tests/gru-hidden-decay-fast.R",
+      "sha256": "bb686a3331b7d65da17a02cd090956c650132615425027c3859f13f82a15f580"
+    },
+    {
+      "path": "tests/gru-hidden-decay.R",
+      "sha256": "927302134306ab9ae16db7e0ccf23994ba15e2e55cf30a05e7219d2e38c468c6"
     },
     {
       "path": "tests/gru-inference.R",
@@ -451,12 +751,32 @@
       "sha256": "7411074eab5746a10187d93133d28c0a30f3d2dd3b2f743206b21870b6b6414f"
     },
     {
+      "path": "tests/gru-item-skill-rate.R",
+      "sha256": "599968eb454ec7dd4d12eb66035e4b555bc95ae200e7d8d8f20117358d2f2805"
+    },
+    {
       "path": "tests/gru-joint-encoder.R",
       "sha256": "5fa0be3e7e192a4d70f78e6c764fda8233a5f07a8c54c8b32c3b39aa7d27d21d"
     },
     {
       "path": "tests/gru-ktst-ideas.R",
       "sha256": "146cfb85203a2f2d5314f2d7f6ef33965532203b0a2bc3c72c1a7aa4e6a5edde"
+    },
+    {
+      "path": "tests/gru-latent-denoising.R",
+      "sha256": "dbae5f9ec8fff79c1ee1948fdcd158191fac5e9e6494083d71a4948621a360f5"
+    },
+    {
+      "path": "tests/gru-numeric-selection.R",
+      "sha256": "3aaa41e6d5f2e4bd32beec7780f6adb6eac09d30a239dff91a7c51fbfa161076"
+    },
+    {
+      "path": "tests/gru-optional-identities.R",
+      "sha256": "8ec2b2bd86053424e0e91212e4992c542edd828eb60a495c6ad57c485d1ad629"
+    },
+    {
+      "path": "tests/gru-plasticity.R",
+      "sha256": "32983164da19d4f232d0bf18a1b6993e154f836adeecd6127d8917b9e3f92273"
     },
     {
       "path": "tests/gru-regression.R",
@@ -475,12 +795,32 @@
       "sha256": "9bbe66596e341e41ae608db5dabf948df53534c0e900885aec9f622dbc23a8b8"
     },
     {
+      "path": "tests/gru-saved-architecture.R",
+      "sha256": "08ba4d057dd3262194b14e1c32037f259cac503eac12a099f0743b33ca771499"
+    },
+    {
+      "path": "tests/gru-semantic-input.R",
+      "sha256": "af2190f2bd4d6414c9d86138a4417ae8b3c6ce250b4479757f1153a9593d3a37"
+    },
+    {
+      "path": "tests/gru-simplified.R",
+      "sha256": "866228f4bc6d0305d6dd028fe6691744e8d44e90078d2f8232533274e5c00b7f"
+    },
+    {
+      "path": "tests/gru-tensor-ownership.R",
+      "sha256": "027cd875e947f767ee96764971961b20889ade6ebebac608f3eb4d9f73b1f39d"
+    },
+    {
       "path": "tests/gru-time-features.R",
-      "sha256": "62eb2848b4d8b56099c8dbe85d48080248b6de7207640f2f08d4ddbd66fadeb0"
+      "sha256": "132a4d4ab79d909771ed7f8444986d0bdf4e470c1d18965c0a3cd1cb7dec9c2c"
     },
     {
       "path": "tests/gui-dataset-regression.R",
       "sha256": "bcaf6ecfbf58c1dafe5a9cd0a0a707338d19d902d12fa425189c4291effb818e"
+    },
+    {
+      "path": "tests/lasso-feature-selection.R",
+      "sha256": "84f4d41da0ca0ab8d10eb781630e611fcc1b38974d825fbf05533c831d690892"
     },
     {
       "path": "tests/latency-regression.R",
@@ -489,6 +829,14 @@
     {
       "path": "tests/online-bayesian.R",
       "sha256": "bf5bb5a30eb646a4ae301005c4a3b40a6d59ca83863d5fc6493fe7e7ce00de49"
+    },
+    {
+      "path": "tests/pdp-controlled.R",
+      "sha256": "10127e8eca67d74b0b8a15c4013b7595ecb129ae08b234fd2d401d19c9322268"
+    },
+    {
+      "path": "tests/pdp-source.R",
+      "sha256": "d3efbf8c28e580854f8e0c0158589879fbc2e6a2de038e225016aefbdca738a6"
     },
     {
       "path": "tests/sequence-configuration.R",
@@ -505,6 +853,14 @@
     {
       "path": "tests/sequence-unit-contract.R",
       "sha256": "d363e109d2db52afa674b8dee585ec64197d2171d22848212d03005c3ac97a57"
+    },
+    {
+      "path": "tests/study-outcomes.R",
+      "sha256": "645245b8b55c36b9130061ed113f6050dbd94b79f4bde5f20844868d51cb8a1d"
+    },
+    {
+      "path": "tests/gru-study-outcomes.R",
+      "sha256": "06bf38951b3e36f528928fba1b0d63e8af7d4017a09934f97ab28ea865674e95"
     }
   ]
 }

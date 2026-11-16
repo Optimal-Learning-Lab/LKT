@@ -24,9 +24,19 @@ live in `C:/dev/LKT-outputs/package-vignettes/_example-reports`. The report writ
 use this location; executing a vignette or benchmark may fit models and is a
 separate action from locating or reading existing results.
 
-## Frozen GRU design and results
+## Current and previous GRU designs and results
 
-The November 6 reviewed design is documented in
+The current default and its connected figure are documented in
+[the default GRU guide](figures/gru-default-model/README.md). The matched Cloze
+comparison, all thirty fitted checkpoints, original submissions and independent
+verification remain in `C:/dev/LKT-outputs/gru-simplified-cloze-20261106/`.
+The six-input adoption and ablation are in
+`C:/dev/LKT-outputs/gru-six-input-release-20261107/` and
+`C:/dev/LKT-outputs/gru-numeric-ablation-20261107/`. The previous seven-input
+figure is preserved in `docs/figures/gru-default-seven-input-20261106/`.
+Earlier release-promotion evidence remains in `C:/dev/LKT-outputs/gru-default-release-20261106/`.
+
+The preceding November 6 reviewed design is preserved in
 [the curated GRU figure guide](figures/gru-base-model/README.md). Its unfitted
 editable specification and current location record remain alongside the figure.
 The immutable freeze is `C:/dev/LKT-outputs/gru-defaults-freeze-20261106/`:
@@ -45,7 +55,7 @@ The earlier 144-fit factorial study is separately preserved in
 `C:/dev/LKT-outputs/gru-ktst-comparison-20261104/RESULTS.md` and `download/results/`.
 The local GRU/Mamba study is in `C:/dev/LKT-outputs/sequence-mamba/experiment/`.
 
-From `C:/dev/LKT`, verify the current figure's checkpoint/specification without
+From `C:/dev/LKT`, verify the previous figure's checkpoint/specification without
 training, or regenerate the figure into a fresh review directory:
 
 ```powershell

@@ -22,7 +22,7 @@ GRUModel(
   standardize = TRUE,
   numeric_transforms = character(),
   use_lkt_features = TRUE,
-  time_col = "CF..Time.",
+  time_col = NULL,
   time_units = "seconds",
   subject_col = "Anon.Student.Id",
   history_group_cols = "Anon.Student.Id",
@@ -85,19 +85,56 @@ GRUModel(
   retrieval_cue_cols = character(),
   zero_init_embedding_cols = "KC..Default.",
   retrieval_decay_lr_multiplier = 1,
-  encoder_output_sizes = integer(),
+  encoder_output_sizes = c(numeric = 32L),
   numeric_fusion = "concat",
   categorical_fusion = "concat",
   input_fusion = "concat",
   joint_encoder_output_size = NULL,
   joint_encoder_hidden_sizes = 32L,
   joint_encoder_activation = "relu",
-  joint_encoder_dropout = 0
+  joint_encoder_dropout = 0,
+  numeric_encoder = "combined",
+  response_encoding = "binary",
+  retrieval_value_mode = "raw",
+  numeric_feature_cols = NULL,
+  hidden_decay = FALSE,
+  hidden_decay_time_col = NULL,
+  hidden_decay_parameterization = "amplitude",
+  plasticity = "none",
+  plasticity_time_col = NULL,
+  gate_fatigue = FALSE,
+  gate_fatigue_time_col = NULL,
+  gate_fatigue_mode = "unit",
+  connection_time_scale_range = c(1, 1),
+  connection_time_scale_seed = 1L,
+  connection_fatigue_scope = "all",
+  embedding_adaptation = "none",
+  adaptive_embedding_cols = "KC..Default.",
+  embedding_learning_rate = 0.01,
+  optional_adaptive_cols = character(),
+  semantic_input = NULL,
+  exercise_attributes = NULL,
+  latent_denoising = FALSE,
+  denoising_noise_std = 0.20,
+  denoising_loss_weight = 0.15
 )
 
 lkt_gru_defaults()
 }
 \arguments{
+\item{latent_denoising}{Optional training-only residual 32-to-32-to-32 Gaussian latent reconstruction. Disabled by default. Predictions and online state never use the denoiser.}
+\item{denoising_noise_std}{Fixed .20 Gaussian corruption SD at valid pre-answer top GRU states.}
+\item{denoising_loss_weight}{Fixed .15 coordinate-mean reconstruction MSE coefficient; 0 is the explicit parity control. Gradients pass through both the reconstruction and clean target.}
+\item{exercise_attributes}{Optional explicit hash-bound annotation and provenance
+bindings. Replaces the first16-wide item lookup with five-rank difficulty/time
+embeddings and mean ability embeddings projected24-to-16. See
+docs/gru-exercise-attributes.md for the complete required bindings.}
+
+\item{semantic_input}{NULL (disabled), or explicit text-column and local encoder bindings; optional hash-bound cache_file/cache_sha256. Frozen MPNet question, completed-response and KC vectors are projected 2304 to 32 with tanh and appended only to the post-response recurrent input. See docs/gru-semantic-input.md for required fields and replay contracts.}
+\item{embedding_adaptation}{none preserves ordinary training and inference. per_student resets local embeddings for each student and learns them after observed responses during both fitting and continuation.}
+\item{adaptive_embedding_cols}{Categorical embedding inputs learned separately for each student. Unseen labels receive distinct zero-initialized local vectors.}
+\item{embedding_learning_rate}{Positive SGD learning rate for the local post-answer update. Shared network weights remain fixed during continuation.}
+\item{optional_adaptive_cols}{Explicitly optional adaptive categorical inputs. Missing labels supply zero vectors, create no local entry, receive no update, and cannot match retrieval memories. The default is empty/strict.}
 \item{hidden_size}{Width of each recurrent layer.}
 
 \item{num_layers}{Number of recurrent layers.}
@@ -126,7 +163,10 @@ lkt_gru_defaults()
 
 \item{use_lkt_features}{Append the configured, fixed-parameter LKT features.}
 
-\item{time_col}{Optional numeric/POSIXct timestamp column.}
+\item{time_col}{Optional numeric/POSIXct timestamp column for the previous-response
+gap input. NULL (default) omits that input. Set explicitly to include it.
+order_col independently controls chronological ordering; additional timing
+columns remain controlled by time_feature_cols.}
 
 \item{time_units}{seconds, minutes, hours, or days for numeric timestamps.}
 
@@ -147,6 +187,33 @@ lkt_gru_defaults()
 \item{learning_rate}{Initial learning rate.}
 
 \item{weight_decay}{Optimizer weight decay.}
+
+\item{hidden_decay}{Enable elapsed-time decay of GRU hidden units, controlled by
+each unit's exponentially fading signed change history (DK). Three shared
+scalars are learned during training; connection weights stay fixed at testing.}
+
+\item{hidden_decay_time_col}{Explicit timestamp column for hidden decay. Required
+when hidden_decay is TRUE. Uses time_units, independently of numeric time inputs.}
+
+\item{gate_fatigue}{Enable compiled activity-driven GRU write-gate fatigue.}
+
+\item{gate_fatigue_mode}{unit preserves the earlier unit-write model; connection scales individual GRU weights with recovery and fatigue.}
+
+\item{connection_fatigue_scope}{all scales all GRU matrix rows; candidate scales candidate rows; input_candidate excludes recurrent matrices; h1_input_candidate limits input-to-candidate fatigue to the first layer; recurrent_candidate scales only recurrent-to-candidate weights in all layers.}
+
+\item{connection_time_scale_range}{Positive bounds for fixed log-uniform connection recovery-time multipliers; c(1,1) disables scaling.}
+
+\item{connection_time_scale_seed}{Fixed matrix-generation seed independent of model seed.}
+
+\item{gate_fatigue_time_col}{Explicit recovery timestamp column, in time_units.}
+
+\item{plasticity}{none, constant, fatigue, error_rate, item_skill, or bayesian_prototypes. Adds compiled student-specific final-output connection updates after feedback. error_rate learns alpha and c from zero. After feedback the student rate changes by alpha*absolute error-c. The existing learned eta initializes each student; current output updates use the prior student rate, which remains signed during training and testing. item_skill instead learns a nonnegative skill-rate table and a positive item-multiplier table, using the first two categorical columns as nested item/skill IDs. Skill rates start at zero; item multipliers start at one and have geometric mean one within each skill.}
+
+\item{plasticity_time_col}{Explicit recovery timestamp column, in time_units.}
+
+\item{hidden_decay_parameterization}{amplitude uses a nonnegative, zero-initialized
+baseline rate and a compiled Torch recurrence. softplus reads the original
+positive-baseline decay model; its historical interpretation is preserved.}
 
 \item{optimizer_options}{Named optimizer-specific controls: betas, eps, amsgrad for Adam; momentum, dampening, nesterov for SGD.}
 
@@ -218,7 +285,7 @@ lkt_gru_defaults()
 
 \item{time_feature_cols}{Additional nonnegative timing columns in seconds, computed
 before removing unscored exposures. Each receives log1p and training-only scaling,
-and enters the same encoder as recency. See LKTGRUTimeFeatures.}
+and enters the numeric encoder. See LKTGRUTimeFeatures.}
 
 \item{time_missing_cols}{Subset of time_feature_cols allowed to be missing. Each
 adds an availability indicator to the time encoder; missing values do not enter
@@ -268,7 +335,8 @@ these remain trainable. Other tables retain ordinary random initialization.}
 retrieval decay parameter. Ordinary network weights keep learning_rate.}
 
 \item{encoder_output_sizes}{Named positive widths overriding encoder_output_size
-for time, history, or response. integer(0) uses the common width.}
+for time, history, response, or numeric (the combined encoder).
+integer(0) uses the common width.}
 
 \item{numeric_fusion}{concat or sum for the encoded time and history values.}
 
@@ -287,6 +355,21 @@ gives a single learned linear map.}
 \item{joint_encoder_activation}{relu, tanh, or gelu in the shared input MLP.}
 
 \item{joint_encoder_dropout}{Dropout after shared input hidden layers.}
+
+\item{numeric_encoder}{separate time/history MLPs or one combined numeric MLP.}
+
+\item{response_encoding}{mlp encodes binary responses when feature_encoder is
+mlp; binary supplies the observed zero/one response directly to memory.}
+
+\item{retrieval_value_mode}{projected uses separate value/output maps; raw
+averages unprojected states before one output map. raw requires one head
+and zero attention dropout, and preserves the zero read for empty matches.}
+
+\item{numeric_feature_cols}{Optional selection of final numeric input names, after
+timing transforms and LKT feature construction and before training-only scaling.
+NULL retains all inputs; character(0) omits the numeric block. Names use raw:,
+time:, or lkt: prefixes and must exist. Selection order is preserved. In the GUI,
+ALL retains all inputs and an empty field omits them.}
 }
 \value{
 GRUModel returns an LKT model adapter. lkt_gru_defaults returns all resolved default settings without requiring Torch.
@@ -295,8 +378,11 @@ GRUModel returns an LKT model adapter. lkt_gru_defaults returns all resolved def
 GRUModel predicts from the previous hidden state and the current predictors,
 then updates the state with the observed response. All controls are explicit;
 see the GRU vignette for input, split, and continuation semantics.
-Defaults use three 32-unit GRU layers, a 128-unit prediction head, separate
-16-value feature encoders, item/skill embeddings, filtered one-head retrieval
-and zero-initialized trainable item embeddings. Explicit arguments override
+Defaults use three 32-unit GRU layers, a 128-unit prediction head, a combined
+numeric encoder with 32 outputs, raw binary answers, item/skill embeddings,
+and no previous-response-gap input (time_col=NULL). Additional timing inputs
+accompany filtered one-head retrieval with one output projection. Item embeddings
+start at zero. LKT's default interc=FALSE and the GRU configuration default
+omit the global intercept. Explicit arguments override
 these ordinary defaults. LKT itself still defaults to LibLinearModel.
 }

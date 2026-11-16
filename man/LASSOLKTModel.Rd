@@ -17,13 +17,14 @@ LASSOLKTModel(
   target_n,
   removefeat = c(),
   removecomp = c(),
-  test_fold = 1
+  test_fold = 1,
+  train_folds = NULL
 )
 }
 \arguments{
 \item{data}{Data frame or data table containing \code{Anon.Student.Id}, \code{CF..ansbin.}, component columns, and a \code{fold} column.}
 
-\item{gridpars}{Numeric vector of parameter values used to materialize nonlinear feature candidates.}
+\item{gridpars}{Finite numeric values for zero/one-parameter candidate families. Multi-parameter terms require explicit complete vectors in \code{specialpars}; Cartesian grids are never inferred.}
 
 \item{allcomponents}{Character vector of candidate component columns.}
 
@@ -39,13 +40,14 @@ LASSOLKTModel(
 
 \item{specialpars}{Numeric vector of parameter values for \code{specialfeatures}.}
 
-\item{target_n}{Desired number of nonzero model features used to choose a lambda from the fitted path.}
+\item{target_n}{Desired number of nonzero predictor columns, excluding the intercept. Select the closest training-fitted path count, preferring fewer predictors on a tie.}
 
 \item{removefeat}{Character vector of feature names to exclude from the crossed candidate list.}
 
 \item{removecomp}{Character vector of component names paired with \code{removefeat} to exclude from the crossed candidate list.}
 
 \item{test_fold}{Fold value used as the held-out test fold.}
+\item{train_folds}{Explicit fitting folds. NULL uses every fold other than \code{test_fold}; specify training folds to exclude a separate validation partition.}
 }
 \value{
 A list containing training and test matrices, response vectors, the fitted \code{glmnet} object, AUC/RMSE/BIC by lambda, selected lambda index, predictions, selected coefficients, and selected feature summary.
@@ -62,7 +64,7 @@ lasso_model <- LASSOLKTModel(
   data = samplelkt,
   gridpars = c(0.25, 0.5),
   allcomponents = "KC..Default.",
-  allfeatures = "lineafm",
+  allfeatures = c("lineafm", "logsuc"),
   target_n = 2,
   test_fold = 1
 )

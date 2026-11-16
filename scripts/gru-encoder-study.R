@@ -136,7 +136,7 @@ study_tasks <- function(p,partition) {
 
 # One fit is the unit of work. Checkpoints contain portable fitted weights and
 # diagnostics, but do not duplicate the common raw dataset or null-model object.
-study_fit_one <- function(task,s,output,p,d) {
+study_fit_one <- function(task,s,output,p,d,intercept=p$baseline$interc) {
   s$seed <- as.integer(task$seed);s <- do.call(LKT::GRUModel,s)$settings
   id <- task$run_id;path <- file.path(output,'models',paste0(id,'.rds'))
   fingerprint <- digest::digest(list(study=study_hash(file.path(output,'study.rds')),task=task,settings=s),algo='sha256')
@@ -146,7 +146,7 @@ study_fit_one <- function(task,s,output,p,d) {
     cat('START',id,'\n');flush.console()
     elapsed <- system.time(fit <- LKT::LKT(data.table::copy(data.table::as.data.table(d)),usefolds=1,
       components=p$baseline$components,features=p$baseline$features,fixedpars=p$baseline$fixedpars,
-      interc=TRUE,model=do.call(LKT::GRUModel,s),verbose=FALSE))[['elapsed']]
+      interc=intercept,model=do.call(LKT::GRUModel,s),verbose=FALSE))[['elapsed']]
     fit$newdata <- NULL;fit$nullmodel <- NULL
     saved <- list(fingerprint=fingerprint,task=task,settings=s,fit=fit,elapsed=elapsed)
     study_write_rds(saved,path)
@@ -252,7 +252,7 @@ study_finalize <- function(output,p,partition,workers,library) {
 # Reconstruct probabilities from weights before scoring a selected test checkpoint.
 # The batched replay follows each complete held-out history with dropout disabled.
 study_replay <- function(fit,d) {
-  ns <- asNamespace('LKT');s <- get('lkt_gru_settings',ns)(fit$gru_settings)
+  ns <- asNamespace('LKT');s <- get('lkt_sequence_model',ns)(fit)$settings
   cleanup <- get('lkt_gru_runtime',ns)(s);on.exit(cleanup())
   net <- LKT::LKTGRURuntime(fit)$network
   encoded <- get('lkt_gru_encode',ns)(d,fit$model$preprocessing,fit$model$recipe,s)

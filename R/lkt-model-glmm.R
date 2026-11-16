@@ -49,6 +49,7 @@ lkt_fit_glmm <- function(request,mode,unseen,nAGQ,control,epsilon) {
     lkt_require_columns(data,'fold','GLMM fold selection')
     data$fold %in% request$usefolds
   }
+  keep <- keep & !is.na(data$CF..ansbin.)
   if(!any(keep)) stop('GLMM has no rows selected for fitting.',call.=FALSE)
   formula<-lkt_glmm_formula(request$formula)
   if(!length(lme4::findbars(formula)))stop('GLMMModel requires a random-effect term.',call.=FALSE)

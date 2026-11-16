@@ -10,7 +10,8 @@ lkt_features <- function() lkt_feature_registry()
 #' from fixed values; supplying a start never fixes that parameter.
 #' @param terms Data frame with component and feature, and optional fixed,
 #'   start (semicolon-separated numbers), interaction, and connector columns.
-#' @param intercept Include the global intercept.
+#' @param intercept Include the global intercept. NULL uses FALSE for GRU/Sequence
+#'   and TRUE for other backends. An explicit logical value overrides this default.
 #' @param backend LibLinear, GLMM, OnlineBayesian, GRU, or Sequence.
 #' @param gru_options Named GRUModel arguments. All resolved settings are saved.
 #' @param sequence_options Named SequenceModel arguments, including unit and unit_options.
@@ -28,11 +29,12 @@ lkt_features <- function() lkt_feature_registry()
 #'   and between-participant covariance using training participants only.
 #' @return A versioned LKTModelConfig list, suitable for saveRDS().
 #' @export
-lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM','OnlineBayesian','GRU','Sequence'),
+lkt_model_config <- function(terms, intercept=NULL, backend=c('LibLinear','GLMM','OnlineBayesian','GRU','Sequence'),
                              latency=c('none','Wald'), folds=NA,
                              options=list(), glmm_prediction='conditional',
                              glmm_unseen='error',bayesian_options=NULL,bayesian_training=NULL,gru_options=NULL,sequence_options=NULL) {
   backend<-match.arg(backend);latency<-match.arg(latency)
+  if(is.null(intercept))intercept <- !backend %in% c('GRU','Sequence')
   terms<-as.data.frame(terms,stringsAsFactors=FALSE)
   if(!nrow(terms) || !all(c('component','feature') %in% names(terms)))
     stop('Supply at least one ordered component/feature term.',call.=FALSE)
@@ -108,6 +110,9 @@ lkt_model_config <- function(terms, intercept=TRUE, backend=c('LibLinear','GLMM'
 
 lkt_config_arguments <- function(config) {
   if(!inherits(config,'LKTModelConfig')||!identical(config$schema,1L))stop('Expected an LKT model configuration.',call.=FALSE)
+  # Preserve the explicit architecture of older saved specifications.
+  if(config$backend=='GRU')config$gru_options <- lkt_gru_saved_controls(config$gru_options)
+  if(config$backend=='Sequence')config$sequence_options <- lkt_gru_saved_controls(config$sequence_options)
   # Revalidate loaded files; serialized lists are not an alternative validation path.
   checked<-lkt_model_config(config$terms,config$intercept,config$backend,config$latency,
     config$folds,config$options,config$glmm_prediction,config$glmm_unseen,config$bayesian_options,config$bayesian_training,config$gru_options,config$sequence_options)
@@ -146,7 +151,7 @@ lkt_config_call <- function(config) {
   if(!is.null(config$bayesian_training))
     return(as.call(list(as.name('fit_lkt_config'),data=as.name('data'),config=literal(config))))
   args$model<-switch(config$backend,GLMM=call('GLMMModel',prediction_mode=config$glmm_prediction,unseen_levels=config$glmm_unseen),
-    GRU=as.call(c(list(as.name('GRUModel')),lapply(lkt_gru_settings(config$gru_options),literal))),
+    GRU=as.call(c(list(as.name('GRUModel')),lapply(args$model$settings,literal))),
     Sequence=as.call(c(list(as.name('SequenceModel')),lapply(lkt_sequence_arguments(args$model$settings),literal))),
     OnlineBayesian=as.call(c(list(as.name('OnlineBayesianModel')),lapply(lkt_validate_bayesian_options(config$bayesian_options),literal))),
     LibLinear=call('LibLinearModel'))

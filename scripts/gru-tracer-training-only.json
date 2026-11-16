@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "variant_id": "tracer_six",
+  "dataset": "Cloze",
+  "data_sha256": "964b30f32fc04233e5377faf06f553719eea359db15640aec6d202b2e317b10c",
+  "study_sha256": "802ea1d62e4ae32c1098b8589404a12de3c08c6037872fc6d12b1f1f73244eb1",
+  "history_control_sha256": "83686172dae99a1ae5d6ba5e2b38be21180dc2617d520c5db5c44661e141ede3",
+  "history_control_protocol_sha256": "2179c516e2cc6e357b9421826aa6a818b31c0a7800e209d45f8d9311492b9947",
+  "calibration_scope": "training_only",
+  "training_fold": 1,
+  "validation_fold": 2,
+  "test_fold": 3,
+  "numeric_inputs": 6,
+  "layers": 3,
+  "hidden_size": 32,
+  "seed": 1,
+  "plasticity": "constant",
+  "embedding_adaptation": "per_student",
+  "evaluation": "Same whole-student cv1 split: 305 training, 77 validation, 96 test students. Reuse the verified six-parameter LKT calibration fitted on training students only. Numeric scaling and vocabularies use training rows only. Validation selects the epoch; test students do not select parameters or epochs. Item and supplied-skill vectors, memory, retrieval and output adjustments reset for every student. Only preceding observed answers update local state.",
+  "simulations": 0,
+  "defaults_changed": false
+}

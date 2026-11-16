@@ -1,0 +1,11 @@
+"connection","weights","biases","copies"
+"numeric input to hidden",192,32,1
+"numeric hidden to output",1024,32,1
+"shared query/key",3072,32,1
+"retrieval output",1024,32,1
+"head hidden",12288,128,1
+"head logit",128,1,1
+"GRU layer 1 input",6240,192,1
+"GRU layer 2 input",3072,192,1
+"GRU layer 3 input",3072,192,1
+"each GRU recurrence",3072,0,3

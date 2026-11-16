@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "description": "Three explicit Cloze GRU research profiles. These do not change GRUModel defaults.",
+  "common": {
+    "subject_col": "Anon.Student.Id",
+    "categorical_cols": ["KC..Default.", "KC..Cluster."],
+    "plasticity": "constant",
+    "plasticity_time_col": "CF..Time.",
+    "time_feature_cols": ["gru_item_age_seconds", "gru_mean_prior_spacing_seconds"],
+    "time_missing_cols": ["gru_mean_prior_spacing_seconds"]
+  },
+  "variants": {
+    "baseline_six": {
+      "name": "Six-input predictive baseline",
+      "purpose": "Predict new students using item/skill embeddings learned across training students",
+      "numeric_input_count": 6,
+      "numeric_cols": [],
+      "embedding_adaptation": "none",
+      "adaptive_embedding_cols": [],
+      "runner": "LKT(..., model=gru_variant_model('baseline_six', root))",
+      "explicit_lkt_traits": false
+    },
+    "tracer_six": {
+      "name": "Six-input student-local knowledge tracer",
+      "purpose": "Predict from observable history, learning new item/skill vectors within each student",
+      "numeric_input_count": 6,
+      "numeric_cols": [],
+      "embedding_adaptation": "per_student",
+      "adaptive_embedding_cols": ["KC..Default.", "KC..Cluster."],
+      "runner": "scripts/gru-tracer-training-only.R",
+      "configuration": "scripts/gru-tracer-training-only.json",
+      "explicit_lkt_traits": false
+    },
+    "ground_truth_eight": {
+      "name": "Eight-input trait-conditioned ground-truth candidate",
+      "purpose": "Model responses conditional on supplied student ability and item easiness for controlled simulation",
+      "numeric_input_count": 8,
+      "numeric_cols": ["random_intercept", "kc_intercept"],
+      "embedding_adaptation": "per_student",
+      "adaptive_embedding_cols": ["KC..Default.", "KC..Cluster."],
+      "runner": "scripts/gru-ground-truth-eight-input.R",
+      "training_only_configuration": "scripts/gru-ground-truth-training-only.json",
+      "known_traits_configuration": "scripts/gru-ground-truth-eight-input.json",
+      "explicit_lkt_traits": true
+    }
+  }
+}

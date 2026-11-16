@@ -31,9 +31,27 @@ lkt_gru_embeddings <- function(prep,s) {
   tables <- lapply(if(s$categorical_encoding=='embedding')seq_along(prep$embedding_dims) else integer(),function(j) {
     table <- torch::nn_embedding(length(prep$vocabularies[[j]])+1L,prep$embedding_dims[j],padding_idx=1L)
     if(names(prep$vocabularies)[j] %in% s$zero_init_embedding_cols)torch::nn_init_zeros_(table$weight)
+    if(lkt_gru_adaptive(s) && names(prep$vocabularies)[j]%in%s$adaptive_embedding_cols) {
+      torch::nn_init_zeros_(table$weight)
+      table$weight$requires_grad_(FALSE)
+    }
+    if(lkt_gru_exercise_active(s) && names(prep$vocabularies)[j]==s$exercise_attributes$item_col)table <- lkt_gru_exercise_padding(table$weight)
     table
   })
   torch::nn_module_list(tables)
+}
+
+# Shared categorical lookups, including externally supplied student-local vectors.
+# The operations and ordering are identical in both historical network layouts.
+lkt_gru_categorical_parts <- function(net,categorical,prep,s,values=NULL,dtype=NULL) {
+  lapply(seq_along(prep$vocabularies),function(j) {
+    ids <- categorical[,,j,drop=FALSE]$squeeze(3)
+    if(!is.null(values[[as.character(j)]]))return(values[[as.character(j)]])
+    if(lkt_gru_exercise_active(s)&&names(prep$vocabularies)[j]==s$exercise_attributes$item_col)
+      return(lkt_gru_exercise_vector(net,ids,j,s))
+    if(s$categorical_encoding=='embedding')return(net$embeddings[[j]](ids))
+    torch::nnf_one_hot(ids,num_classes=length(prep$vocabularies[[j]])+1L)[,,seq.int(2L,length(prep$vocabularies[[j]])+1L),drop=FALSE]$to(dtype=dtype)
+  })
 }
 
 # Warm starts are an explicit expansion of an ordinary fitted model on the same

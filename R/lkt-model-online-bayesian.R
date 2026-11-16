@@ -229,8 +229,8 @@ lkt_fit_online_bayesian <- function(request, options) {
       stop("OnlineBayesian requires finite chronological CF..Time. within subjects.", call. = FALSE)
   }
   y <- request$response
-  if (!is.numeric(y) || length(y) != nrow(x) || anyNA(y) || any(!y %in% c(0, 1)))
-    stop("OnlineBayesian requires complete binary responses.", call. = FALSE)
+  if (!is.numeric(y) || length(y) != nrow(x) || any(!is.na(y) & !y %in% c(0, 1)))
+    stop("OnlineBayesian requires binary responses or unscored study trials.", call. = FALSE)
   fixed <- setdiff(nm, terms)
   offset <- if (length(fixed)) as.numeric(x[, fixed, drop = FALSE] %*% mu[fixed]) else
     rep(0, nrow(x))
@@ -244,11 +244,11 @@ lkt_fit_online_bayesian <- function(request, options) {
     for (row in which(subjects == id)) {
       current <- as.numeric(x[row, terms, drop = FALSE])
       names(current) <- terms
-      step <- LKTBayesianStep(state, current, y[row], offset[row],
+      step <- LKTBayesianStep(state, current, if (is.na(y[row])) NULL else y[row], offset[row],
                                options$ess_threshold, options$ess_action)
       state <- step$state
       pred[row] <- step$prediction
-      score[row] <- step$log_score
+      score[row] <- if (is.null(step$log_score)) 0 else step$log_score
       ess[row] <- state$ess
       low[row] <- step$low_ess
       if (options$store_trace) trace[[row]] <- list(mean = state$mean,

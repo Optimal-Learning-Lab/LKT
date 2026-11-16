@@ -1,0 +1,97 @@
+"text","width_in","height_in","box_width_in","box_height_in"
+"7 numeric inputs; no intercept / Recency; item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",6.03949652777778,0.5695,7.77777777777778,1.38888888888889
+"Current item ID",1.69965277777778,0.1417,4,1
+"Current skill-combination ID",2.86870659722222,0.1317,4.77777777777778,1
+"Shared numeric encoder: Linear 7 <U+2192> 32; ReLU / 32 biases",4.63736979166667,0.374366666666667,7.77777777777778,0.933333333333333
+"Numeric output: Linear 32 <U+2192> 32 / 32 biases",3.21028645833333,0.374366666666667,7.77777777777778,0.933333333333333
+"Item embedding / 16 values per item / Starts at zero; trainable / Reserved row stays zero",2.30251736111111,0.7935,4,1.77777777777778
+"Skill-combination embedding / 16 values per combination / Random start; trainable / Reserved row stays zero",2.43250868055556,0.7935,4.77777777777778,1.77777777777778
+"Concatenate 32 numeric + 16 item + 16 skill = 64 values / Input dropout 0.1 produces x(t), shared by retrieval, prediction and memory update",8.58875868055556,0.374366666666667,17.7777777777778,1
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Concatenation: 0 parameters",2.90364583333333,0.5695,5.22222222222222,1.11111111111111
+"Past completed events from this participant / Newest 100 global events: e(j), post-answer h3(j), raw item/skill IDs",5.66167534722222,0.345499999999999,12.2222222222222,1.11111111111111
+"Keep same item OR same skill-combination ID; compare exact raw IDs (0 parameters)",7.39605034722222,0.1114,12.2222222222222,0.466666666666667
+"Shared Q/K linear 96 <U+2192> 32 / Query q(t); 32 shared biases*",2.67426215277778,0.374366666666667,4.77777777777778,1.15555555555556
+"Same Q/K linear 96 <U+2192> 32 / Key k(j); same 32 biases*",2.29904513888889,0.374366666666667,5.22222222222222,1.15555555555556
+"Raw values v(j) = h3(j) / 32 values; no value map",2.28797743055556,0.345499999999999,4.33333333333333,1.15555555555556
+"Scores q(t) <U+00B7> k(j) / sqrt(32) / Past 100 AND (same item OR skill) / Softmax over eligible events only / 0 parameters",3.236328125,0.7935,6.22222222222222,1.33333333333333
+"Weighted mean: m(t) = <U+03A3> a(t,j) h3(j) / 32 values; 0 parameters",3.68185763888889,0.374366666666667,6.66666666666667,1.33333333333333
+"Single output linear 32 <U+2192> 32; 32 biases / Retrieved r(t): 32 values / No eligible memory: force r(t) = 0",3.6640625,0.5695,6.66666666666667,1.11111111111111
+"r(t): 32 + x(t): 64 / Concatenate 96 values / 0 parameters",2.08072916666667,0.617033333333334,5,1.11111111111111
+"Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.83203125,0.374366666666667,4.66666666666667,1.11111111111111
+"Linear 128 <U+2192> 1 / 1 bias; one logit",1.33832465277778,0.345499999999999,2.44444444444444,1.11111111111111
+"Sigmoid + clipping / p(correct at trial t) / 0 parameters",1.77495659722222,0.5695,3.11111111111111,1.11111111111111
+"Observed response y(t) / 0 = incorrect; 1 = correct / No response encoder",2.58072916666667,0.617033333333334,5.11111111111111,1
+"Previous h1(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1.05555555555556
+"GRU layer 1; 32 units / h1(t): 32 values / 192 biases (two sets of 96)",2.54817708333333,0.5695,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1.05555555555556
+"GRU layer 2; 32 units / h2(t): 32 values / 192 biases (two sets of 96)",2.54817708333333,0.5695,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41080729166667,0.345499999999999,2.77777777777778,1.05555555555556
+"GRU layer 3; 32 units / h3(t): 32 values / 192 biases (two sets of 96)",2.54817708333333,0.5695,2.77777777777778,1.44444444444444
+"Current x(t): 64 + raw y(t): 1 / 65 values into GRU layer 1 / Concatenation: 0 parameters",2.44835069444444,0.5695,5.11111111111111,1.22222222222222
+"Dropout / 0.1; 0 params",0.966796875,0.287966666666666,1.55555555555556,0.722222222222222
+"Dropout / 0.1; 0 params",0.966796875,0.287966666666666,1.55555555555556,0.722222222222222
+"Keep h1(t), h2(t), h3(t) for the next trial: 3 <U+00D7> 32 state values / Append [pre-answer e(t): 96, post-answer h3(t): 32, raw IDs] to the newest-100-event bank; 0 parameters",10.0249565972222,0.345499999999999,17.7777777777778,1
+"7 numeric inputs; no intercept / Recency; item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",6.04646809895833,0.583389539930556,7.77777777777778,1.38888888888889
+"Current item ID",1.69939507378472,0.1556396484375,4,1
+"Current skill-combination ID",2.86887613932292,0.145514594184029,4.77777777777778,1
+"Shared numeric encoder: Linear 7 <U+2192> 32; ReLU / 32 biases",4.64419216579861,0.388181260850695,7.77777777777778,0.933333333333333
+"Numeric output: Linear 32 <U+2192> 32 / 32 biases",3.2103271484375,0.388181260850695,7.77777777777778,0.933333333333333
+"Item embedding / 16 values per item / Starts at zero; trainable / Reserved row stays zero",2.30745442708333,0.807389539930556,4,1.77777777777778
+"Skill-combination embedding / 16 values per combination / Random start; trainable / Reserved row stays zero",2.43196614583333,0.807389539930556,4.77777777777778,1.77777777777778
+"Concatenate 32 numeric + 16 item + 16 skill = 64 values / Input dropout 0.1 produces x(t), shared by retrieval, prediction and memory update",8.58829074435764,0.388181260850695,17.7777777777778,1
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Concatenation: 0 parameters",2.90421549479167,0.583389539930556,5.22222222222222,1.11111111111111
+"Past completed events from this participant / Newest 100 global events: e(j), post-answer h3(j), raw item/skill IDs",5.66031901041667,0.359389539930556,12.2222222222222,1.11111111111111
+"Keep same item OR same skill-combination ID; compare exact raw IDs (0 parameters)",7.39965142144097,0.125264485677084,12.2222222222222,0.466666666666667
+"Shared Q/K linear 96 <U+2192> 32 / Query q(t); 32 shared biases*",2.67915174696181,0.388181260850695,4.77777777777778,1.15555555555556
+"Same Q/K linear 96 <U+2192> 32 / Key k(j); same 32 biases*",2.30869547526042,0.388181260850695,5.22222222222222,1.15555555555556
+"Raw values v(j) = h3(j) / 32 values; no value map",2.288330078125,0.359389539930556,4.33333333333333,1.15555555555556
+"Scores q(t) <U+00B7> k(j) / sqrt(32) / Past 100 AND (same item OR skill) / Softmax over eligible events only / 0 parameters",3.24202473958333,0.807389539930556,6.22222222222222,1.33333333333333
+"Weighted mean: m(t) = <U+03A3> a(t,j) h3(j) / 32 values; 0 parameters",3.68851725260417,0.388181260850695,6.66666666666667,1.33333333333333
+"Single output linear 32 <U+2192> 32; 32 biases / Retrieved r(t): 32 values / No eligible memory: force r(t) = 0",3.66495768229167,0.583389539930556,6.66666666666667,1.11111111111111
+"r(t): 32 + x(t): 64 / Concatenate 96 values / 0 parameters",2.08150227864583,0.630847927517362,5,1.11111111111111
+"Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.83202446831597,0.388181260850695,4.66666666666667,1.11111111111111
+"Linear 128 <U+2192> 1 / 1 bias; one logit",1.33805338541667,0.359389539930556,2.44444444444444,1.11111111111111
+"Sigmoid + clipping / p(correct at trial t) / 0 parameters",1.77530924479167,0.583389539930556,3.11111111111111,1.11111111111111
+"Observed response y(t) / 0 = incorrect; 1 = correct / No response encoder",2.58067491319444,0.630847927517362,5.11111111111111,1
+"Previous h1(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1.05555555555556
+"GRU layer 1; 32 units / h1(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.583389539930556,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1.05555555555556
+"GRU layer 2; 32 units / h2(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.583389539930556,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41666666666667,0.359389539930556,2.77777777777778,1.05555555555556
+"GRU layer 3; 32 units / h3(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.583389539930556,2.77777777777778,1.44444444444444
+"Current x(t): 64 + raw y(t): 1 / 65 values into GRU layer 1 / Concatenation: 0 parameters",2.447509765625,0.583389539930556,5.11111111111111,1.22222222222222
+"Dropout / 0.1; 0 params",0.967475043402779,0.301806098090278,1.55555555555556,0.722222222222222
+"Dropout / 0.1; 0 params",0.967475043402779,0.301806098090278,1.55555555555556,0.722222222222222
+"Keep h1(t), h2(t), h3(t) for the next trial: 3 <U+00D7> 32 state values / Append [pre-answer e(t): 96, post-answer h3(t): 32, raw IDs] to the newest-100-event bank; 0 parameters",10.0250651041667,0.359389539930556,17.7777777777778,1
+"7 numeric inputs; no intercept / Recency; item age; prior mean spacing; spacing-availability flag / Student logitdec; student-item logitdec; student-item PPES",6.04646809895833,0.577833984374999,7.77777777777778,1.38888888888889
+"Current item ID",1.69939507378472,0.150084092881944,4,1
+"Current skill-combination ID",2.86887613932292,0.139959038628472,4.77777777777778,1
+"Shared numeric encoder: Linear 7 <U+2192> 32; ReLU / 32 biases",4.64419216579861,0.382625705295139,7.77777777777778,0.933333333333333
+"Numeric output: Linear 32 <U+2192> 32 / 32 biases",3.2103271484375,0.382625705295139,7.77777777777778,0.933333333333333
+"Item embedding / 16 values per item / Starts at zero; trainable / Reserved row stays zero",2.30745442708333,0.801833984375,4,1.77777777777778
+"Skill-combination embedding / 16 values per combination / Random start; trainable / Reserved row stays zero",2.43196614583333,0.801833984375,4.77777777777778,1.77777777777778
+"Concatenate 32 numeric + 16 item + 16 skill = 64 values / Input dropout 0.1 produces x(t), shared by retrieval, prediction and memory update",8.58829074435764,0.382625705295139,17.7777777777778,1
+"Current event e(t): 96 values / Previous h3(t<U+2212>1): 32 + x(t): 64 / Concatenation: 0 parameters",2.90421549479167,0.577833984374999,5.22222222222222,1.11111111111111
+"Past completed events from this participant / Newest 100 global events: e(j), post-answer h3(j), raw item/skill IDs",5.66031901041667,0.353833984374999,12.2222222222222,1.11111111111111
+"Keep same item OR same skill-combination ID; compare exact raw IDs (0 parameters)",7.39965142144098,0.119708930121528,12.2222222222222,0.466666666666667
+"Shared Q/K linear 96 <U+2192> 32 / Query q(t); 32 shared biases*",2.67915174696181,0.382625705295139,4.77777777777778,1.15555555555556
+"Same Q/K linear 96 <U+2192> 32 / Key k(j); same 32 biases*",2.30869547526042,0.382625705295139,5.22222222222222,1.15555555555556
+"Raw values v(j) = h3(j) / 32 values; no value map",2.288330078125,0.353833984374999,4.33333333333333,1.15555555555556
+"Scores q(t) <U+00B7> k(j) / sqrt(32) / Past 100 AND (same item OR skill) / Softmax over eligible events only / 0 parameters",3.24202473958333,0.801833984375,6.22222222222222,1.33333333333333
+"Weighted mean: m(t) = <U+03A3> a(t,j) h3(j) / 32 values; 0 parameters",3.68851725260417,0.382625705295139,6.66666666666667,1.33333333333333
+"Single output linear 32 <U+2192> 32; 32 biases / Retrieved r(t): 32 values / No eligible memory: force r(t) = 0",3.66495768229167,0.577833984374999,6.66666666666667,1.11111111111111
+"r(t): 32 + x(t): 64 / Concatenate 96 values / 0 parameters",2.08150227864583,0.625292371961805,5,1.11111111111111
+"Linear 96 <U+2192> 128; 128 biases / ReLU; head dropout 0.1",2.83202446831597,0.382625705295139,4.66666666666667,1.11111111111111
+"Linear 128 <U+2192> 1 / 1 bias; one logit",1.33805338541667,0.353833984374999,2.44444444444444,1.11111111111111
+"Sigmoid + clipping / p(correct at trial t) / 0 parameters",1.77530924479167,0.577833984374999,3.11111111111111,1.11111111111111
+"Observed response y(t) / 0 = incorrect; 1 = correct / No response encoder",2.58067491319444,0.625292371961805,5.11111111111111,1
+"Previous h1(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1.05555555555556
+"GRU layer 1; 32 units / h1(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.577833984374999,2.77777777777778,1.44444444444444
+"Previous h2(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1.05555555555556
+"GRU layer 2; 32 units / h2(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.577833984374999,2.77777777777778,1.44444444444444
+"Previous h3(t<U+2212>1) / 32 state values",1.41666666666667,0.353833984374999,2.77777777777778,1.05555555555556
+"GRU layer 3; 32 units / h3(t): 32 values / 192 biases (two sets of 96)",2.54890950520833,0.577833984374999,2.77777777777778,1.44444444444444
+"Current x(t): 64 + raw y(t): 1 / 65 values into GRU layer 1 / Concatenation: 0 parameters",2.447509765625,0.577833984374999,5.11111111111111,1.22222222222222
+"Dropout / 0.1; 0 params",0.967475043402779,0.296250542534722,1.55555555555556,0.722222222222222
+"Dropout / 0.1; 0 params",0.967475043402779,0.296250542534722,1.55555555555556,0.722222222222222
+"Keep h1(t), h2(t), h3(t) for the next trial: 3 <U+00D7> 32 state values / Append [pre-answer e(t): 96, post-answer h3(t): 32, raw IDs] to the newest-100-event bank; 0 parameters",10.0250651041667,0.353833984374999,17.7777777777778,1

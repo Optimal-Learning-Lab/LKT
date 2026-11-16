@@ -17,7 +17,15 @@ stopifnot(fit$model_name=='GLMM',identical(fit$fit_rows,which(d$fold==1)),
  length(fit$random_effects)==1,nrow(fit$variance_components)>=1,
  identical(predict_lkt(fit,fit$newdata)$predictions,fit$prediction))
 # With intercept/numeric features, changing held-out labels must not change fit.
+with_study<-rbind(copy(d),copy(d[1]))
+with_study[nrow(with_study),`:=`(Outcome='STUDY',CF..ansbin.=0L)]
+study_fit<-LKT(with_study,usefolds=1L,components=c('Anon.Student.Id','X'),
+  features=c('intercept@','numer'),interc=TRUE,verbose=FALSE)
+stopifnot(nobs(study_fit$model)==sum(d$fold==1),
+ max(abs(study_fit$prediction[seq_len(nrow(d))]-fit$prediction))<1e-7,
+ is.na(study_fit$newdata$CF..ansbin.[nrow(with_study)]))
 changed<-copy(d);changed[fold==2L,CF..ansbin.:=1L-CF..ansbin.]
+changed[,Outcome:=ifelse(CF..ansbin.==1,'CORRECT','INCORRECT')]
 changed[,Outcome:=ifelse(CF..ansbin.==1,'CORRECT','INCORRECT')]
 b<-LKT(changed,usefolds=1L,components=c('Anon.Student.Id','X'),features=c('intercept@','numer'),interc=TRUE,verbose=FALSE)
 stopifnot(identical(fit$coefs,b$coefs),identical(fit$prediction,b$prediction))

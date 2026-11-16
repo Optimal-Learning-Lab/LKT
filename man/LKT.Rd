@@ -40,7 +40,7 @@ LKT(
 )
 }
 \arguments{
-\item{data}{Data frame or data table containing one row per trial. Must include \code{Anon.Student.Id}, \code{CF..ansbin.}, and every component column named in \code{components}. Some features also require timing columns such as \code{CF..Time.}, \code{CF..reltime.}, or \code{Duration..sec.}.}
+\item{data}{Data frame or data table containing one row per trial. Must include \code{Anon.Student.Id}, either \code{Outcome} or binary \code{CF..ansbin.}, and every component column named in \code{components}. \code{Outcome} is authoritative: \code{CORRECT}, \code{INCORRECT}, and \code{STUDY} derive binary answers 1, 0, and NA. Studies remain in exposure histories but are excluded from response updates and fitting losses. Some features also require timing columns such as \code{CF..Time.}, \code{CF..reltime.}, or \code{Duration..sec.}.}
 
 \item{usefolds}{Numeric vector of fold values to use for fitting. Features are still computed over all rows so held-out rows can be evaluated later. \code{NA} fits on all rows.}
 

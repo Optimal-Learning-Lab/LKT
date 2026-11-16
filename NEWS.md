@@ -1,4 +1,70 @@
-# Development candidate (not released)
+# LKT 2.0.0.9027
+
+* Count all prior opportunities, including study exposures, in every AFM feature
+  and in plain PPE. PPE spacing normalization also uses the full exposure count;
+  PPES/PPEF retain their success/failure-specific repetition factors.
+
+* Make Outcome authoritative: studies have missing binary correctness and remain
+  exposure events. Response histories, fitting losses and online updates use only
+  scored responses. Preserve study labels and exposure histories in GRU/sequence
+  features and continuation without adding recurrent response updates.
+
+* Add opt-in optional student-local identities. An unmarked skill supplies a zero
+  vector, creates no identity entry/update and cannot match retrieval memories.
+  Supplied new skill labels still learn normally. Existing fits remain strict;
+  an explicit fitted-model derivation preserves weights and changes continuation
+  identity without refitting.
+
+* Repair Lasso candidate parameter alignment and data-frame inputs, retain sparse
+  matrices, count predictors separately from the intercept, and allow explicit
+  training folds so validation students are excluded from feature selection.
+  Automatic parameter grids are restricted to zero/one-parameter families;
+  multi-parameter terms require explicit complete specifications.
+
+* Own the storage of tensors created from R arrays, including singleton
+  float64 inputs and retrieval distances. This prevents temporary R input
+  memory from changing continuation predictions after garbage collection.
+
+* Add opt-in student-local GRU embeddings with causal post-answer SGD updates,
+  episodic training, distinct unseen identities, serializable state, and shared
+  immutable inference weights. Ordinary models default to no adaptation.
+  Decode original pre-encoder saved GRUs explicitly instead of applying newer
+  encoder/retrieval defaults to their saved weights.
+
+* Add opt-in compiled student-specific output connections with constant or
+  signed fatigue/recovery learning rates, exact zero-rate stock initialization,
+  and chronological state in fitting, replay and continuation.
+
+* Add an isolated source-matched 2004 PDP model, preserving signed learning
+  rates, target/expressed LTP and phase-specific update order. Include literal
+  source parity, fatigue/recovery, spacing and interference diagnostics.
+
+* Add an isolated controlled PDP connection model with separate STP/LTP weights,
+  learning-dependent fatigue and exponential recovery. Include analytic and
+  factorial mechanism checks before any GRU integration.
+
+* Add a compiled Torch GRU/DK scan with a directly constrained nonnegative decay
+  amplitude. New decay models start at exactly zero decay and learn through the
+  existing optimizer with amplitude projection. Preserve original softplus-model
+  readers and the disabled stock path.
+
+* Add opt-in elapsed-time GRU hidden-unit decay controlled by an exponentially
+  fading signed history of activation changes (DK). Three shared scalars learn
+  through the existing loss; student DK includes response and decay changes.
+  Preserve the disabled path, retrieval, and immutable candidate scoring.
+
+# LKT 2.0.0.9021
+
+* Adopt the six-input GRU recipe by omitting the previous-response gap by default
+  (time_col=NULL). Chronological ordering and item-age/prior-spacing inputs remain
+  explicit independent controls. Saved models keep their recorded input settings;
+  an explicit time_col restores the previous seven-input recipe.
+* Support explicit final numeric-coordinate selection for reproducible ablations,
+  including an empty numeric block, with training-only scaling and saved replay.
+* Update the connected generic figure to a 6 -> 32 -> 32 numeric encoder, and
+  retain the preceding seven-input figure and matched Cloze results.
+
+## Earlier development notes (preserved)
 
 * Set GRUModel argument defaults to the selected three-layer, width-32 GRU with
   a 128-unit head, 16-value feature encoders and embeddings, filtered one-head
@@ -178,3 +244,17 @@
 * corrected namespace bug
 * added predict_lkt function
 * update of vignettes
+# Development: student-local tracer
+
+* Allow opt-in student-local item embeddings together with constant-rate student-local output learning. Shared network weights and rates remain trained across students; both local states reset per student in training and evaluation. Existing defaults and nonadaptive paths are preserved.
+
+# LKT 2.0.0.9025
+
+- Add explicit `method="batched"` to candidate scoring; historical reference
+  scoring remains the default. Independent GRU queries reuse committed memory,
+  retrieval projections and component feature histories, with bounded neural
+  chunks and no gradients or learning transitions.
+- Add `LKTGRUCandidateTimeFeatures()` for independent timing queries against a
+  complete committed exposure log. Unknown item/skill identity semantics and
+  fitted/state formats are unchanged.
+

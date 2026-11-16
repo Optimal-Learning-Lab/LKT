@@ -92,6 +92,7 @@ SEXP C_lkt_online_simple_adaptive_eval(SEXP par_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -218,10 +219,10 @@ SEXP C_lkt_online_simple_adaptive_gradient(SEXP par_,
         }
       }
 
+      if (ISNA(y[i])) continue;
       for (int k = 0; k < 6; k++) {
         gradient[k] += (p - y[i]) * d_eta[k];
       }
-
       const double err = y[i] - p;
       if (xr != 0.0) {
         const double denom = xr * xr + denom_epsilon;
@@ -315,6 +316,7 @@ SEXP C_lkt_online_simple_adaptive_value_gradient(SEXP par_,
       double d_eta[6];
       double d_p[6];
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -338,10 +340,10 @@ SEXP C_lkt_online_simple_adaptive_value_gradient(SEXP par_,
         }
       }
 
+      if (ISNA(y[i])) continue;
       for (int k = 0; k < 6; k++) {
         gradient[k] += (p - y[i]) * d_eta[k];
       }
-
       const double err = y[i] - p;
       if (xr != 0.0) {
         const double denom = xr * xr + denom_epsilon;
@@ -465,6 +467,7 @@ SEXP C_lkt_online_simple_adaptive_decay_eval(SEXP par_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -591,6 +594,7 @@ SEXP C_lkt_online_adaptive_beta_eval(SEXP alpha_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -731,6 +735,7 @@ SEXP C_lkt_online_adaptive_recency_decay_eval(SEXP alpha_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -795,24 +800,18 @@ static double lkt_logitdec_previous_window(const double *y,
                                            int start,
                                            int current,
                                            double d) {
-  const int last = current - 1;
-  if (last < start) {
-    return 0.0;
-  }
-  int first = last - 59;
-  if (first < start) {
-    first = start;
-  }
-  const int w = last - first + 1;
-  double corv = pow(d, (double) w);
-  double incorv = pow(d, (double) w);
-  for (int k = 0; k < w; k++) {
-    const int idx = first + k;
-    const double exponent = (double) (w - 1 - k);
-    const double weight = pow(d, exponent);
+  int count = 0;
+  double corv = 0.0, incorv = 0.0, weight = 1.0;
+  for (int idx = current - 1; idx >= start && count < 60; idx--) {
+    if (ISNA(y[idx])) continue;
     corv += y[idx] * weight;
     incorv += fabs(y[idx] - 1.0) * weight;
+    weight *= d;
+    count++;
   }
+  if (count == 0) return 0.0;
+  corv += weight;
+  incorv += weight;
   return log(corv / incorv);
 }
 
@@ -973,6 +972,7 @@ SEXP C_lkt_online_adaptive_feature_group_eval(SEXP alpha_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {
@@ -1158,6 +1158,7 @@ SEXP C_lkt_online_adaptive_feature_decay_eval(SEXP alpha_,
         pred[i] = p;
       }
 
+      if (ISNA(y[i])) continue;
       if (y[i] == 1.0) {
         loglike += log(p);
       } else {

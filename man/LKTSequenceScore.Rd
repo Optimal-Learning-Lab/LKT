@@ -4,7 +4,8 @@
 \alias{LKTSequenceScore}
 \title{Score independent sequence candidates without observing them}
 \usage{
-LKTSequenceScore(modelob, state, data, runtime = NULL)
+LKTSequenceScore(modelob, state, data, runtime = NULL,
+  method = c("reference", "batched"), candidate_batch_size = 256L)
 }
 \arguments{
 \item{modelob}{Fitted sequence or GRU LKT model.}
@@ -14,6 +15,8 @@ LKTSequenceScore(modelob, state, data, runtime = NULL)
 \item{data}{Candidate trial rows.}
 
 \item{runtime}{Optional process-local sequence or GRU runtime.}
+\item{method}{Historical reference scoring (default), or opt-in batched GRU scoring.}
+\item{candidate_batch_size}{Maximum number of independent neural queries per chunk.}
 }
 \value{
 Numeric correctness probabilities, one per candidate.

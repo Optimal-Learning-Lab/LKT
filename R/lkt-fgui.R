@@ -57,11 +57,13 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
   if(inherits(config,'LKTModelConfig') && identical(config$backend,'Sequence'))
     stop('Sequence models currently use the R APIs; GUI architecture selection is not implemented.',call.=FALSE)
   if(!requireNamespace('fgui',quietly=TRUE))stop('Install the optional fgui package to open this interface.',call.=FALSE)
+  new_specification <- is.null(config)
   if(is.null(config))config<-lkt_model_config(data.frame(component='KC..Default.',feature='intercept'),options=list(verbose=FALSE))
-  lkt_config_arguments(config)
+  initial_arguments <- lkt_config_arguments(config)
+  if(config$backend=='GRU')config$gru_options <- initial_arguments$model$settings
   bayesian<-new.env(parent=emptyenv());bayesian$options<-config$bayesian_options
   gru<-new.env(parent=emptyenv());gru$options<-config$gru_options
-  controller<-function(action='Preview',terms='',intercept=TRUE,backend='LibLinear',
+  controller<-function(action='Preview',terms='',intercept='Model default',backend='LibLinear',
     latency='none',folds='NA',wald_allowance=.02,dataset='RDS file',data_file='',output_file='',load_file='',
     bayesian_workflow='Participant split + prefit',training_fraction=.7,split_seed=1,
     participant_column='Anon.Student.Id',personalized='',particles=2048,particle_seed=1,
@@ -87,7 +89,8 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
           ess_threshold=as.numeric(ess_threshold),ess_action=ess_action,store_trace=as.character(store_trace)%in%c('TRUE','1')))
       online_options$beta_alpha_terms<-if(nzchar(trimws(personalized)))trimws(strsplit(personalized,',',fixed=TRUE)[[1L]]) else NULL
     }
-    construct<-function(terms=parsed)lkt_model_config(terms,as.character(intercept)%in%c('TRUE','1'),backend,latency,f,
+    intercept_value <- if(as.character(intercept)=='Model default')!backend %in% c('GRU','Sequence') else as.character(intercept)%in%c('TRUE','1')
+    construct<-function(terms=parsed)lkt_model_config(terms,intercept_value,backend,latency,f,
       options=utils::modifyList(config$options,c(list(epsilon=as.numeric(epsilon),cost=as.numeric(cost),
         maxitv=as.numeric(maxitv),factrv=as.numeric(factrv)),
         if(latency=='Wald')list(wald_contamination_weight=as.numeric(wald_allowance)) else list())),
@@ -97,7 +100,7 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
     if(action=='Predictor names') {
       # Explicit matrix-only inspection of shared features; no model is fitted
       # and no prior is inferred from the evaluation responses.
-      cfg<-lkt_model_config(parsed,as.character(intercept)%in%c('TRUE','1'),
+      cfg<-lkt_model_config(parsed,intercept_value,
         backend='LibLinear',latency='none',options=list(verbose=FALSE))
       if(any(!is.finite(cfg$fixedpars))||any(cfg$fixedpars>=1&cfg$fixedpars%%1==0))
         stop('Fix all nonlinear feature parameters before inspecting Bayesian predictors.')
@@ -166,7 +169,7 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
     paste('Fitted model saved:',output_file,'\nLog likelihood:',fit$loglike,'\n',preview)
   }
   formals(controller)$terms<-lkt_gui_terms_text(config$terms)
-  formals(controller)$intercept<-config$intercept
+  formals(controller)$intercept<-if(new_specification)'Model default' else config$intercept
   formals(controller)$backend<-config$backend
   formals(controller)$latency<-config$latency
   formals(controller)$folds<-paste(config$folds,collapse=',')
@@ -203,7 +206,7 @@ lkt_gui <- function(config=NULL,modal=TRUE,theme=c('blue','green'),
       bayesian_workflow=c('Participant split + prefit','Supplied prior (no split)'),
       ess_action=c('warn','error','ignore'),store_trace=c('FALSE','TRUE'),
       backend=c('LibLinear','GLMM','OnlineBayesian','GRU'),latency=c('none','Wald'),
-      intercept=c('TRUE','FALSE'),glmm_prediction=c('conditional','fixed'),
+      intercept=c('Model default','TRUE','FALSE'),glmm_prediction=c('conditional','fixed'),
       glmm_unseen=c('error','zero'),dataset=c('RDS file','samplelkt (built-in)')),
     files=c('data_file','load_file'),edit=list(terms=c(85,8,FALSE)),
     labels=list(terms='Ordered model terms (| columns; semicolon parameters)',backend='Accuracy model',

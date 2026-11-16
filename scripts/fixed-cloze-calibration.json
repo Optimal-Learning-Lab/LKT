@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "dataset": "Cloze",
+  "data_sha256": "964b30f32fc04233e5377faf06f553719eea359db15640aec6d202b2e317b10c",
+  "ground_truth": {
+    "components": ["Anon.Student.Id", "KC..Default.", "KC..Default.", "KC..Default."],
+    "features": ["intercept", "ppes", "intercept", "ppef"],
+    "nonlinear_parameters": 8
+  },
+  "control": {
+    "components": ["Anon.Student.Id", "KC..Default.", "KC..Default."],
+    "features": ["logitdec", "ppes", "logitdec"],
+    "nonlinear_parameters": 6
+  },
+  "seed": 25,
+  "epsilon": 1e-12,
+  "factrv": 10000,
+  "maxitv": 1000,
+  "wald_contamination_weight": 0.02,
+  "procedure": "Initial accuracy-only nonlinear fit on all Cloze rows for each recipe. Freeze nonlinear defaults and reuse fitted accuracy coefficients. Fit Wald once after accuracy calibration is complete."
+}

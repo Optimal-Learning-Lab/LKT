@@ -45,6 +45,7 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     Outcome=rep(c('STUDY',rep('CORRECT',14)),6),fold=rep(c(1,1,1,1,2,3),each=15))
   full <- LKTGRUTimeFeatures(exposure)
   scored <- full[full$Outcome!='STUDY',];scored$CF..ansbin. <- rbinom(nrow(scored),1,.6)
+  scored$Outcome <- ifelse(scored$CF..ansbin.==1,'CORRECT','INCORRECT')
   for(engineered in c(FALSE,TRUE)) {
     s <- list(time_col='CF..Time.',order_col='CF..Time.',time_feature_cols=columns,time_missing_cols=columns[2],
       feature_encoder='mlp',encoder_hidden_sizes=8L,encoder_output_size=4L,
@@ -57,6 +58,7 @@ if(requireNamespace('torch',quietly=TRUE) && torch::torch_is_installed()) {
     rt <- LKTGRURuntime(fit)
     first <- LKTGRUStep(fit,LKTGRUState(fit),scored[1:5,],rt)
     pending <- scored[6,,drop=FALSE];pending$CF..ansbin. <- NA_real_
+    pending$Outcome <- 'PENDING'
     peek <- LKTGRUStep(fit,first$state,pending,rt)
     close(peek$predictions,fit$prediction[6])
     stopifnot(identical(peek$state$hidden,first$state$hidden))

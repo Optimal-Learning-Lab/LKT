@@ -26,6 +26,7 @@ lkt_gru_inference_body <- function(width,hidden,activation,dropout) {
 # claiming to reproduce its unpublished layer settings. Before predicting trial t it
 # sees memory through t-2, the completed interaction t-1, and current numeric features.
 lkt_gru_inference_network <- function(preprocessing,s) {
+  if(lkt_gru_exercise_active(s))lkt_gru_exercise_saved(preprocessing$exercise_attributes,s)
   self <- NULL
   raw_numeric_width <- length(preprocessing$numeric_names)
   learned <- s$feature_encoder=='mlp'
@@ -51,6 +52,7 @@ lkt_gru_inference_network <- function(preprocessing,s) {
     initialize=function() {
       self$embeddings <- lkt_gru_embeddings(preprocessing,s)
       self$input_drop <- torch::nn_dropout(s$input_dropout)
+      if(lkt_gru_semantic_active(s))self$semantic_projection <- torch::nn_linear(2304L,32L)
       # Independent towers learn representations of responses, time and other numeric
       # predictors. Item/skill IDs retain their jointly learned embedding tables.
       if(learned) {
@@ -59,11 +61,16 @@ lkt_gru_inference_network <- function(preprocessing,s) {
           last <- if(length(s$encoder_hidden_sizes))utils::tail(s$encoder_hidden_sizes,1L) else n
           torch::nn_sequential(body,torch::nn_linear(last,out))
         }
-        self$response_encoder <- tower(1L,layout$sizes[['response']])
-        if(length(time_indices))self$time_encoder <- tower(length(time_indices),layout$sizes[['time']])
-        if(length(auxiliary_indices))self$auxiliary_encoder <- tower(length(auxiliary_indices),layout$sizes[['history']])
+        if(s$response_encoding=='mlp')self$response_encoder <- tower(1L,layout$sizes[['response']])
+        if(s$numeric_encoder=='combined') {
+          if(raw_numeric_width)self$numeric_encoder <- tower(raw_numeric_width,layout$sizes[['numeric']])
+        } else {
+          if(length(time_indices))self$time_encoder <- tower(length(time_indices),layout$sizes[['time']])
+          if(length(auxiliary_indices))self$auxiliary_encoder <- tower(length(auxiliary_indices),layout$sizes[['history']])
+        }
       }
-      self[[lkt_sequence_module_name(s)]] <- lkt_sequence_build(width+response_width,s)
+      self[[lkt_sequence_module_name(s)]] <- lkt_sequence_build(width+response_width+if(lkt_gru_semantic_active(s))32L else 0L,s)
+      if(s$hidden_decay)self$hidden_decay <- lkt_gru_hidden_decay_module(s$hidden_decay_parameterization)
       if(s$inference_mode!='none') {
         self$inference <- lkt_gru_inference_body(inference_width,s$inference_hidden_sizes,
           s$inference_activation,s$inference_dropout)
@@ -96,21 +103,23 @@ lkt_gru_inference_network <- function(preprocessing,s) {
       if(!is.null(s$joint_encoder_output_size)) {
         body <- lkt_gru_inference_body(layout$combined_width,s$joint_encoder_hidden_sizes,
           s$joint_encoder_activation,s$joint_encoder_dropout)
-        last <- if(length(s$joint_encoder_hidden_sizes))tail(s$joint_encoder_hidden_sizes,1L) else layout$combined_width
+        last <- if(length(s$joint_encoder_hidden_sizes))utils::tail(s$joint_encoder_hidden_sizes,1L) else layout$combined_width
         self$joint_encoder <- torch::nn_sequential(body,torch::nn_linear(last,s$joint_encoder_output_size))
       }
+      if(lkt_gru_plastic(s))self$plasticity <- lkt_gru_plasticity_module(s$plasticity,preprocessing$plasticity_item_skill)
+      if(lkt_gru_gate_active(s))self$gate_fatigue <- lkt_gru_gate_module(s,lkt_sequence_module(self,s))
+      if(lkt_gru_denoising_active(s))self$latent_denoiser <- lkt_gru_denoising_module()
+      if(lkt_gru_exercise_active(s))self$exercise_attributes <- lkt_gru_exercise_module(preprocessing$exercise_attributes)
     },
-    encode=function(numeric,categorical) {
+    encode=function(numeric,categorical,embedding_values=NULL) {
       numeric_parts <- list();category_parts <- list()
-      if(!learned)numeric_parts <- list(numeric) else {
+      if(!learned)numeric_parts <- list(numeric) else if(s$numeric_encoder=='combined') {
+        if(raw_numeric_width)numeric_parts <- list(self$numeric_encoder(numeric))
+      } else {
         if(length(time_indices))numeric_parts[[length(numeric_parts)+1L]] <- self$time_encoder(numeric[,,time_indices,drop=FALSE])
         if(length(auxiliary_indices))numeric_parts[[length(numeric_parts)+1L]] <- self$auxiliary_encoder(numeric[,,auxiliary_indices,drop=FALSE])
       }
-      for(j in seq_along(preprocessing$vocabularies)) {
-        ids <- categorical[,,j,drop=FALSE]$squeeze(3)
-        if(s$categorical_encoding=='embedding')category_parts[[length(category_parts)+1L]] <- self$embeddings[[j]](ids)
-        else category_parts[[length(category_parts)+1L]] <- torch::nnf_one_hot(ids,num_classes=length(preprocessing$vocabularies[[j]])+1L)[,,seq.int(2L,length(preprocessing$vocabularies[[j]])+1L),drop=FALSE]$to(dtype=numeric$dtype)
-      }
+      category_parts <- lkt_gru_categorical_parts(self,categorical,preprocessing,s,embedding_values,numeric$dtype)
       # First apply the declared pair sums or concatenation. The optional shared
       # encoder then sees the complete current input once, before input dropout.
       parts <- list()
@@ -120,8 +129,21 @@ lkt_gru_inference_network <- function(preprocessing,s) {
       if(!is.null(s$joint_encoder_output_size))combined <- self$joint_encoder(combined)
       self$input_drop(combined)
     },
-    forward=function(numeric,categorical,answers,hidden=NULL,context=NULL,retrieval_ids=NULL) {
-      x <- self$encode(numeric,categorical)
+    score_candidates=function(numeric,categorical,prior,bank=NULL,retrieval_ids=NULL,
+                              embedding_values=NULL,plastic_weights=NULL) {
+      x <- self$encode(numeric,categorical,embedding_values)
+      prior <- prior$expand(c(x$size(1),1L,s$hidden_size))
+      memory <- prior
+      if(retrieving) {
+        cue <- if(length(cue_indices))x[,,cue_indices,drop=FALSE] else torch::torch_cat(list(prior,x),dim=3)
+        read <- self$retrieval$score_candidates(cue,bank,retrieval_ids)
+        memory <- if(s$retrieval_fusion=='replace')read else torch::torch_cat(list(prior,read),dim=3)
+      }
+      out <- lkt_gru_head(self,torch::torch_cat(list(memory,x),dim=3),s)
+      lkt_gru_plasticity_read(out,plastic_weights,s)
+    },
+    forward=function(numeric,categorical,answers,hidden=NULL,context=NULL,retrieval_ids=NULL,decay_gaps=NULL,valid=NULL,embedding_values=NULL,semantic=NULL) {
+      x <- self$encode(numeric,categorical,embedding_values)
       batch <- x$size(1);steps <- x$size(2)
       retrieval_context <- context
       zeros <- function(n)torch::torch_zeros(c(batch,1L,n),dtype=x$dtype,device=x$device)
@@ -129,10 +151,12 @@ lkt_gru_inference_network <- function(preprocessing,s) {
       if(is.null(context))context <- list(older_hidden=zeros(s$hidden_size),last_interaction=zeros(width+response_width),
         mean=zeros(s$latent_size),logvar=zeros(s$latent_size),has_previous=zeros(1L))
       response <- answers$unsqueeze(3)
-      if(learned)response <- self$response_encoder(response)
-      interaction <- torch::torch_cat(list(x,response),dim=3)
-      transition <- lkt_sequence_advance(self,interaction,hidden,s)
-      prior <- torch::torch_cat(list(lkt_sequence_read(hidden,s),transition[[1]]),dim=2)[,seq_len(steps),,drop=FALSE]
+      if(learned && s$response_encoding=='mlp')response <- self$response_encoder(response)
+      interaction <- lkt_gru_semantic_interaction(self,torch::torch_cat(list(x,response),dim=3),semantic,s)
+      transition <- if(lkt_gru_gate_active(s))lkt_gru_gate_transition(self,interaction,hidden,s,decay_gaps,valid) else if(lkt_gru_compiled_decay(s))lkt_gru_compiled_transition(self,interaction,hidden,s,decay_gaps,valid) else
+        lkt_sequence_advance(self,interaction,hidden,s)
+      prior <- if(lkt_gru_compiled_decay(s) || lkt_gru_gate_active(s))transition$prior else
+        torch::torch_cat(list(lkt_sequence_read(hidden,s),transition[[1]]),dim=2)[,seq_len(steps),,drop=FALSE]
       memory <- prior
       if(retrieving) {
         cue <- if(length(cue_indices))x[,,cue_indices,drop=FALSE] else torch::torch_cat(list(prior,x),dim=3)
@@ -140,11 +164,11 @@ lkt_gru_inference_network <- function(preprocessing,s) {
         memory <- if(s$retrieval_fusion=='replace')retrieved$read else torch::torch_cat(list(prior,retrieved$read),dim=3)
       }
       if(s$inference_mode=='none') {
-        result <- list(logits=self$head(torch::torch_cat(list(memory,x),dim=3))$squeeze(3),hidden=transition[[2]])
+        result <- c(lkt_gru_head(self,torch::torch_cat(list(memory,x),dim=3),s),list(hidden=transition[[2]]))
         if(retrieving) {
           result$context <- retrieved$context;result$retrieval_attention <- retrieved$weights
         }
-        return(result)
+        return(lkt_gru_denoising_state(self,result,prior,s))
       }
       # Shift both inputs back one interaction: the current answer cannot reach its
       # own mean, variance, or probability. The most recent completed interaction
@@ -171,11 +195,11 @@ lkt_gru_inference_network <- function(preprocessing,s) {
       }
       decoder <- list(latent)
       if(categorical_width)decoder[[2L]] <- x[,,numeric_width+seq_len(categorical_width),drop=FALSE]
-      result <- list(logits=self$head(torch::torch_cat(decoder,dim=3))$squeeze(3),hidden=transition[[2]],
+      result <- c(lkt_gru_head(self,torch::torch_cat(decoder,dim=3),s),list(hidden=transition[[2]],
         latent_mean=mean,latent_logvar=logvar,kl_per_trial=kl,kl_valid=valid,
         context=list(older_hidden=prior[,steps,,drop=FALSE],last_interaction=interaction[,steps,,drop=FALSE],
           mean=mean[,steps,,drop=FALSE],logvar=logvar[,steps,,drop=FALSE],
-          has_previous=torch::torch_ones(c(batch,1L,1L),dtype=x$dtype,device=x$device)))
+          has_previous=torch::torch_ones(c(batch,1L,1L),dtype=x$dtype,device=x$device))))
       if(retrieving) {
         result$context <- c(result$context,retrieved$context)
         result$retrieval_attention <- retrieved$weights

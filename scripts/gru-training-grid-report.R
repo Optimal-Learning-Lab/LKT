@@ -7,7 +7,7 @@ training_grid_report <- function(output,p,tasks_for,action='report',
 
   # Audit the saved settings, masks, validation scores and baseline reproduction
   # before selecting any setting. Held-out outcomes never enter that selection.
-  stopifnot(length(list.files(file.path(output,'models'),pattern='[.]rds$'))==240L)
+  stopifnot(length(list.files(file.path(output,'models'),pattern='[.]rds$'))==p$total_fits)
   d <- readRDS(file.path(output,'data/prepared_data.rds'));records <- list();controls <- readRDS(file.path(output,'data/reference-controls.rds'))
   baseline_controls <- list();predictions <- list()
   for(part in p$partitions) {
@@ -68,10 +68,16 @@ training_grid_report <- function(output,p,tasks_for,action='report',
     seed_sd=sd(tuned_scores$AUC),training_AUC=mean(tuned_fits$training_AUC),validation_AUC=mean(tuned_fits$validation_AUC),
     baseline_CV_AUC=summary[condition=='baseline',CV_AUC])
   factors <- list()
-  for(axis in c('learning_rate','dropout','batch_size','weight_decay')) {
-    old <- p$grid[[axis]][1L];new <- unique(p$grid[[axis]])[2L]
-    factors[[axis]] <- data.frame(factor=axis,current=old,alternative=new,
-      mean_CV_AUC_change=mean(summary[get(axis)==new,CV_AUC])-mean(summary[get(axis)==old,CV_AUC]))
+  for(axis in setdiff(names(p$grid),'condition')) {
+    values <- unique(p$grid[[axis]])
+    if(length(values)<2L)next
+    old <- p$grid[[axis]][match('baseline',p$grid$condition)]
+    stopifnot(length(old)==1L,!is.na(old))
+    for(new in values[values!=old]) {
+      key <- paste(axis,new,sep='__')
+      factors[[key]] <- data.frame(factor=axis,current=old,alternative=new,
+        mean_CV_AUC_change=mean(summary[get(axis)==new,CV_AUC])-mean(summary[get(axis)==old,CV_AUC]))
+    }
   }
   if(action=='report') {
     for(name in c('summary','pooled','r','selected','tuned_scores','tuned','primary')) {
@@ -81,7 +87,7 @@ training_grid_report <- function(output,p,tasks_for,action='report',
     }
     study_write_csv(rbindlist(factors),file.path(report_directory,'factor-effects.csv'))
     study_write_csv(rbindlist(baseline_controls),file.path(report_directory,'control-reproduction.csv'))
-    writeLines('PASS 240 checkpoint contracts, restored training AUCs, 15 baseline controls, held-out replay and validation-only grid selection.',file.path(report_directory,'verification.txt'))
+    writeLines(sprintf('PASS %d checkpoint contracts, restored training AUCs, %d baseline controls, held-out replay and validation-only grid selection.',p$total_fits,length(baseline_controls)),file.path(report_directory,'verification.txt'))
   } else stopifnot(isTRUE(all.equal(as.data.frame(fread(file.path(report_directory,'grid-auc.csv'))),as.data.frame(summary),tolerance=1e-12,check.attributes=FALSE)))
   print(summary);print(primary)
 

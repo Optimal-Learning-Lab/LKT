@@ -3,22 +3,24 @@
 # Represent settings as editable text without turning that text into R code. This allows
 # vectors and named controls to round-trip through ordinary GUI fields.
 lkt_gru_gui_encode <- function(settings) {
-  vapply(settings,function(x) {
+  result <- vapply(settings,function(x) {
     if(is.null(x))return('')
     if(is.list(x))return(paste(vapply(names(x),function(n)paste(n,paste(x[[n]],collapse=','),sep='|'),character(1)),collapse='\n'))
     if(!is.null(names(x)))return(paste(names(x),x,sep='|',collapse='\n'))
     paste(x,collapse=',')
   },character(1))
+  if('numeric_feature_cols' %in% names(settings) && is.null(settings$numeric_feature_cols))result[['numeric_feature_cols']] <- 'ALL'
+  result
 }
 
 # Parse each field according to the public control's expected type. The result passes
 # through the same GRU validator used by scripted calls.
 lkt_gru_gui_decode <- function(values) {
   defaults <- lkt_gru_defaults()
-  nullable <- c('time_col','order_col','weight_col','sequence_length','gradient_clip','validation_folds','retrieval_window','initial_model_file','joint_encoder_output_size')
-  numeric_vectors <- c('head_hidden_sizes','inference_hidden_sizes','encoder_hidden_sizes','encoder_output_sizes','joint_encoder_hidden_sizes','logvar_bounds','embedding_dims','validation_folds')
-  character_vectors <- c('categorical_cols','numeric_cols','history_group_cols','time_feature_cols','time_missing_cols',
-    'retrieval_filter_cols','retrieval_cue_cols','zero_init_embedding_cols')
+  nullable <- c('exercise_attributes','semantic_input','time_col','order_col','weight_col','sequence_length','gradient_clip','validation_folds','retrieval_window','initial_model_file','joint_encoder_output_size','hidden_decay_time_col','plasticity_time_col','gate_fatigue_time_col')
+  numeric_vectors <- c('connection_time_scale_range','head_hidden_sizes','inference_hidden_sizes','encoder_hidden_sizes','encoder_output_sizes','joint_encoder_hidden_sizes','logvar_bounds','embedding_dims','validation_folds')
+  character_vectors <- c('numeric_feature_cols','categorical_cols','numeric_cols','history_group_cols','time_feature_cols','time_missing_cols',
+    'retrieval_filter_cols','retrieval_cue_cols','zero_init_embedding_cols','adaptive_embedding_cols','optional_adaptive_cols')
   result <- list()
   tokens <- function(x)trimws(strsplit(x,',',fixed=TRUE)[[1L]])
   table <- function(x) {
@@ -32,8 +34,20 @@ lkt_gru_gui_decode <- function(values) {
   }
   for(n in names(defaults)) {
     x <- trimws(as.character(values[[n]]))
+    if(n=='numeric_feature_cols' && x=='ALL') {result[n] <- list(NULL);next}
     if(!nzchar(x) && n %in% nullable) {result[n] <- list(NULL);next}
-    if(n %in% c('optimizer_options','scheduler_options')) {
+    if(n=='exercise_attributes') {
+      rows <- table(x)
+      for(field in intersect(names(rows),c('expected_item_count','expected_kc_count')))rows[[field]] <- as.numeric(rows[[field]])
+      result[[n]] <- rows
+    } else if(n=='semantic_input') {
+      rows <- table(x)
+      if(!is.null(rows$kc_strip_number)) {
+        if(!rows$kc_strip_number %in% c('TRUE','FALSE'))stop('Semantic kc_strip_number requires TRUE/FALSE.',call.=FALSE)
+        rows$kc_strip_number <- rows$kc_strip_number=='TRUE'
+      }
+      result[[n]] <- rows
+    } else if(n %in% c('optimizer_options','scheduler_options')) {
       rows <- table(x)
       result[[n]] <- lapply(rows,function(v) {
         if(v %in% c('TRUE','FALSE'))return(v=='TRUE')
@@ -65,24 +79,29 @@ lkt_gru_gui <- function(settings=NULL,theme='blue') {
     tcltk::tkdestroy(fgui::guiGet('MAIN'));NULL
   }
   formals(controller) <- as.pairlist(as.list(lkt_gru_gui_encode(settings)))
-  choices <- list(joint_encoder_activation=c('relu','tanh','gelu'),numeric_fusion=c('concat','sum'),categorical_fusion=c('concat','sum'),input_fusion=c('concat','sum'),additional_input_init=c('random','zero'),retrieval_fusion=c('replace','concat'),retrieval_decay=c('none','exponential','akt'),feature_encoder=c('none','mlp'),encoder_activation=c('relu','tanh','gelu'),head_activation=c('relu','tanh','gelu'),categorical_encoding=c('embedding','one_hot'),
+  choices <- list(connection_fatigue_scope=c('all','candidate','input_candidate','h1_input_candidate','recurrent_candidate'),gate_fatigue_mode=c('unit','connection'),plasticity=c('none','constant','fatigue','error_rate','item_skill','bayesian_prototypes'),hidden_decay_parameterization=c('amplitude','softplus'),numeric_encoder=c('separate','combined'),response_encoding=c('mlp','binary'),
+    retrieval_value_mode=c('projected','raw'),
+    joint_encoder_activation=c('relu','tanh','gelu'),numeric_fusion=c('concat','sum'),categorical_fusion=c('concat','sum'),input_fusion=c('concat','sum'),additional_input_init=c('random','zero'),retrieval_fusion=c('replace','concat'),retrieval_decay=c('none','exponential','akt'),feature_encoder=c('none','mlp'),encoder_activation=c('relu','tanh','gelu'),head_activation=c('relu','tanh','gelu'),categorical_encoding=c('embedding','one_hot'),
     optimizer=c('adamw','adam','sgd'),scheduler=c('none','plateau'),time_units=c('seconds','minutes','hours','days'),
     dtype=c('float32','float64'),unknown_levels=c('error','zero'),
     inference_mode=c('none','deterministic','gaussian'),inference_activation=c('relu','tanh','gelu'))
   for(n in names(settings)[vapply(settings,is.logical,logical(1))])choices[[n]] <- c('TRUE','FALSE')
+  choices$embedding_adaptation <- c('none','per_student')
   sections <- list(
-    Inputs=c('categorical_cols','numeric_cols','categorical_encoding','embedding_dims','numeric_transforms','unknown_levels'),
-    History=c('subject_col','history_group_cols','order_col','time_col','time_units','time_feature_cols','time_missing_cols','use_lkt_features'),
+    Inputs=c('exercise_attributes','semantic_input','numeric_feature_cols','categorical_cols','numeric_cols','categorical_encoding','embedding_dims','numeric_transforms','unknown_levels'),
+    History=c('subject_col','history_group_cols','order_col','time_col','time_units','time_feature_cols','time_missing_cols','use_lkt_features','hidden_decay','hidden_decay_time_col','hidden_decay_parameterization','plasticity','plasticity_time_col','gate_fatigue','gate_fatigue_time_col','gate_fatigue_mode','connection_time_scale_range','connection_time_scale_seed','connection_fatigue_scope'),
     Architecture=c('hidden_size','num_layers','gru_bias','input_to_all_layers','head_hidden_sizes','head_activation','head_bias'),
     Initialization=c('additional_input_init','initial_model_file','zero_init_embedding_cols'),
+    'Adaptive embeddings'=c('embedding_adaptation','adaptive_embedding_cols','optional_adaptive_cols','embedding_learning_rate'),
     'Feature encoding'=c('feature_encoder','encoder_hidden_sizes','encoder_output_size','encoder_output_sizes','encoder_activation','encoder_dropout',
-      'numeric_fusion','categorical_fusion','input_fusion'),
+      'numeric_encoder','response_encoding','numeric_fusion','categorical_fusion','input_fusion'),
     'Joint input encoder'=c('joint_encoder_output_size','joint_encoder_hidden_sizes','joint_encoder_activation','joint_encoder_dropout'),
     Retrieval=c('retrieval_heads','retrieval_size','retrieval_window','retrieval_dropout','retrieval_fusion',
       'retrieval_decay','retrieval_decay_init','retrieval_share_qk','retrieval_bias','retrieval_filter_cols',
-      'retrieval_cue_cols','retrieval_decay_lr_multiplier'),
+      'retrieval_cue_cols','retrieval_decay_lr_multiplier','retrieval_value_mode'),
     Inference=c('inference_mode','latent_size','inference_hidden_sizes','inference_activation','inference_dropout',
       'temporal_kl_beta','logvar_bounds','logvar_init'),
+    'Latent denoising'=c('latent_denoising','denoising_noise_std','denoising_loss_weight'),
     Regularization=c('input_dropout','gru_dropout','head_dropout','standardize','positive_weight','weight_col'),
     Optimization=c('optimizer','learning_rate','weight_decay','optimizer_options','gradient_clip','gradient_clip_norm'),
     Sequences=c('epochs','batch_size','sequence_length','seed'),
@@ -90,8 +109,16 @@ lkt_gru_gui <- function(settings=NULL,theme='blue') {
     Scheduling=c('scheduler','scheduler_options'),
     Runtime=c('device','dtype','deterministic','num_threads','clip_epsilon'))
   labels <- stats::setNames(as.list(gsub('_',' ',names(settings),fixed=TRUE)),names(settings))
+  labels$latent_denoising <- 'Training-only pre-answer latent denoising (KeenKT component)'
+  labels$denoising_noise_std <- 'Fixed Gaussian noise SD (.20)'
+  labels$denoising_loss_weight <- 'Auxiliary MSE weight (.15; 0 = parity control)'
+  labels$exercise_attributes <- 'Frozen exercise attributes and provenance (name|value lines; blank = disabled)'
+  labels$semantic_input <- 'Frozen semantic input bindings (name|value lines; blank = disabled)'
   labels$embedding_dims <- 'Embedding widths (scalar or column|width lines)'
-  labels$encoder_output_sizes <- 'Output widths: time|width, history|width, response|width (blank = common)'
+  labels$encoder_output_sizes <- 'Output widths: time/history/response/numeric|width (blank = common)'
+  labels$numeric_encoder <- 'Numeric encoders: separate time/history or combined'
+  labels$response_encoding <- 'Observed response: learned MLP or binary value'
+  labels$retrieval_value_mode <- 'Retrieval values: projected or raw with one output map'
   labels$numeric_fusion <- 'Time and history: concatenate or sum'
   labels$categorical_fusion <- 'Item/skill embeddings: concatenate or sum'
   labels$input_fusion <- 'Temporal history and item coding: concatenate or sum'
@@ -102,6 +129,8 @@ lkt_gru_gui <- function(settings=NULL,theme='blue') {
   labels$additional_input_init <- 'Additional input weights: random or zero'
   labels$initial_model_file <- 'Initial fitted GRU RDS (blank = train from scratch)'
   labels$history_group_cols <- 'History keys (comma-separated; include student ID)'
+  labels$hidden_decay <- 'Decay GRU hidden units using signed change history (DK)'
+  labels$hidden_decay_time_col <- 'Hidden decay timestamp column (required when enabled)'
   labels$retrieval_heads <- 'Attention heads (0 = off)'
   labels$retrieval_size <- 'Total attention width (divisible by heads)'
   labels$retrieval_window <- 'Prior interactions retained (blank = all)'
@@ -111,7 +140,7 @@ lkt_gru_gui <- function(settings=NULL,theme='blue') {
   labels$retrieval_decay_lr_multiplier <- 'Decay learning rate multiplier'
   lkt_form_gui(controller,title='GRU settings',theme=theme,modal=TRUE,sections=sections,choices=choices,
     subtitle='All settings are saved. Vectors use commas; named values use name|value lines. Blank optional fields mean NULL. No training runs in this editor.',
-    labels=labels,edit=list(optimizer_options=c(55,4,FALSE),scheduler_options=c(55,4,FALSE),
+    labels=labels,edit=list(exercise_attributes=c(70,12,FALSE),semantic_input=c(70,8,FALSE),optimizer_options=c(55,4,FALSE),scheduler_options=c(55,4,FALSE),
       embedding_dims=c(55,2,FALSE),encoder_output_sizes=c(55,3,FALSE),numeric_transforms=c(55,2,FALSE)),submit_label='Use GRU settings')
   selected$value
 }

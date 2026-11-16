@@ -1,0 +1,190 @@
+{
+  "nodes": ["numeric_inputs", "item_id", "skill_id", "numeric_hidden", "predictors", "current_event", "bank", "attention", "prediction_input", "prediction_hidden", "probability", "answer", "interaction", "previous_1", "gru_1", "previous_2", "gru_2", "previous_3", "gru_3", "retained"],
+  "edges": [
+    {
+      "from": "numeric_inputs",
+      "to": "numeric_hidden",
+      "weights": "192 weights",
+      "next_trial": false
+    },
+    {
+      "from": "numeric_hidden",
+      "to": "predictors",
+      "weights": "1,024 weights",
+      "next_trial": false
+    },
+    {
+      "from": "item_id",
+      "to": "predictors",
+      "weights": "16 × I table values",
+      "next_trial": false
+    },
+    {
+      "from": "skill_id",
+      "to": "predictors",
+      "weights": "16 × S table values",
+      "next_trial": false
+    },
+    {
+      "from": "predictors",
+      "to": "current_event",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "predictors",
+      "to": "bank",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "current_event",
+      "to": "attention",
+      "weights": "3,072 weights*",
+      "next_trial": false
+    },
+    {
+      "from": "bank",
+      "to": "attention",
+      "weights": "3,072 shared weights*",
+      "next_trial": false
+    },
+    {
+      "from": "bank",
+      "to": "attention",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "attention",
+      "to": "prediction_input",
+      "weights": "1,024 weights",
+      "next_trial": false
+    },
+    {
+      "from": "predictors",
+      "to": "prediction_input",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "prediction_input",
+      "to": "prediction_hidden",
+      "weights": "12,288 weights",
+      "next_trial": false
+    },
+    {
+      "from": "prediction_hidden",
+      "to": "probability",
+      "weights": "128 weights",
+      "next_trial": false
+    },
+    {
+      "from": "answer",
+      "to": "interaction",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "predictors",
+      "to": "interaction",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "previous_1",
+      "to": "gru_1",
+      "weights": "3,072 recurrent weights",
+      "next_trial": false
+    },
+    {
+      "from": "interaction",
+      "to": "gru_1",
+      "weights": "6,240 weights",
+      "next_trial": false
+    },
+    {
+      "from": "gru_1",
+      "to": "gru_2",
+      "weights": "3,072 weights",
+      "next_trial": false
+    },
+    {
+      "from": "previous_2",
+      "to": "gru_2",
+      "weights": "3,072 recurrent weights",
+      "next_trial": false
+    },
+    {
+      "from": "gru_2",
+      "to": "gru_3",
+      "weights": "3,072 weights",
+      "next_trial": false
+    },
+    {
+      "from": "previous_3",
+      "to": "gru_3",
+      "weights": "3,072 recurrent weights",
+      "next_trial": false
+    },
+    {
+      "from": "gru_1",
+      "to": "retained",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "gru_2",
+      "to": "retained",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "gru_3",
+      "to": "retained",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "current_event",
+      "to": "retained",
+      "weights": "information only",
+      "next_trial": false
+    },
+    {
+      "from": "retained",
+      "to": "bank",
+      "weights": "information only",
+      "next_trial": true
+    },
+    {
+      "from": "retained",
+      "to": "current_event",
+      "weights": "information only",
+      "next_trial": true
+    },
+    {
+      "from": "retained",
+      "to": "previous_1",
+      "weights": "information only",
+      "next_trial": true
+    },
+    {
+      "from": "retained",
+      "to": "previous_2",
+      "weights": "information only",
+      "next_trial": true
+    },
+    {
+      "from": "retained",
+      "to": "previous_3",
+      "weights": "information only",
+      "next_trial": true
+    }
+  ],
+  "checks": {
+    "all_nodes_connected": true,
+    "explicit_predictor_branches": true,
+    "answer_reaches_only_future_predictions": true
+  }
+}

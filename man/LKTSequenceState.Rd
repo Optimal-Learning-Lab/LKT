@@ -14,7 +14,7 @@ LKTSequenceStep(modelob, state, data, runtime = NULL)
 
 \item{state}{State returned by LKTSequenceState or LKTSequenceStep.}
 
-\item{data}{New trial rows. CF..ansbin. is optional for an unanswered final trial in each history group.}
+\item{data}{New trial rows. Outcome is authoritative when supplied. STUDY commits an exposure without a response update; PENDING (or a missing binary answer without Outcome) is an unanswered final trial in each history group.}
 
 \item{runtime}{Optional process-local runtime returned by LKTSequenceRuntime.}
 }
@@ -25,5 +25,11 @@ LKTSequenceState returns empty state. LKTSequenceStep returns predictions and ne
 States contain ordinary R arrays, optional per-history retrieval banks, and,
 for engineered features, retained raw observations. They can be
 saved with saveRDS. They are tied to one fitted model. Predictions are made
-before response updates; network weights never change during continuation.
+before response updates; shared network weights never change during continuation.
+With plasticity enabled, student-specific output-weight adjustments and signed
+learning rates change only after observed feedback and are retained in context.
+With hidden_decay enabled, hidden units and their signed DK histories evolve
+using elapsed time even though the learned connection weights remain fixed.
+With per_student embedding adaptation, a versioned adaptive_embeddings member
+stores student-local vectors; candidate scoring never changes those vectors.
 }

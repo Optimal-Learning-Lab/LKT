@@ -1,0 +1,5 @@
+Figure verified against actual tracer settings and six-input preprocessing.
+Source artifact: C:/dev/LKT-outputs/gru-anonymous-tracer-20261111/verification/smoke.rds
+Orange: item lookup replaced by student-local vectors. Red: supplied skill information removed.
+Green: existing student-local state and constant output learning, retained.
+Gray: shared learned parameters retained across students; fixed during evaluation.

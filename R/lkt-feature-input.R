@@ -154,7 +154,10 @@ lkt_get_formula_terms <- function(formula, data, cache = NULL) {
 
 lkt_sparse_model_matrix <- function(formula, data, terms_cache = NULL) {
   formula_terms <- lkt_get_formula_terms(formula, data, terms_cache)
-  predictset <- sparse.model.matrix(formula_terms, data)
+  # Responses may be NA for study exposures; they cannot remove predictor rows.
+  predictor_terms <- stats::delete.response(formula_terms)
+  frame <- stats::model.frame(predictor_terms, data, na.action = stats::na.pass)
+  predictset <- sparse.model.matrix(predictor_terms, frame)
   predictset.csc <- new("matrix.csc",
                         ra = predictset@x,
                         ja = predictset@i + 1L,

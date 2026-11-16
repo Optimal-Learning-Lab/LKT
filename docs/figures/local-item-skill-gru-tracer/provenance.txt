@@ -1,0 +1,5 @@
+Figure verified against actual tracer settings and six-input preprocessing.
+Source artifact: C:/dev/LKT-outputs/gru-local-item-skill-tracer-20261111/verification/smoke.rds
+Orange: item and skill lookups replaced by student-local vectors; supplied grouping and retrieval matching retained.
+Green: existing student-local state and constant output learning, retained.
+Gray: shared learned parameters retained across students; fixed during evaluation.

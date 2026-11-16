@@ -14,7 +14,7 @@ LKTGRUStep(modelob, state, data, runtime = NULL)
 
 \item{state}{State returned by LKTSequenceState or LKTSequenceStep.}
 
-\item{data}{New trial rows. CF..ansbin. is optional for an unanswered final trial in each history group.}
+\item{data}{New trial rows. Outcome is authoritative when supplied. STUDY commits an exposure without a response update; PENDING (or a missing binary answer without Outcome) is an unanswered final trial in each history group.}
 
 \item{runtime}{Optional process-local runtime returned by LKTSequenceRuntime.}
 }

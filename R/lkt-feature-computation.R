@@ -2,6 +2,76 @@
 # These functions are sourced before latency/model orchestration modules
 # and collated before LKTfunctions.R during package installation.
 
+# Outcome is the event type; binary correctness is defined only for responses.
+# Rebuild the derived column even when an older caller encoded studies as zero.
+lkt_normalize_outcomes <- function(data, allow_pending = FALSE) {
+  if ("Outcome" %in% names(data)) {
+    outcome <- as.character(data$Outcome)
+    if (allow_pending) outcome[is.na(outcome)] <- "PENDING"
+    allowed <- c("CORRECT", "INCORRECT", "STUDY", if (allow_pending) "PENDING")
+    if (anyNA(outcome) || any(!outcome %in% allowed))
+      stop("Outcome must be CORRECT, INCORRECT or STUDY",
+           if (allow_pending) " (PENDING is also allowed for prediction)", ".", call. = FALSE)
+    data$Outcome <- outcome
+    data$CF..ansbin. <- ifelse(outcome == "CORRECT", 1,
+                               ifelse(outcome == "INCORRECT", 0, NA_real_))
+  } else {
+    if (!"CF..ansbin." %in% names(data)) {
+      if (!allow_pending) stop("Supply Outcome or CF..ansbin..", call. = FALSE)
+      data$CF..ansbin. <- rep(NA_real_, nrow(data))
+    }
+    y <- data$CF..ansbin.
+    if ((!allow_pending && anyNA(y)) || any(!is.na(y) & !y %in% c(0, 1)))
+      stop("CF..ansbin. must contain binary responses; unscored trials require Outcome.", call. = FALSE)
+    data$Outcome <- ifelse(is.na(y), "PENDING", ifelse(y == 1, "CORRECT", "INCORRECT"))
+  }
+  data
+}
+
+# Evaluate an existing lagged response-history function on scored answers only.
+# The extra final element exposes the state after the last observed response.
+lkt_scored_history <- function(data, index, values, fun) {
+  result <- numeric(nrow(data))
+  for (rows in split(seq_len(nrow(data)), index, drop = TRUE)) {
+    scored <- data$Outcome[rows] %in% c("CORRECT", "INCORRECT")
+    states <- fun(c(values[rows][scored], 0))
+    prior <- cumsum(scored) - as.integer(scored)
+    result[rows] <- states[prior + 1L]
+  }
+  result
+}
+
+lkt_previous_response <- function(data, index) {
+  lkt_require_columns(data, c('Outcome', 'CF..ansbin.', 'CF..Time.'), 'Response recency')
+  answer <- spacing <- numeric(nrow(data))
+  for (rows in split(seq_len(nrow(data)), index, drop = TRUE)) {
+    scored <- data$Outcome[rows] %in% c("CORRECT", "INCORRECT")
+    prior <- cumsum(scored) - as.integer(scored)
+    has <- prior > 0L
+    previous <- rows[which(scored)[prior[has]]]
+    answer[rows[has]] <- data$CF..ansbin.[previous]
+    spacing[rows[has]] <- data$CF..Time.[rows[has]] - data$CF..Time.[previous]
+  }
+  list(answer = answer, spacing = spacing)
+}
+
+# Opportunity counts are independent of correctness. Respect source/target
+# component selectors while counting every committed exposure, including studies.
+lkt_prior_opportunities <- function(data, index, component) {
+  exposure <- data$Outcome %in% c('CORRECT', 'INCORRECT', 'STUDY')
+  target <- rep(TRUE, nrow(data))
+  if (grepl('%', component, fixed = TRUE)) {
+    parts <- strsplit(component, '%', fixed = TRUE)[[1L]]
+    exposure <- exposure & tolower(as.character(data[[parts[2L]]])) %in% tolower(parts[3L])
+  } else if (grepl('?', component, fixed = TRUE)) {
+    parts <- strsplit(component, '?', fixed = TRUE)[[1L]]
+    index <- data$Anon.Student.Id
+    exposure <- exposure & tolower(as.character(data[[parts[3L]]])) %in% tolower(parts[4L])
+    target <- data[[parts[1L]]] == parts[2L]
+  }
+  as.numeric(ave(as.integer(exposure), index, FUN = function(x)cumsum(x)-x)) * target
+}
+
 
 
 
@@ -9,7 +79,7 @@
 #'
 #' @description Adds repetition-spacing history columns for one or more component columns. These columns are required by recency, spacing, and forgetting features in `LKT()`. If `CF..reltime.` or `CF..Time.` is missing, the function derives it from `Duration..sec.` when possible.
 #'
-#' @param data Data frame or data table containing `Anon.Student.Id`, `CF..ansbin.`, and each component named in `KCs`. Requires either `CF..reltime.` or `Duration..sec.`.
+#' @param data Data frame or data table containing `Anon.Student.Id`, either authoritative `Outcome` or `CF..ansbin.`, and each component named in `KCs`. Study outcomes derive NA binary answers and remain in spacing histories. Requires either `CF..reltime.` or `Duration..sec.`.
 #' @param KCs Character vector of component columns for which spacing predictors should be computed.
 #' @return The input data with added spacing-history columns for each component: `spacing`, `relspacing`, `prev`, `previousstudy`, `meanspacing`, `relmeanspacing`, and `spacinglagged` suffixes. `previousstudy` identifies a preceding `Outcome == "STUDY"` within the student-component history; binary-only input has no study outcomes.
 #' @examples
@@ -20,6 +90,7 @@
 #' head(spacing_data$KC..Default.spacing)
 #' @export
 computeSpacingPredictors <- function(data, KCs) {
+  data <- lkt_normalize_outcomes(data, allow_pending = TRUE)
   required_cols <- c("Anon.Student.Id", "CF..ansbin.")
   missing_required <- setdiff(required_cols, colnames(data))
   if (length(missing_required) > 0) {
@@ -68,8 +139,10 @@ lkt_apply_autokc <- function(data, component, feature_index, cluster_count,
                              randomize = FALSE) {
   CF..ansbin. <- Anon.Student.Id <- NULL
 
-  aggdata <- data[, mean(CF..ansbin.),
+  aggdata <- data[!is.na(CF..ansbin.), mean(CF..ansbin.),
                   by = list(get(component), Anon.Student.Id)]
+  if (!all(unique(data[[component]]) %in% aggdata[[1L]]))
+    stop("Automatic KC clustering requires scored responses for every component.", call. = FALSE)
   colnames(aggdata) <- c(component, "Anon.Student.Id", "CF..ansbin.")
   aggdata <- aggdata[with(aggdata, order(get(component))), ]
 
@@ -185,10 +258,11 @@ lkt_prepare_ppe_static_context <- function(data, index, component) {
   cumulative_spacing <- ave(
     transformed_spacing, index, FUN = function(x) cumsum(x))
   data[[context_columns[["tn"]]]] <- data$CF..Time. - mintime
+  opportunities <- lkt_prior_opportunities(data, index, component)
   data[[context_columns[["space"]]]] <- ifelse(
-    (data$cor + data$icor) <= 1,
+    opportunities <= 1,
     0,
-    cumulative_spacing / (data$cor + data$icor - 1))
+    cumulative_spacing / (opportunities - 1))
   data
 }
 
@@ -285,6 +359,7 @@ lkt_prepare_component_context <- function(data, component, feature,
 #' @export
 computefeatures <- function(data, feat, par1, par2, index, index2,
                              par3, par4, par5, fcomp) {
+  data <- lkt_normalize_outcomes(data, allow_pending = TRUE)
   # dispatch on feature name to generate a numeric vector ---
   feat <- gsub("[$@]", "", feat)
   if (feat == "intercept") {
@@ -296,13 +371,13 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     return(temp)
   }
   if (feat == "lineafm") {
-    return((data$cor + data$icor))
+    return(lkt_prior_opportunities(data, index, fcomp))
   }
   if (feat == "logafm") {
-    return(log(1 + data$cor + data$icor))
+    return(log1p(lkt_prior_opportunities(data, index, fcomp)))
   }
   if (feat == "powafm") {
-    return((data$cor + data$icor)^par1)
+    return(lkt_prior_opportunities(data, index, fcomp)^par1)
   }
     if (feat == "recency") {
     data$rec <- lkt_component_column(data, fcomp, "spacing")
@@ -351,7 +426,7 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
   if (feat == "ppe") {
     data <- lkt_prepare_ppe_static_context(data, index, fcomp)
     ppe_context <- lkt_ppe_static_context_names(fcomp)
-    data$Nc <- (data$cor + data$icor)^par1
+    data$Nc <- lkt_prior_opportunities(data, index, fcomp)^par1
     data$Tn <- data[[ppe_context[["tn"]]]]
     data$space <- data[[ppe_context[["space"]]]]
     data$tw <- ave(data$Tn, index, FUN = function(x) slideppetw(x, par4))
@@ -496,20 +571,22 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     return(data$icor)
   }
   if (feat == "recencyfail") {
-    data$rec <- lkt_component_column(data, fcomp, "spacing")
-    data$prev <- lkt_component_column(data, fcomp, "prev")
+    previous <- lkt_previous_response(data, index)
+    data$rec <- previous$spacing
+    data$prev <- previous$answer
     return(ifelse(data$rec == 0, 0, (1 - data$prev) * data$rec^-par1))
   }
   if (feat == "recencysuc") {
-    data$rec <- lkt_component_column(data, fcomp, "spacing")
-    data$prev <- lkt_component_column(data, fcomp, "prev")
+    previous <- lkt_previous_response(data, index)
+    data$rec <- previous$spacing
+    data$prev <- previous$answer
     return(ifelse(data$rec == 0, 0, data$prev * data$rec^-par1))
   }
   if (feat == "expdecsuc") {
-    return(ave(data$CF..ansbin., index, FUN = function(x) slideexpdec(x, par1)))
+    return(lkt_scored_history(data, index, data$CF..ansbin., function(x) slideexpdec(x, par1)))
   }
   if (feat == "expdecfail") {
-    return(ave(1 - data$CF..ansbin., index, FUN = function(x) slideexpdec(x, par1)))
+    return(lkt_scored_history(data, index, 1 - data$CF..ansbin., function(x) slideexpdec(x, par1)))
   }
   if (feat == "basesuc") {
     data$mintime <- ave(data$CF..Time., index, FUN = min)
@@ -546,20 +623,20 @@ computefeatures <- function(data, feat, par1, par2, index, index2,
     return(log((.1 + par1 * 30 + data$cor) / (.1 + par1 * 30 + data$icor)))
   }
   if (feat == "errordec") {
-    return(ave(data$pred_ed - data$CF..ansbin., index, FUN = function(x) slideerrordec(x, par1)))
+    return(lkt_scored_history(data, index, data$pred_ed - data$CF..ansbin., function(x) slideerrordec(x, par1)))
   }
   if (feat == "propdec") {
-    return(ave(data$CF..ansbin., index, FUN = function(x) slidepropdec(x, par1)))
+    return(lkt_scored_history(data, index, data$CF..ansbin., function(x) slidepropdec(x, par1)))
   }
   if (feat == "propdec2") {
-    return(ave(data$CF..ansbin., index, FUN = function(x) slidepropdec2(x, par1)))
+    return(lkt_scored_history(data, index, data$CF..ansbin., function(x) slidepropdec2(x, par1)))
   }
   if (feat == "logitdec") {
-    return(ave(data$CF..ansbin., index, FUN = function(x) slidelogitdec(x, par1)))
+    return(lkt_scored_history(data, index, data$CF..ansbin., function(x) slidelogitdec(x, par1)))
   }
 
   if (feat == "logitdecevol") {
-    return(ave(data$CF..ansbin., index2, FUN = function(x) slidelogitdecfree(x, par1)))
+    return(lkt_scored_history(data, index2, data$CF..ansbin., function(x) slidelogitdecfree(x, par1)))
   }
   if (feat == "baseratepropdec") {
     return(as.numeric(ave(index2, data$Anon.Student.Id, FUN = function(x) baserateslidedec(x, par1))))

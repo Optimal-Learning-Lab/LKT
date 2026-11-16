@@ -7,7 +7,7 @@
 computeSpacingPredictors(data, KCs)
 }
 \arguments{
-\item{data}{Data frame or data table containing \code{Anon.Student.Id}, \code{CF..ansbin.}, and each component named in \code{KCs}. Requires either \code{CF..reltime.} or \code{Duration..sec.}.}
+\item{data}{Data frame or data table containing \code{Anon.Student.Id}, either authoritative \code{Outcome} or \code{CF..ansbin.}, and each component named in \code{KCs}. Study outcomes derive NA binary answers and remain in spacing histories. Requires either \code{CF..reltime.} or \code{Duration..sec.}.}
 
 \item{KCs}{Character vector of component columns for which spacing predictors should be computed.}
 }

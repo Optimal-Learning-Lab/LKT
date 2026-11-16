@@ -363,6 +363,7 @@ lkt_fit_online_calibration <- function(design_matrix, data, response, usefolds,
   } else {
     data$fold %in% usefolds
   }
+  fit_mask <- fit_mask & !is.na(response)
   if (!any(fit_mask)) {
     stop("OnlineCalibrationModel has no rows selected for fitting.",
          call. = FALSE)
